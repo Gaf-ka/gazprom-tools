@@ -1,109 +1,110 @@
-function initAIAssistant() {
-    const aiInput = document.querySelector('.ai-input input');
-    const sendBtn = document.querySelector('.send-question');
-    const quickQuestions = document.querySelectorAll('.quick-question');
+// Скрипт для ИИ помощника
+document.addEventListener('DOMContentLoaded', function() {
     const aiMessages = document.querySelector('.ai-messages');
+    const aiInput = document.getElementById('ai-question');
+    const aiSend = document.getElementById('ai-send');
     
-    const knowledgeBase = {
-        'командировка': {
-            questionPatterns: [/как оформить командировк\w+/i, /документы для командировк\w+/i],
-            response: `Для оформления командировки в 2025 году необходимо:
-            1. Заполнить заявку в корпоративном портале
-            2. Прикрепить обоснование поездки
-            3. Согласовать с руководителем подразделения
-            4. После подтверждения получить приказ о командировке
-            
-            Все шаблоны документов доступны в разделе "Офисные инструменты".`
-        },
-        'шаблоны': {
-            questionPatterns: [/где найти шаблон\w+/i, /шаблон\w+ документ\w+/i],
-            response: `Шаблоны документов доступны:
-            1. На корпоративном портале в разделе "Документы"
-            2. В облачном хранилище Газпром (доступ по VPN)
-            3. В разделе "Офисные инструменты" этого приложения
-            
-            Если вам нужен конкретный шаблон, уточните его название.`
-        },
-        'регламенты': {
-            questionPatterns: [/какие новые регламент\w+/i, /изменения в регламент\w+/i],
-            response: `В 2025 году вступили в силу следующие изменения:
-            1. Новый регламент по работе с подрядчиками (ГП-2025-07)
-            2. Обновлённые правила техники безопасности (ГП-2025-12)
-            3. Изменения в порядке согласования договоров (ГП-2025-05)
-            
-            Полные тексты документов доступны на корпоративном портале.`
-        },
-        'контакты': {
-            questionPatterns: [/контакт\w+ ответственн\w+/i, /кто ответственный за/i],
-            response: `Контакты ответственных сотрудников:
-            1. По общим вопросам - Иванова А.П., тел. 1234, каб. 305
-            2. По техническим вопросам - Петров С.И., тел. 5678, каб. 412
-            3. По кадровым вопросам - Сидорова О.Л., тел. 9012, каб. 201
-            
-            Полный список контактов доступен в корпоративном справочнике.`
-        },
-        'default': {
-            response: `Извините, я не совсем понял ваш вопрос. Пожалуйста, уточните его или выберите один из вариантов:
-            1. Как оформить командировку?
-            2. Где найти шаблоны документов?
-            3. Какие новые регламенты в 2025?
-            4. Кто ответственный за...?`
-        }
-    };
+    // Быстрые вопросы
+    const quickQuestions = [
+        "Как оформить служебную записку?",
+        "Где найти шаблоны документов?",
+        "Как получить доступ к корпоративному порталу?",
+        "Какие новые проекты запущены в 2025 году?",
+        "Как оформить командировку?",
+        "Где найти регламенты работы?",
+        "Как подключиться к VPN?",
+        "Какие льготы предусмотрены для сотрудников?",
+        "Как подать заявку на обучение?",
+        "Кто отвечает за техническую поддержку?"
+    ];
     
-    function addMessage(text, isUser = false) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `ai-message ${isUser ? 'user-message' : 'ai-response'}`;
-        messageDiv.innerHTML = `<p>${text}</p>`;
-        aiMessages.appendChild(messageDiv);
-        aiMessages.scrollTop = aiMessages.scrollHeight;
-    }
+    // Заполняем быстрые вопросы
+    const quickQuestionsGrid = document.querySelector('.quick-questions-grid');
+    quickQuestions.forEach(question => {
+        const quickQuestion = document.createElement('div');
+        quickQuestion.classList.add('quick-question');
+        quickQuestion.textContent = question;
+        quickQuestion.addEventListener('click', function() {
+            sendMessage(question);
+        });
+        quickQuestionsGrid.appendChild(quickQuestion);
+    });
     
-    function processQuestion(question) {
-        let found = false;
-        
-        for (const topic in knowledgeBase) {
-            if (topic === 'default') continue;
-            
-            const patterns = knowledgeBase[topic].questionPatterns;
-            for (const pattern of patterns) {
-                if (pattern.test(question)) {
-                    addMessage(knowledgeBase[topic].response);
-                    found = true;
-                    break;
-                }
-            }
-            if (found) break;
-        }
-        
-        if (!found) {
-            addMessage(knowledgeBase.default.response);
-        }
-    }
-    
-    sendBtn.addEventListener('click', function() {
+    // Обработчик отправки сообщения
+    aiSend.addEventListener('click', function() {
         const question = aiInput.value.trim();
         if (question) {
-            addMessage(question, true);
-            processQuestion(question);
+            sendMessage(question);
             aiInput.value = '';
         }
     });
     
+    // Обработчик нажатия Enter
     aiInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-            sendBtn.click();
+            const question = aiInput.value.trim();
+            if (question) {
+                sendMessage(question);
+                aiInput.value = '';
+            }
         }
     });
     
-    quickQuestions.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const question = this.textContent;
-            aiInput.value = question;
-            sendBtn.click();
-        });
-    });
+    function sendMessage(question) {
+        // Добавляем вопрос пользователя
+        addMessage(question, 'user');
+        
+        // Имитируем задержку ответа
+        setTimeout(() => {
+            const answer = getAnswer(question);
+            addMessage(answer, 'ai');
+            
+            // Прокрутка к последнему сообщению
+            aiMessages.scrollTop = aiMessages.scrollHeight;
+        }, 500);
+    }
     
-    // Инициализация чата
-    addMessage('Здравствуйте! Я цифровой помощник Газпром. Чем могу помочь?');
-}
+    function addMessage(text, sender) {
+        const message = document.createElement('div');
+        message.classList.add('ai-message');
+        message.classList.add(sender === 'user' ? 'ai-question' : 'ai-response');
+        message.innerHTML = `<p>${text}</p>`;
+        aiMessages.appendChild(message);
+        
+        // Прокрутка к последнему сообщению
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+    }
+    
+    function getAnswer(question) {
+        // База знаний помощника
+        const knowledgeBase = {
+            "оформ.*служебн.*записк": "Служебная записка оформляется по стандартному шаблону, который можно найти в разделе 'Инструменты' -> 'Генератор документов'. В 2025 году все служебные записки должны быть оформлены в электронном виде и подписаны ЭЦП.",
+            "шаблон.*документ": "Все актуальные шаблоны документов доступны в разделе 'Инструменты' -> 'Генератор документов'. Там вы найдёте шаблоны служебных записок, отчётов, приказов и других документов, соответствующие стандартам Газпрома 2025 года.",
+            "корпоративн.*порта": "Корпоративный портал доступен по адресу intranet.gazprom.ru. Для входа используйте ваш корпоративный логин и пароль. В 2025 году был обновлён интерфейс портала - если у вас возникли проблемы с доступом, обратитесь в IT-поддержку.",
+            "нов.*проект.*2025": "В 2025 году Газпром запустил несколько новых проектов: 1) Цифровизация процессов учёта, 2) Внедрение ИИ-аналитики на всех этапах работы, 3) Программа 'Зелёный офис' по сокращению углеродного следа. Подробности можно найти на корпоративном портале.",
+            "оформ.*командиров": "Для оформления командировки в 2025 году необходимо: 1) Заполнить заявку в системе 'Командировки', 2) Получить одобрение руководителя, 3) Оформить билеты через корпоративного провайдера. Все расходы должны быть согласованы заранее. Подробная инструкция доступна на портале.",
+            "регламент.*работ": "Все актуальные регламенты работы доступны в разделе 'Документы' на корпоративном портале. В 2025 году были обновлены регламенты по работе с данными и информационной безопасности.",
+            "подключ.*vpn": "Для подключения к VPN в 2025 году необходимо установить приложение 'Газпром Secure Access' с корпоративного магазина приложений. После установки введите ваш логин и пароль. При возникновении проблем обратитесь в IT-поддержку по тел. 5555.",
+            "льгот.*сотрудник": "В 2025 году для сотрудников Газпрома предусмотрены следующие льготы: медицинское страхование, корпоративный пенсионный план, льготные путёвки в санатории, компенсация занятий спортом и дополнительные дни отпуска за стаж. Подробности в отделе кадров.",
+            "заявк.*обучен": "Для подачи заявки на обучение в 2025 году необходимо: 1) Выбрать программу в каталоге на портале, 2) Получить одобрение руководителя, 3) Зарегистрироваться через систему 'Корпоративный университет'. Все обучение проводится онлайн или в корпоративном учебном центре.",
+            "техническ.*поддерж": "Техническая поддержка доступна по телефону 5555 (внутренний) или через тикет-систему на корпоративном портале. В 2025 году время ответа сокращено до 15 минут для критичных вопросов. Перед обращением проверьте раздел 'Частые вопросы'.",
+            "привет|здравств": "Здравствуйте! Я ваш цифровой помощник. Чем могу помочь?",
+            "спасибо|благодар": "Пожалуйста! Если у вас есть ещё вопросы, обращайтесь. В 2025 году мы стремимся сделать вашу работу максимально комфортной.",
+            "пока|до свидан": "До свидания! Если возникнут вопросы, я всегда готов помочь. Хорошего дня!",
+            "": "Извините, я не расслышал ваш вопрос. Можете повторить?"
+        };
+        
+        // Поиск подходящего ответа
+        question = question.toLowerCase();
+        let answer = "Извините, я не могу ответить на этот вопрос. Попробуйте переформулировать или обратитесь в соответствующее подразделение. В 2025 году все актуальные контакты доступны на корпоративном портале.";
+        
+        for (const [pattern, response] of Object.entries(knowledgeBase)) {
+            if (new RegExp(pattern, 'i').test(question)) {
+                answer = response;
+                break;
+            }
+        }
+        
+        return answer;
+    }
+});
