@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр Excel - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .excel-trainer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .excel-sheet {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .excel-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        .excel-table th, .excel-table td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: center;
+            min-width: 80px;
+        }
+        
+        .excel-table th {
+            background-color: #f2f2f2;
+            font-weight: 500;
+        }
+        
+        .excel-table td {
+            height: 40px;
+        }
+        
+        .excel-table td.active {
+            background-color: #e6f7ff;
+            border: 2px solid var(--primary-color);
+        }
+        
+        .excel-table td input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-family: inherit;
+            font-size: inherit;
+        }
+        
+        .excel-tasks {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+        
+        .excel-tasks h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .task-item {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .task-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .task-item h4 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .task-item p {
+            margin-bottom: 1rem;
+            color: #666;
+        }
+        
+        .task-formula {
+            font-family: monospace;
+            background-color: #f5f5f5;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .task-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .task-check button {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .task-check button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .task-feedback {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .task-feedback.correct {
+            color: green;
+        }
+        
+        .task-feedback.incorrect {
+            color: red;
+        }
+        
+        .excel-controls {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        @media (max-width: 768px) {
+            .excel-trainer {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром">
+            <h1>Тренажёр Excel</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Главная</a></li>
+                <li><a href="../office-tools/index.html">Офисные инструменты</a></li>
+                <li><a href="index.html">Тренажёры</a></li>
+                <li><a href="../visualization/index.html">Визуализация данных</a></li>
+                <li><a href="../ai-assistant/index.html">ИИ помощник</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="welcome">
+            <h2>Тренажёр Excel для начинающих</h2>
+            <p>Освойте основные функции Excel с помощью интерактивных упражнений.</p>
+        </section>
+
+        <div class="excel-trainer">
+            <div class="excel-sheet">
+                <table class="excel-table" id="excel-table">
+                    <tr>
+                        <th></th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                    </tr>
+                    <tr>
+                        <th>1</th>
+                        <td><input type="text" data-cell="A1"></td>
+                        <td><input type="text" data-cell="B1"></td>
+                        <td><input type="text" data-cell="C1"></td>
+                        <td><input type="text" data-cell="D1"></td>
+                    </tr>
+                    <tr>
+                        <th>2</th>
+                        <td><input type="text" data-cell="A2"></td>
+                        <td><input type="text" data-cell="B2"></td>
+                        <td><input type="text" data-cell="C2"></td>
+                        <td><input type="text" data-cell="D2"></td>
+                    </tr>
+                    <tr>
+                        <th>3</th>
+                        <td><input type="text" data-cell="A3"></td>
+                        <td><input type="text" data-cell="B3"></td>
+                        <td><input type="text" data-cell="C3"></td>
+                        <td><input type="text" data-cell="D3"></td>
+                    </tr>
+                    <tr>
+                        <th>4</th>
+                        <td><input type="text" data-cell="A4"></td>
+                        <td><input type="text" data-cell="B4"></td>
+                        <td><input type="text" data-cell="C4"></td>
+                        <td><input type="text" data-cell="D4"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="excel-tasks">
+                <h3>Задания</h3>
+                
+                <div class="task-item" data-task="1">
+                    <h4>Задание 1: Сумма</h4>
+                    <p>В ячейке D1 посчитайте сумму значений из ячеек A1, B1 и C1.</p>
+                    <div class="task-formula">Пример формулы: =A1+B1+C1</div>
+                    <div class="task-check">
+                        <button onclick="checkTask(1)">Проверить</button>
+                        <div class="task-feedback" id="feedback-1"></div>
+                    </div>
+                </div>
+                
+                <div class="task-item" data-task="2">
+                    <h4>Задание 2: Среднее значение</h4>
+                    <p>В ячейке D2 посчитайте среднее значение из ячеек A2, B2 и C2.</p>
+                    <div class="task-formula">Пример формулы: =(A2+B2+C2)/3</div>
+                    <div class="task-check">
+                        <button onclick="checkTask(2)">Проверить</button>
+                        <div class="task-feedback" id="feedback-2"></div>
+                    </div>
+                </div>
+                
+                <div class="task-item" data-task="3">
+                    <h4>Задание 3: Максимальное значение</h4>
+                    <p>В ячейке D3 найдите максимальное значение из ячеек A3, B3 и C3.</p>
+                    <div class="task-formula">Пример формулы: =МАКС(A3:C3)</div>
+                    <div class="task-check">
+                        <button onclick="checkTask(3)">Проверить</button>
+                        <div class="task-feedback" id="feedback-3"></div>
+                    </div>
+                </div>
+                
+                <div class="task-item" data-task="4">
+                    <h4>Задание 4: Условное форматирование</h4>
+                    <p>В ячейке D4 напишите "Да", если сумма A4+B4+C4 больше 100, и "Нет" в противном случае.</p>
+                    <div class="task-formula">Пример формулы: =ЕСЛИ(A4+B4+C4>100;"Да";"Нет")</div>
+                    <div class="task-check">
+                        <button onclick="checkTask(4)">Проверить</button>
+                        <div class="task-feedback" id="feedback-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="excel-controls">
+            <button class="btn" onclick="fillExampleData()">Заполнить пример данных</button>
+            <button class="btn" onclick="clearTable()">Очистить таблицу</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2023 Газпром. Все права защищены.</p>
+        <p>Внутренний портал для сотрудников</p>
+    </footer>
+
+    <script>
+        // Инициализация таблицы
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('#excel-table input');
+            
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    // Убираем активное состояние у всех ячеек
+                    document.querySelectorAll('#excel-table td').forEach(td => {
+                        td.classList.remove('active');
+                    });
+                    
+                    // Добавляем активное состояние к текущей ячейке
+                    this.parentElement.classList.add('active');
+                });
+            });
+        });
+        
+        // Проверка задания
+        function checkTask(taskNumber) {
+            const feedback = document.getElementById(`feedback-${taskNumber}`);
+            const cellD = document.querySelector(`input[data-cell="D${taskNumber}"]`);
+            const valueD = cellD.value.trim();
+            
+            // Получаем значения из ячеек A, B, C
+            const cellA = document.querySelector(`input[data-cell="A${taskNumber}"]`).value;
+            const cellB = document.querySelector(`input[data-cell="B${taskNumber}"]`).value;
+            const cellC = document.querySelector(`input[data-cell="C${taskNumber}"]`).value;
+            
+            // Проверяем, что все ячейки заполнены
+            if (!cellA || !cellB || !cellC) {
+                feedback.textContent = 'Заполните ячейки A, B и C для этого задания';
+                feedback.className = 'task-feedback incorrect';
+                return;
+            }
+            
+            // Парсим числа
+            const numA = parseFloat(cellA);
+            const numB = parseFloat(cellB);
+            const numC = parseFloat(cellC);
+            
+            // Проверяем каждое задание
+            let isCorrect = false;
+            let correctAnswer = '';
+            
+            switch(taskNumber) {
+                case 1:
+                    correctAnswer = (numA + numB + numC).toString();
+                    isCorrect = Math.abs(parseFloat(valueD) - (numA + numB + numC)) < 0.001;
+                    break;
+                case 2:
+                    correctAnswer = ((numA + numB + numC) / 3).toString();
+                    isCorrect = Math.abs(parseFloat(valueD) - (numA + numB + numC)/3) < 0.001;
+                    break;
+                case 3:
+                    correctAnswer = Math.max(numA, numB, numC).toString();
+                    isCorrect = Math.abs(parseFloat(valueD) - Math.max(numA, numB, numC)) < 0.001;
+                    break;
+                case 4:
+                    const sum = numA + numB + numC;
+                    correctAnswer = sum > 100 ? 'Да' : 'Нет';
+                    isCorrect = valueD.toLowerCase() === correctAnswer.toLowerCase();
+                    break;
+            }
+            
+            if (isCorrect) {
+                feedback.textContent = 'Правильно!';
+                feedback.className = 'task-feedback correct';
+            } else {
+                feedback.textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
+                feedback.className = 'task-feedback incorrect';
+            }
+        }
+        
+        // Заполнение примера данных
+        function fillExampleData() {
+            const exampleData = {
+                'A1': '10', 'B1': '20', 'C1': '30',
+                'A2': '15', 'B2': '25', 'C2': '35',
+                'A3': '50', 'B3': '30', 'C3': '70',
+                'A4': '40', 'B4': '35', 'C4': '30'
+            };
+            
+            for (const [cell, value] of Object.entries(exampleData)) {
+                const input = document.querySelector(`input[data-cell="${cell}"]`);
+                if (input) input.value = value;
+            }
+        }
+        
+        // Очистка таблицы
+        function clearTable() {
+            const inputs = document.querySelectorAll('#excel-table input');
+            inputs.forEach(input => {
+                input.value = '';
+            });
+            
+            const feedbacks = document.querySelectorAll('.task-feedback');
+            feedbacks.forEach(feedback => {
+                feedback.textContent = '';
+                feedback.className = 'task-feedback';
+            });
+        }
+    </script>
+</body>
+</html>

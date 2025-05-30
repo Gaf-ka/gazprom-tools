@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Диаграммы - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .diagram-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .diagram-box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+        
+        .diagram-box h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .diagram-wrapper {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .diagram-controls {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .diagram-controls button {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .diagram-controls button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: center;
+        }
+        
+        .data-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .data-table input {
+            width: 100%;
+            border: none;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .diagram-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром">
+            <h1>Диаграммы данных</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Главная</a></li>
+                <li><a href="../office-tools/index.html">Офисные инструменты</a></li>
+                <li><a href="../trainers/index.html">Тренажёры</a></li>
+                <li><a href="index.html">Визуализация данных</a></li>
+                <li><a href="../ai-assistant/index.html">ИИ помощник</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="welcome">
+            <h2>Диаграммы данных</h2>
+            <p>Создавайте и настраивайте различные типы диаграмм для визуализации ваших данных.</p>
+        </section>
+
+        <div class="diagram-container">
+            <div class="diagram-box">
+                <h3>Круговая диаграмма</h3>
+                <div class="diagram-wrapper">
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <div class="diagram-controls">
+                    <button onclick="updatePieChart()">Обновить диаграмму</button>
+                    <button onclick="randomizePieData()">Случайные данные</button>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Категория</th>
+                            <th>Значение</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pieChartData">
+                        <tr>
+                            <td>Зарплаты</td>
+                            <td><input type="number" value="45" data-category="salaries"></td>
+                        </tr>
+                        <tr>
+                            <td>Оборудование</td>
+                            <td><input type="number" value="25" data-category="equipment"></td>
+                        </tr>
+                        <tr>
+                            <td>Аренда</td>
+                            <td><input type="number" value="15" data-category="rent"></td>
+                        </tr>
+                        <tr>
+                            <td>Командировки</td>
+                            <td><input type="number" value="10" data-category="travel"></td>
+                        </tr>
+                        <tr>
+                            <td>Прочее</td>
+                            <td><input type="number" value="5" data-category="other"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="diagram-box">
+                <h3>Кольцевая диаграмма</h3>
+                <div class="diagram-wrapper">
+                    <canvas id="doughnutChart"></canvas>
+                </div>
+                <div class="diagram-controls">
+                    <button onclick="updateDoughnutChart()">Обновить диаграмму</button>
+                    <button onclick="randomizeDoughnutData()">Случайные данные</button>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Регион</th>
+                            <th>Добыча</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doughnutChartData">
+                        <tr>
+                            <td>Западная Сибирь</td>
+                            <td><input type="number" value="60" data-region="west-siberia"></td>
+                        </tr>
+                        <tr>
+                            <td>Восточная Сибирь</td>
+                            <td><input type="number" value="20" data-region="east-siberia"></td>
+                        </tr>
+                        <tr>
+                            <td>Дальний Восток</td>
+                            <td><input type="number" value="10" data-region="far-east"></td>
+                        </tr>
+                        <tr>
+                            <td>Европейская часть</td>
+                            <td><input type="number" value="10" data-region="europe"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2023 Газпром. Все права защищены.</p>
+        <p>Внутренний портал для сотрудников</p>
+    </footer>
+
+    <script>
+        // Инициализация диаграмм
+        let pieChart, doughnutChart;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Круговая диаграмма
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Зарплаты', 'Оборудование', 'Аренда', 'Командировки', 'Прочее'],
+                    datasets: [{
+                        data: [45, 25, 15, 10, 5],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            // Кольцевая диаграмма
+            const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+            doughnutChart = new Chart(doughnutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Западная Сибирь', 'Восточная Сибирь', 'Дальний Восток', 'Европейская часть'],
+                    datasets: [{
+                        data: [60, 20, 10, 10],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%'
+                }
+            });
+        });
+        
+        // Обновление круговой диаграммы
+        function updatePieChart() {
+            const pieData = [];
+            
+            document.querySelectorAll('#pieChartData input').forEach(input => {
+                pieData.push(parseFloat(input.value));
+            });
+            
+            pieChart.data.datasets[0].data = pieData;
+            pieChart.update();
+        }
+        
+        // Обновление кольцевой диаграммы
+        function updateDoughnutChart() {
+            const doughnutData = [];
+            
+            document.querySelectorAll('#doughnutChartData input').forEach(input => {
+                doughnutData.push(parseFloat(input.value));
+            });
+            
+            doughnutChart.data.datasets[0].data = doughnutData;
+            doughnutChart.update();
+        }
+        
+        // Случайные данные для круговой диаграммы
+        function randomizePieData() {
+            document.querySelectorAll('#pieChartData input').forEach(input => {
+                input.value = Math.floor(Math.random() * 40) + 5;
+            });
+            updatePieChart();
+        }
+        
+        // Случайные данные для кольцевой диаграммы
+        function randomizeDoughnutData() {
+            document.querySelectorAll('#doughnutChartData input').forEach(input => {
+                input.value = Math.floor(Math.random() * 50) + 5;
+            });
+            updateDoughnutChart();
+        }
+    </script>
+</body>
+</html>
