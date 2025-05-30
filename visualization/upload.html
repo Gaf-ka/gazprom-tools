@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализ данных | Газпром</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <style>
+        .upload-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            padding: 2rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--medium-gray);
+            border-radius: 8px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .chart-container {
+            margin-top: 3rem;
+            display: none;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .chart-controls select, .chart-controls button {
+            padding: 0.7rem 1.2rem;
+            border-radius: 4px;
+            border: 1px solid var(--medium-gray);
+            background: var(--white);
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        
+        .chart-controls button {
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-controls button:hover {
+            background: var(--primary-dark);
+        }
+        
+        .data-preview {
+            max-height: 300px;
+            overflow: auto;
+            margin-top: 2rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+        
+        th {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: var(--light-gray);
+        }
+    </style>
+</head>
+<body>
+    <div class="background-pattern"></div>
+    
+    <header class="main-header">
+        <div class="header-content">
+            <a href="../../index.html" class="logo-link">
+                <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром" class="logo">
+            </a>
+            <h1 class="portal-title">Анализ данных</h1>
+        </div>
+        
+        <nav class="main-nav">
+            <ul class="nav-list">
+                <li><a href="../../index.html" class="nav-link">Главная</a></li>
+                <li><a href="../../tools/index.html" class="nav-link">Инструменты</a></li>
+                <li><a href="../../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                <li><a href="index.html" class="nav-link active">Аналитика</a></li>
+                <li><a href="../../assistant/index.html" class="nav-link">Помощник</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="upload-container">
+            <h2>Загрузка данных для анализа</h2>
+            <p>Загрузите файл в формате CSV или Excel для визуализации данных</p>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📊</div>
+                <h3>Перетащите файл сюда или кликните для выбора</h3>
+                <p>Поддерживаемые форматы: .csv, .xlsx</p>
+                <input type="file" id="fileInput" class="file-input" accept=".csv,.xlsx">
+            </div>
+            
+            <div class="data-preview" id="dataPreview" style="display: none;">
+                <h3>Предпросмотр данных</h3>
+                <table id="previewTable">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <div class="chart-container" id="chartContainer">
+                <h3>Настройка визуализации</h3>
+                
+                <div class="chart-controls">
+                    <select id="chartType">
+                        <option value="line">Линейный график</option>
+                        <option value="bar">Столбчатая диаграмма</option>
+                        <option value="pie">Круговая диаграмма</option>
+                        <option value="doughnut">Кольцевая диаграмма</option>
+                    </select>
+                    
+                    <select id="xAxis"></select>
+                    <select id="yAxis"></select>
+                    
+                    <button id="generateChart">Создать график</button>
+                    <button id="saveChart">Сохранить как изображение</button>
+                    <button id="generateReport">Создать отчёт</button>
+                </div>
+                
+                <div class="chart-wrapper">
+                    <canvas id="dataChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <p>© 2025 ПАО «Газпром». Все права защищены.</p>
+        <p>Внутренний корпоративный портал v2.1</p>
+    </footer>
+
+    <script src="../../assets/js/visualization.js"></script>
+</body>
+</html>

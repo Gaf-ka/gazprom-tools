@@ -3,41 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ИИ помощник - Газпром</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>ИИ помощник | Газпром</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
     <style>
         .assistant-container {
             max-width: 800px;
             margin: 2rem auto;
-            background-color: white;
+            background: var(--white);
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             overflow: hidden;
         }
         
         .assistant-header {
             padding: 1.5rem;
-            background-color: var(--primary-color);
-            color: white;
+            background: var(--primary-color);
+            color: var(--white);
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem;
         }
         
         .assistant-avatar {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            background-color: white;
+            background: var(--white);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .assistant-info h2 {
+            margin-bottom: 0.5rem;
         }
         
         .assistant-messages {
-            height: 400px;
+            height: 500px;
             overflow-y: auto;
             padding: 1.5rem;
             display: flex;
@@ -47,64 +52,92 @@
         
         .message {
             max-width: 80%;
-            padding: 0.75rem 1rem;
+            padding: 1rem;
             border-radius: 1rem;
+            line-height: 1.5;
         }
         
         .user-message {
             align-self: flex-end;
-            background-color: var(--primary-color);
-            color: white;
+            background: var(--primary-color);
+            color: var(--white);
             border-bottom-right-radius: 0.25rem;
         }
         
         .assistant-message {
             align-self: flex-start;
-            background-color: #f0f0f0;
+            background: var(--light-gray);
             border-bottom-left-radius: 0.25rem;
+        }
+        
+        .quick-questions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .quick-question {
+            padding: 0.75rem;
+            background: var(--white);
+            border: 1px solid var(--medium-gray);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .quick-question:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
         }
         
         .assistant-input {
             display: flex;
             padding: 1rem;
-            border-top: 1px solid #eee;
+            border-top: 1px solid var(--medium-gray);
+            background: var(--light-gray);
         }
         
         .assistant-input input {
             flex: 1;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--medium-gray);
             border-radius: 4px 0 0 4px;
             outline: none;
+            font-family: inherit;
         }
         
         .assistant-input button {
             padding: 0 1.5rem;
-            background-color: var(--primary-color);
-            color: white;
+            background: var(--primary-color);
+            color: var(--white);
             border: none;
             border-radius: 0 4px 4px 0;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
         
         .assistant-input button:hover {
-            background-color: var(--secondary-color);
+            background: var(--primary-dark);
         }
         
         .typing-indicator {
             display: flex;
-            gap: 0.25rem;
-            padding: 0.75rem 1rem;
-            background-color: #f0f0f0;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--light-gray);
             border-radius: 1rem;
             border-bottom-left-radius: 0.25rem;
             align-self: flex-start;
+            width: fit-content;
         }
         
         .typing-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #999;
+            width: 10px;
+            height: 10px;
+            background: var(--dark-gray);
             border-radius: 50%;
             animation: typingAnimation 1.4s infinite ease-in-out;
         }
@@ -128,162 +161,62 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром">
-            <h1>ИИ помощник</h1>
+    <div class="background-pattern"></div>
+    
+    <header class="main-header">
+        <div class="header-content">
+            <a href="../../index.html" class="logo-link">
+                <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром" class="logo">
+            </a>
+            <h1 class="portal-title">ИИ помощник</h1>
         </div>
-        <nav>
-            <ul>
-                <li><a href="../index.html">Главная</a></li>
-                <li><a href="../office-tools/index.html">Офисные инструменты</a></li>
-                <li><a href="../trainers/index.html">Тренажёры</a></li>
-                <li><a href="../visualization/index.html">Визуализация данных</a></li>
-                <li><a href="index.html" class="active">ИИ помощник</a></li>
+        
+        <nav class="main-nav">
+            <ul class="nav-list">
+                <li><a href="../../index.html" class="nav-link">Главная</a></li>
+                <li><a href="../../tools/index.html" class="nav-link">Инструменты</a></li>
+                <li><a href="../../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                <li><a href="../../visualization/index.html" class="nav-link">Аналитика</a></li>
+                <li><a href="index.html" class="nav-link active">Помощник</a></li>
             </ul>
         </nav>
     </header>
 
-    <main>
-        <section class="welcome">
-            <h2>ИИ помощник для сотрудников</h2>
-            <p>Задавайте вопросы и получайте помощь по работе с внутренними инструментами и документами.</p>
-        </section>
-
+    <main class="main-content">
         <div class="assistant-container">
             <div class="assistant-header">
                 <div class="assistant-avatar">AI</div>
-                <div>
-                    <h3>Помощник Газпром</h3>
-                    <p>Чем могу помочь?</p>
+                <div class="assistant-info">
+                    <h2>Корпоративный помощник</h2>
+                    <p>Задайте вопрос о работе компании</p>
                 </div>
             </div>
             
-            <div class="assistant-messages" id="chat-messages">
+            <div class="assistant-messages" id="chatMessages">
                 <div class="message assistant-message">
-                    Здравствуйте! Я ваш виртуальный помощник. Могу ответить на вопросы о работе компании, внутренних инструментах и документах. Чем могу помочь?
+                    <p>Здравствуйте! Я ваш виртуальный помощник. Могу ответить на вопросы о работе компании, внутренних процессах и инструментах.</p>
+                    
+                    <div class="quick-questions">
+                        <div class="quick-question" onclick="sendQuickQuestion('Как работать с аналитикой данных?')">Как работать с аналитикой данных?</div>
+                        <div class="quick-question" onclick="sendQuickQuestion('Где найти тренажёры по Excel?')">Где найти тренажёры по Excel?</div>
+                        <div class="quick-question" onclick="sendQuickQuestion('Как создать отчёт?')">Как создать отчёт?</div>
+                        <div class="quick-question" onclick="sendQuickQuestion('Контакты службы поддержки')">Контакты службы поддержки</div>
+                    </div>
                 </div>
             </div>
             
             <div class="assistant-input">
-                <input type="text" id="user-input" placeholder="Введите ваш вопрос..." onkeypress="handleKeyPress(event)">
+                <input type="text" id="userInput" placeholder="Введите ваш вопрос..." onkeypress="handleKeyPress(event)">
                 <button onclick="sendMessage()">Отправить</button>
             </div>
         </div>
     </main>
 
-    <footer>
-        <p>© 2023 Газпром. Все права защищены.</p>
-        <p>Внутренний портал для сотрудников</p>
+    <footer class="main-footer">
+        <p>© 2025 ПАО «Газпром». Все права защищены.</p>
+        <p>Внутренний корпоративный портал v2.1</p>
     </footer>
 
-    <script>
-        // База знаний помощника
-        const knowledgeBase = {
-            "привет": "Здравствуйте! Чем могу помочь?",
-            "как пользоваться калькулятором": "Калькулятор находится в разделе 'Офисные инструменты'. Вы можете выполнять базовые арифметические операции, а также финансовые расчеты.",
-            "техника безопасности": "Подробную информацию о технике безопасности вы можете найти в тренажере по технике безопасности в разделе 'Тренажёры'.",
-            "визуализация данных": "В разделе 'Визуализация данных' вы можете создавать графики и диаграммы. Доступны линейные, столбчатые, круговые и кольцевые диаграммы.",
-            "как создать отчет": "Для создания отчета вы можете использовать инструменты визуализации данных, а также экспортировать результаты в формате PDF или изображения.",
-            "контакты службы поддержки": "Служба поддержки доступна по внутреннему телефону 1234 или по email support@gazprom.ru.",
-            "как работать с excel": "В разделе 'Тренажёры' доступен тренажёр Excel, где вы можете изучить основные функции и формулы.",
-            "что такое газпром": "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти."
-        };
-        
-        // Общие фразы, если вопрос не найден
-        const defaultAnswers = [
-            "Извините, я не совсем понял ваш вопрос. Можете переформулировать?",
-            "Уточните, пожалуйста, ваш вопрос.",
-            "Я пока не могу ответить на этот вопрос. Попробуйте задать его иначе.",
-            "Информация по вашему вопросу может быть доступна в других разделах портала."
-        ];
-        
-        // Отправка сообщения
-        function sendMessage() {
-            const userInput = document.getElementById('user-input');
-            const message = userInput.value.trim();
-            
-            if (message === '') return;
-            
-            // Добавляем сообщение пользователя в чат
-            addMessage(message, 'user');
-            userInput.value = '';
-            
-            // Показываем индикатор набора сообщения
-            showTypingIndicator();
-            
-            // Имитация задержки ответа
-            setTimeout(() => {
-                // Убираем индикатор набора
-                hideTypingIndicator();
-                
-                // Получаем ответ
-                const response = getResponse(message);
-                
-                // Добавляем ответ в чат
-                addMessage(response, 'assistant');
-            }, 1000 + Math.random() * 2000);
-        }
-        
-        // Обработка нажатия Enter
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
-        
-        // Добавление сообщения в чат
-        function addMessage(text, sender) {
-            const chatMessages = document.getElementById('chat-messages');
-            const messageElement = document.createElement('div');
-            messageElement.className = `message ${sender}-message`;
-            messageElement.textContent = text;
-            chatMessages.appendChild(messageElement);
-            
-            // Прокрутка вниз
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        // Показать индикатор набора сообщения
-        function showTypingIndicator() {
-            const chatMessages = document.getElementById('chat-messages');
-            const typingElement = document.createElement('div');
-            typingElement.className = 'typing-indicator';
-            typingElement.id = 'typing-indicator';
-            typingElement.innerHTML = `
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-            `;
-            chatMessages.appendChild(typingElement);
-            
-            // Прокрутка вниз
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        // Скрыть индикатор набора сообщения
-        function hideTypingIndicator() {
-            const typingElement = document.getElementById('typing-indicator');
-            if (typingElement) {
-                typingElement.remove();
-            }
-        }
-        
-        // Получение ответа от помощника
-        function getResponse(question) {
-            // Приводим вопрос к нижнему регистру для поиска
-            const lowerQuestion = question.toLowerCase();
-            
-            // Ищем точное совпадение в базе знаний
-            for (const [key, value] of Object.entries(knowledgeBase)) {
-                if (lowerQuestion.includes(key.toLowerCase())) {
-                    return value;
-                }
-            }
-            
-            // Если точного совпадения нет, возвращаем случайный общий ответ
-            return defaultAnswers[Math.floor(Math.random() * defaultAnswers.length)];
-        }
-    </script>
+    <script src="../../assets/js/assistant.js"></script>
 </body>
 </html>
