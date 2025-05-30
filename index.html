@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Цифровой помощник Газпром - 2025</title>
+    <title>Газпром - Корпоративный портал 2025</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
@@ -13,57 +13,88 @@
 </head>
 <body>
     <header>
-        <div class="logo-container">
-            <img src="https://www.gazprom.com/f/i/press-center/symbolics/logo/gazprom_logo_250x150_white_rus.png" alt="Газпром лого" class="logo">
-            <div class="header-text">
-                <h1>Цифровой помощник сотрудника</h1>
-                <p>2025 год</p>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="https://www.gazprom.com/f/i/press-center/symbolics/logo/gazprom_logo_250x150_white_rus.png" alt="Газпром лого" class="logo">
+                <div class="header-nav">
+                    <nav>
+                        <ul>
+                            <li><a href="#" class="nav-link active" data-page="home">Компания</a></li>
+                            <li><a href="#" class="nav-link" data-page="data-vis">Аналитика</a></li>
+                            <li><a href="#" class="nav-link" data-page="tools">Инструменты</a></li>
+                            <li><a href="#" class="nav-link" data-page="trainers">Обучение</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-login">Войти</button>
+                <button class="btn btn-primary">Регистрация</button>
             </div>
         </div>
-        <nav>
-            <ul>
-                <li><a href="#" class="nav-link active" data-page="home"><i class="fas fa-home"></i> Главная</a></li>
-                <li><a href="#" class="nav-link" data-page="data-vis"><i class="fas fa-chart-bar"></i> Визуализация</a></li>
-                <li><a href="#" class="nav-link" data-page="tools"><i class="fas fa-tools"></i> Инструменты</a></li>
-                <li><a href="#" class="nav-link" data-page="trainers"><i class="fas fa-dumbbell"></i> Тренажёры</a></li>
-                <li><a href="#" class="nav-link" data-page="ai"><i class="fas fa-robot"></i> Помощник</a></li>
-            </ul>
-        </nav>
     </header>
 
     <main>
         <!-- Главная страница -->
         <section id="home" class="page active">
             <div class="hero">
-                <div class="hero-text">
-                    <h2>Добро пожаловать в цифровой помощник Газпром</h2>
-                    <p>2025 год - новые технологии для вашего комфорта</p>
+                <div class="hero-content">
+                    <h1>Корпоративный портал Газпром</h1>
+                    <p>2025 год - цифровые решения для вашей эффективной работы</p>
+                    <button class="btn btn-primary">Начать работу</button>
                 </div>
-                <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Нефтегазовая промышленность" class="hero-image">
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Нефтегазовая промышленность">
+                </div>
             </div>
 
-            <div class="features">
-                <div class="feature-card">
-                    <i class="fas fa-chart-line"></i>
-                    <h3>Визуализация данных</h3>
-                    <p>Просто загрузите файл и получите красивую диаграмму</p>
+            <div class="company-info">
+                <h2>О компании</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>Миссия</h3>
+                        <p>Обеспечение надежных и эффективных поставок энергоресурсов, способствующих устойчивому развитию экономики</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>История</h3>
+                        <p>Основана в 1989 году. Сегодня - одна из крупнейших энергетических компаний мира</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>География</h3>
+                        <p>Представительства в 30 странах мира, более 400 филиалов</p>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <i class="fas fa-dumbbell"></i>
-                    <h3>Тренажёры</h3>
-                    <p>10+ тренажёров для повышения квалификации</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-robot"></i>
-                    <h3>Цифровой помощник</h3>
-                    <p>Ответы на ваши вопросы по работе компании</p>
+            </div>
+
+            <div class="branches-map">
+                <h2>Филиалы компании</h2>
+                <div class="map-container">
+                    <div class="map-placeholder">
+                        <img src="https://static-maps.yandex.ru/1.x/?lang=ru_RU&ll=30.313497,59.938531&size=650,400&z=4&l=map&pt=30.313497,59.938531,pm2rdl" alt="Карта филиалов">
+                    </div>
+                    <div class="branches-list">
+                        <h3>Крупнейшие филиалы:</h3>
+                        <ul>
+                            <li>Москва (Головной офис)</li>
+                            <li>Санкт-Петербург</li>
+                            <li>Новосибирск</li>
+                            <li>Екатеринбург</li>
+                            <li>Казань</li>
+                            <li>Краснодар</li>
+                            <li>Владивосток</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Визуализация данных -->
+        <!-- Аналитика данных -->
         <section id="data-vis" class="page">
-            <h2><i class="fas fa-chart-bar"></i> Визуализация данных</h2>
+            <div class="section-header">
+                <h2>Аналитика данных</h2>
+                <p>Загружайте данные и получайте автоматические отчеты</p>
+            </div>
+            
             <div class="data-upload-container">
                 <div class="upload-box">
                     <input type="file" id="data-file" accept=".csv,.xlsx,.xls">
@@ -73,103 +104,167 @@
                         <p>Поддерживаемые форматы: CSV, Excel</p>
                     </label>
                 </div>
-                <div class="chart-options">
-                    <select id="chart-type">
+                
+                <div class="chart-controls">
+                    <select id="chart-type" class="form-control">
                         <option value="bar">Столбчатая диаграмма</option>
                         <option value="line">Линейный график</option>
                         <option value="pie">Круговая диаграмма</option>
                         <option value="doughnut">Кольцевая диаграмма</option>
                     </select>
-                    <button id="generate-chart" class="btn">Создать диаграмму</button>
+                    <button id="generate-chart" class="btn btn-primary">Создать диаграмму</button>
                 </div>
             </div>
+            
             <div class="chart-container">
                 <canvas id="data-chart"></canvas>
             </div>
+            
             <div class="chart-actions">
-                <button id="save-chart" class="btn"><i class="fas fa-download"></i> Сохранить</button>
-                <button id="generate-report" class="btn"><i class="fas fa-file-word"></i> Создать отчёт</button>
+                <button id="save-chart" class="btn btn-secondary"><i class="fas fa-download"></i> Сохранить</button>
+                <button id="generate-report" class="btn btn-primary"><i class="fas fa-file-word"></i> Создать отчёт</button>
             </div>
+            
             <div id="report-output" class="report-output"></div>
         </section>
 
-        <!-- Офисные инструменты -->
+        <!-- Инструменты -->
         <section id="tools" class="page">
-            <h2><i class="fas fa-tools"></i> Офисные инструменты</h2>
-            <div class="tools-container">
-                <div class="tool-card" data-tool="converter">
-                    <i class="fas fa-exchange-alt"></i>
+            <div class="section-header">
+                <h2>Корпоративные инструменты</h2>
+                <p>Все необходимое для вашей работы</p>
+            </div>
+            
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <div class="tool-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
                     <h3>Конвертер единиц</h3>
-                    <p>Конвертация различных единиц измерения</p>
+                    <p>Быстрое преобразование различных единиц измерения</p>
+                    <button class="btn btn-small" data-tool="converter">Открыть</button>
                 </div>
-                <div class="tool-card" data-tool="meeting">
-                    <i class="fas fa-calendar-check"></i>
+                
+                <div class="tool-card">
+                    <div class="tool-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
                     <h3>Планировщик встреч</h3>
-                    <p>Оптимизация расписания встреч</p>
+                    <p>Оптимизация расписания и напоминания</p>
+                    <button class="btn btn-small" data-tool="meeting">Открыть</button>
                 </div>
-                <div class="tool-card" data-tool="doc-gen">
-                    <i class="fas fa-file-contract"></i>
+                
+                <div class="tool-card">
+                    <div class="tool-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
                     <h3>Генератор документов</h3>
-                    <p>Шаблоны стандартных документов</p>
+                    <p>Шаблоны стандартных корпоративных документов</p>
+                    <button class="btn btn-small" data-tool="doc-gen">Открыть</button>
+                </div>
+                
+                <div class="tool-card">
+                    <div class="tool-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h3>Логистика</h3>
+                    <p>Отслеживание грузов и транспортных средств</p>
+                    <button class="btn btn-small" data-tool="logistics">Открыть</button>
                 </div>
             </div>
-
+            
             <div id="tool-content" class="tool-content">
                 <!-- Контент будет подгружаться динамически -->
             </div>
         </section>
 
-        <!-- Тренажёры -->
+        <!-- Обучение -->
         <section id="trainers" class="page">
-            <h2><i class="fas fa-dumbbell"></i> Тренажёры</h2>
-            <div class="trainers-list">
-                <!-- Список тренажёров будет заполнен JavaScript -->
+            <div class="section-header">
+                <h2>Корпоративное обучение</h2>
+                <p>Повышайте квалификацию с нашими тренажерами</p>
             </div>
+            
+            <div class="trainers-grid">
+                <!-- Тренажеры будут загружены через JavaScript -->
+            </div>
+            
             <div class="trainer-container">
-                <!-- Контент тренажёра будет подгружаться динамически -->
-            </div>
-        </section>
-
-        <!-- ИИ помощник -->
-        <section id="ai" class="page">
-            <h2><i class="fas fa-robot"></i> Цифровой помощник</h2>
-            <div class="ai-container">
-                <div class="ai-chat">
-                    <div class="ai-messages">
-                        <div class="ai-message ai-response">
-                            <p>Здравствуйте! Я ваш цифровой помощник. Чем могу помочь?</p>
-                        </div>
-                    </div>
-                    <div class="ai-quick-questions">
-                        <h4>Частые вопросы:</h4>
-                        <div class="quick-questions-grid">
-                            <!-- Быстрые вопросы будут заполнены JavaScript -->
-                        </div>
-                    </div>
-                    <div class="ai-input">
-                        <input type="text" id="ai-question" placeholder="Задайте ваш вопрос...">
-                        <button id="ai-send"><i class="fas fa-paper-plane"></i></button>
-                    </div>
-                </div>
-                <div class="ai-info">
-                    <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" alt="ИИ помощник">
-                    <h3>Как работает помощник</h3>
-                    <p>Задавайте вопросы о работе компании, документах или процессах. Помощник использует базу знаний Газпрома 2025 года.</p>
-                </div>
+                <!-- Контент тренажера будет подгружаться динамически -->
             </div>
         </section>
     </main>
 
+    <!-- ИИ помощник (боковая панель) -->
+    <div class="ai-assistant-container">
+        <div class="ai-assistant-header">
+            <h3>Цифровой помощник</h3>
+            <button class="ai-close-btn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="ai-messages">
+            <div class="ai-message ai-response">
+                <p>Здравствуйте! Я ваш цифровой помощник. Чем могу помочь?</p>
+            </div>
+        </div>
+        <div class="ai-quick-questions">
+            <h4>Частые вопросы:</h4>
+            <div class="quick-questions-grid">
+                <!-- Быстрые вопросы будут заполнены JavaScript -->
+            </div>
+        </div>
+        <div class="ai-input">
+            <input type="text" id="ai-question" placeholder="Задайте ваш вопрос...">
+            <button id="ai-send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+    <button class="ai-toggle-btn"><i class="fas fa-robot"></i> Помощник</button>
+
     <footer>
-        <div class="footer-content">
+        <div class="footer-container">
             <div class="footer-logo">
                 <img src="https://www.gazprom.com/f/i/press-center/symbolics/logo/gazprom_logo_250x150_white_rus.png" alt="Газпром лого" class="logo-small">
-                <p>Цифровой помощник сотрудника<br>2025 год</p>
+                <p>Корпоративный портал Газпром<br>2025 год</p>
             </div>
+            
             <div class="footer-links">
+                <div class="links-column">
+                    <h4>Компания</h4>
+                    <ul>
+                        <li><a href="#">О Газпроме</a></li>
+                        <li><a href="#">Миссия и ценности</a></li>
+                        <li><a href="#">Руководство</a></li>
+                        <li><a href="#">Филиалы</a></li>
+                    </ul>
+                </div>
+                
+                <div class="links-column">
+                    <h4>Ресурсы</h4>
+                    <ul>
+                        <li><a href="#">Документы</a></li>
+                        <li><a href="#">Библиотека</a></li>
+                        <li><a href="#">IT-поддержка</a></li>
+                        <li><a href="#">HR-служба</a></li>
+                    </ul>
+                </div>
+                
+                <div class="links-column">
+                    <h4>Контакты</h4>
+                    <ul>
+                        <li><a href="#">Телефонный справочник</a></li>
+                        <li><a href="#">Электронная почта</a></li>
+                        <li><a href="#">Обратная связь</a></li>
+                        <li><a href="#">Техподдержка</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2025 ПАО «Газпром». Все права защищены.</p>
+            <div class="footer-legal">
                 <a href="#">Политика конфиденциальности</a>
-                <a href="#">Техническая поддержка</a>
-                <a href="#">О проекте</a>
+                <a href="#">Пользовательское соглашение</a>
+                <a href="#">Оферта</a>
             </div>
         </div>
     </footer>

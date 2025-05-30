@@ -1,9 +1,7 @@
-// Скрипт для визуализации данных
-document.addEventListener('DOMContentLoaded', function() {
+function initDataVisualizer() {
     let chart = null;
     let currentData = null;
     
-    // Обработчик загрузки файла
     document.getElementById('data-file').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -22,7 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Обработчик генерации диаграммы
     document.getElementById('generate-chart').addEventListener('click', function() {
         if (!currentData) {
             alert('Сначала загрузите данные');
@@ -33,7 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
         renderChart(chartType);
     });
     
-    // Обработчик сохранения диаграммы
     document.getElementById('save-chart').addEventListener('click', function() {
         if (!chart) {
             alert('Нет диаграммы для сохранения');
@@ -46,7 +42,6 @@ document.addEventListener('DOMContentLoaded', function() {
         link.click();
     });
     
-    // Обработчик генерации отчёта
     document.getElementById('generate-report').addEventListener('click', function() {
         if (!chart) {
             alert('Нет диаграммы для отчёта');
@@ -55,12 +50,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         generateReport();
     });
-});
+}
 
 function processFile(data, fileName) {
     try {
         if (fileName.endsWith('.csv')) {
-            // Обработка CSV
             const results = Papa.parse(data, {
                 header: true,
                 skipEmptyLines: true
@@ -73,7 +67,6 @@ function processFile(data, fileName) {
             currentData = results.data;
             showDataPreview(currentData);
         } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
-            // Обработка Excel
             const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
@@ -82,7 +75,6 @@ function processFile(data, fileName) {
                 throw new Error('Файл Excel пуст или содержит только заголовки');
             }
             
-            // Преобразуем в формат, аналогичный CSV
             const headers = jsonData[0];
             const rows = jsonData.slice(1);
             
@@ -142,7 +134,6 @@ function renderChart(type) {
         chart.destroy();
     }
     
-    // Простая обработка данных - берём первые 2 числовых столбца
     const numericColumns = findNumericColumns(currentData);
     
     if (numericColumns.length < 2) {
@@ -194,7 +185,6 @@ function findNumericColumns(data) {
     
     const firstRow = data[0];
     return Object.keys(firstRow).filter(key => {
-        // Проверяем, является ли значение числовым
         const value = firstRow[key];
         return !isNaN(parseFloat(value)) && isFinite(value);
     });
@@ -257,14 +247,13 @@ function generateReport() {
             </div>
             
             <div class="report-actions">
-                <button id="save-report" class="btn"><i class="fas fa-download"></i> Сохранить отчёт</button>
+                <button id="save-report" class="btn btn-primary"><i class="fas fa-download"></i> Сохранить отчёт</button>
             </div>
         </div>
     `;
     
     document.getElementById('report-output').innerHTML = reportHTML;
     
-    // Обработчик сохранения отчёта
     document.getElementById('save-report').addEventListener('click', function() {
         const reportContent = document.querySelector('.report').outerHTML;
         const blob = new Blob([reportContent], { type: 'text/html' });
@@ -288,7 +277,6 @@ function analyzeData(data, column) {
     const min = Math.min(...values);
     const max = Math.max(...values);
     
-    // Вычисление медианы
     let median;
     if (values.length % 2 === 0) {
         median = (values[values.length/2 - 1] + values[values.length/2]) / 2;
@@ -296,7 +284,6 @@ function analyzeData(data, column) {
         median = values[Math.floor(values.length/2)];
     }
     
-    // Определение тренда
     let trend = 'stable';
     if (values.length > 1) {
         const first = values[0];
@@ -316,3 +303,6 @@ function analyzeData(data, column) {
         trend
     };
 }
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', initDataVisualizer);
