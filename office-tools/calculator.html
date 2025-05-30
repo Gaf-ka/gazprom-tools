@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .calculator {
+            max-width: 400px;
+            margin: 2rem auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .calculator-display {
+            padding: 1.5rem;
+            background-color: #f8f8f8;
+            text-align: right;
+            font-size: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+        }
+        
+        .calculator button {
+            border: none;
+            padding: 1rem;
+            font-size: 1.2rem;
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .calculator button:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .calculator button.operator {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .calculator button.operator:hover {
+            background-color: #e6b800;
+        }
+        
+        .calculator button.equals {
+            background-color: var(--primary-color);
+            color: white;
+            grid-column: span 2;
+        }
+        
+        .calculator button.equals:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .financial-calculator {
+            margin-top: 3rem;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .financial-calculator h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .financial-calculator label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .financial-calculator input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .financial-calculator button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .financial-calculator button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .financial-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром">
+            <h1>Калькулятор</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Главная</a></li>
+                <li><a href="index.html">Офисные инструменты</a></li>
+                <li><a href="../trainers/index.html">Тренажёры</a></li>
+                <li><a href="../visualization/index.html">Визуализация данных</a></li>
+                <li><a href="../ai-assistant/index.html">ИИ помощник</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="welcome">
+            <h2>Калькулятор</h2>
+            <p>Простой и расширенный калькулятор для различных расчетов.</p>
+        </section>
+
+        <div class="calculator">
+            <div class="calculator-display" id="display">0</div>
+            <div class="calculator-buttons">
+                <button onclick="clearDisplay()">C</button>
+                <button onclick="appendToDisplay('(')">(</button>
+                <button onclick="appendToDisplay(')')">)</button>
+                <button onclick="appendToDisplay('/')" class="operator">/</button>
+                
+                <button onclick="appendToDisplay('7')">7</button>
+                <button onclick="appendToDisplay('8')">8</button>
+                <button onclick="appendToDisplay('9')">9</button>
+                <button onclick="appendToDisplay('*')" class="operator">×</button>
+                
+                <button onclick="appendToDisplay('4')">4</button>
+                <button onclick="appendToDisplay('5')">5</button>
+                <button onclick="appendToDisplay('6')">6</button>
+                <button onclick="appendToDisplay('-')" class="operator">-</button>
+                
+                <button onclick="appendToDisplay('1')">1</button>
+                <button onclick="appendToDisplay('2')">2</button>
+                <button onclick="appendToDisplay('3')">3</button>
+                <button onclick="appendToDisplay('+')" class="operator">+</button>
+                
+                <button onclick="appendToDisplay('0')">0</button>
+                <button onclick="appendToDisplay('.')">.</button>
+                <button onclick="calculate()" class="equals">=</button>
+            </div>
+        </div>
+
+        <div class="financial-calculator">
+            <h3>Финансовый калькулятор</h3>
+            <div>
+                <label for="principal">Основная сумма (руб):</label>
+                <input type="number" id="principal" placeholder="100000">
+                
+                <label for="rate">Годовая процентная ставка (%):</label>
+                <input type="number" id="rate" placeholder="10">
+                
+                <label for="time">Срок (лет):</label>
+                <input type="number" id="time" placeholder="5">
+                
+                <button onclick="calculateInterest()">Рассчитать</button>
+                
+                <div class="financial-result" id="interestResult">
+                    Результаты расчета появятся здесь
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2023 Газпром. Все права защищены.</p>
+        <p>Внутренний портал для сотрудников</p>
+    </footer>
+
+    <script>
+        let currentDisplay = '0';
+        const display = document.getElementById('display');
+        
+        function updateDisplay() {
+            display.textContent = currentDisplay;
+        }
+        
+        function appendToDisplay(value) {
+            if (currentDisplay === '0' && value !== '.') {
+                currentDisplay = value;
+            } else {
+                currentDisplay += value;
+            }
+            updateDisplay();
+        }
+        
+        function clearDisplay() {
+            currentDisplay = '0';
+            updateDisplay();
+        }
+        
+        function calculate() {
+            try {
+                currentDisplay = eval(currentDisplay).toString();
+                updateDisplay();
+            } catch (e) {
+                currentDisplay = 'Ошибка';
+                updateDisplay();
+                setTimeout(clearDisplay, 1500);
+            }
+        }
+        
+        function calculateInterest() {
+            const principal = parseFloat(document.getElementById('principal').value);
+            const rate = parseFloat(document.getElementById('rate').value);
+            const time = parseFloat(document.getElementById('time').value);
+            
+            if (isNaN(principal) || isNaN(rate) || isNaN(time)) {
+                document.getElementById('interestResult').innerHTML = 'Пожалуйста, введите корректные числа во все поля.';
+                return;
+            }
+            
+            const simpleInterest = (principal * rate * time) / 100;
+            const amountSimple = principal + simpleInterest;
+            
+            const compoundInterest = principal * Math.pow(1 + (rate / 100), time) - principal;
+            const amountCompound = principal + compoundInterest;
+            
+            const monthlyPayment = (principal * (rate/100/12) * Math.pow(1 + rate/100/12, time*12)) / 
+                                 (Math.pow(1 + rate/100/12, time*12) - 1);
+            
+            const resultHTML = `
+                <p><strong>Простой процент:</strong></p>
+                <p>Проценты: ${simpleInterest.toFixed(2)} руб</p>
+                <p>Общая сумма: ${amountSimple.toFixed(2)} руб</p>
+                
+                <p><strong>Сложный процент:</strong></p>
+                <p>Проценты: ${compoundInterest.toFixed(2)} руб</p>
+                <p>Общая сумма: ${amountCompound.toFixed(2)} руб</p>
+                
+                <p><strong>Ежемесячный платеж (аннуитет):</strong> ${monthlyPayment.toFixed(2)} руб/мес</p>
+            `;
+            
+            document.getElementById('interestResult').innerHTML = resultHTML;
+        }
+    </script>
+</body>
+</html>

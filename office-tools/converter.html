@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конвертер единиц - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .converter-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .converter-box {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .converter-box h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .converter-group {
+            margin-bottom: 1rem;
+        }
+        
+        .converter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .converter-group input, 
+        .converter-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .converter-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром">
+            <h1>Конвертер единиц</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Главная</a></li>
+                <li><a href="index.html">Офисные инструменты</a></li>
+                <li><a href="../trainers/index.html">Тренажёры</a></li>
+                <li><a href="../visualization/index.html">Визуализация данных</a></li>
+                <li><a href="../ai-assistant/index.html">ИИ помощник</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="welcome">
+            <h2>Конвертер единиц измерения</h2>
+            <p>Конвертация между различными единицами измерения, включая энергетические и финансовые.</p>
+        </section>
+
+        <div class="converter-container">
+            <div class="converter-box">
+                <h3>Длина</h3>
+                <div class="converter-group">
+                    <label for="length-value">Значение:</label>
+                    <input type="number" id="length-value" value="1" oninput="convertLength()">
+                </div>
+                <div class="converter-group">
+                    <label for="length-from">Из:</label>
+                    <select id="length-from" onchange="convertLength()">
+                        <option value="mm">Миллиметры (mm)</option>
+                        <option value="cm">Сантиметры (cm)</option>
+                        <option value="m" selected>Метры (m)</option>
+                        <option value="km">Километры (km)</option>
+                        <option value="in">Дюймы (in)</option>
+                        <option value="ft">Футы (ft)</option>
+                        <option value="yd">Ярды (yd)</option>
+                        <option value="mi">Мили (mi)</option>
+                    </select>
+                </div>
+                <div class="converter-group">
+                    <label for="length-to">В:</label>
+                    <select id="length-to" onchange="convertLength()">
+                        <option value="mm">Миллиметры (mm)</option>
+                        <option value="cm" selected>Сантиметры (cm)</option>
+                        <option value="m">Метры (m)</option>
+                        <option value="km">Километры (km)</option>
+                        <option value="in">Дюймы (in)</option>
+                        <option value="ft">Футы (ft)</option>
+                        <option value="yd">Ярды (yd)</option>
+                        <option value="mi">Мили (mi)</option>
+                    </select>
+                </div>
+                <div class="converter-result" id="length-result">1 m = 100 cm</div>
+            </div>
+
+            <div class="converter-box">
+                <h3>Масса</h3>
+                <div class="converter-group">
+                    <label for="weight-value">Значение:</label>
+                    <input type="number" id="weight-value" value="1" oninput="convertWeight()">
+                </div>
+                <div class="converter-group">
+                    <label for="weight-from">Из:</label>
+                    <select id="weight-from" onchange="convertWeight()">
+                        <option value="mg">Миллиграммы (mg)</option>
+                        <option value="g">Граммы (g)</option>
+                        <option value="kg" selected>Килограммы (kg)</option>
+                        <option value="t">Тонны (t)</option>
+                        <option value="oz">Унции (oz)</option>
+                        <option value="lb">Фунты (lb)</option>
+                    </select>
+                </div>
+                <div class="converter-group">
+                    <label for="weight-to">В:</label>
+                    <select id="weight-to" onchange="convertWeight()">
+                        <option value="mg">Миллиграммы (mg)</option>
+                        <option value="g" selected>Граммы (g)</option>
+                        <option value="kg">Килограммы (kg)</option>
+                        <option value="t">Тонны (t)</option>
+                        <option value="oz">Унции (oz)</option>
+                        <option value="lb">Фунты (lb)</option>
+                    </select>
+                </div>
+                <div class="converter-result" id="weight-result">1 kg = 1000 g</div>
+            </div>
+
+            <div class="converter-box">
+                <h3>Энергия</h3>
+                <div class="converter-group">
+                    <label for="energy-value">Значение:</label>
+                    <input type="number" id="energy-value" value="1" oninput="convertEnergy()">
+                </div>
+                <div class="converter-group">
+                    <label for="energy-from">Из:</label>
+                    <select id="energy-from" onchange="convertEnergy()">
+                        <option value="J">Джоули (J)</option>
+                        <option value="kJ">Килоджоули (kJ)</option>
+                        <option value="cal">Калории (cal)</option>
+                        <option value="kcal">Килокалории (kcal)</option>
+                        <option value="kWh" selected>Киловатт-часы (kWh)</option>
+                        <option value="BTU">Британские тепловые единицы (BTU)</option>
+                    </select>
+                </div>
+                <div class="converter-group">
+                    <label for="energy-to">В:</label>
+                    <select id="energy-to" onchange="convertEnergy()">
+                        <option value="J">Джоули (J)</option>
+                        <option value="kJ" selected>Килоджоули (kJ)</option>
+                        <option value="cal">Калории (cal)</option>
+                        <option value="kcal">Килокалории (kcal)</option>
+                        <option value="kWh">Киловатт-часы (kWh)</option>
+                        <option value="BTU">Британские тепловые единицы (BTU)</option>
+                    </select>
+                </div>
+                <div class="converter-result" id="energy-result">1 kWh = 3600 kJ</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2023 Газпром. Все права защищены.</p>
+        <p>Внутренний портал для сотрудников</p>
+    </footer>
+
+    <script>
+        // Коэффициенты преобразования для длины
+        const lengthFactors = {
+            mm: 1,
+            cm: 10,
+            m: 1000,
+            km: 1000000,
+            in: 25.4,
+            ft: 304.8,
+            yd: 914.4,
+            mi: 1609344
+        };
+        
+        // Коэффициенты преобразования для массы
+        const weightFactors = {
+            mg: 1,
+            g: 1000,
+            kg: 1000000,
+            t: 1000000000,
+            oz: 28349.5,
+            lb: 453592
+        };
+        
+        // Коэффициенты преобразования для энергии
+        const energyFactors = {
+            J: 1,
+            kJ: 1000,
+            cal: 4.184,
+            kcal: 4184,
+            kWh: 3600000,
+            BTU: 1055.06
+        };
+        
+        function convertLength() {
+            const value = parseFloat(document.getElementById('length-value').value);
+            const from = document.getElementById('length-from').value;
+            const to = document.getElementById('length-to').value;
+            
+            if (isNaN(value)) {
+                document.getElementById('length-result').textContent = 'Введите число';
+                return;
+            }
+            
+            const result = value * lengthFactors[from] / lengthFactors[to];
+            document.getElementById('length-result').textContent = 
+                `${value} ${from} = ${result.toFixed(6)} ${to}`;
+        }
+        
+        function convertWeight() {
+            const value = parseFloat(document.getElementById('weight-value').value);
+            const from = document.getElementById('weight-from').value;
+            const to = document.getElementById('weight-to').value;
+            
+            if (isNaN(value)) {
+                document.getElementById('weight-result').textContent = 'Введите число';
+                return;
+            }
+            
+            const result = value * weightFactors[from] / weightFactors[to];
+            document.getElementById('weight-result').textContent = 
+                `${value} ${from} = ${result.toFixed(6)} ${to}`;
+        }
+        
+        function convertEnergy() {
+            const value = parseFloat(document.getElementById('energy-value').value);
+            const from = document.getElementById('energy-from').value;
+            const to = document.getElementById('energy-to').value;
+            
+            if (isNaN(value)) {
+                document.getElementById('energy-result').textContent = 'Введите число';
+                return;
+            }
+            
+            const result = value * energyFactors[from] / energyFactors[to];
+            document.getElementById('energy-result').textContent = 
+                `${value} ${from} = ${result.toFixed(6)} ${to}`;
+        }
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            convertLength();
+            convertWeight();
+            convertEnergy();
+        });
+    </script>
+</body>
+</html>

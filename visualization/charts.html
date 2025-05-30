@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Графики - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .chart-box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+        
+        .chart-box h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .chart-controls {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .chart-controls button {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .chart-controls button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: center;
+        }
+        
+        .data-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .data-table input {
+            width: 100%;
+            border: none;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром">
+            <h1>Графики данных</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Главная</a></li>
+                <li><a href="../office-tools/index.html">Офисные инструменты</a></li>
+                <li><a href="../trainers/index.html">Тренажёры</a></li>
+                <li><a href="index.html">Визуализация данных</a></li>
+                <li><a href="../ai-assistant/index.html">ИИ помощник</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="welcome">
+            <h2>Графики данных</h2>
+            <p>Создавайте и настраивайте различные типы графиков для визуализации ваших данных.</p>
+        </section>
+
+        <div class="chart-container">
+            <div class="chart-box">
+                <h3>Линейный график</h3>
+                <div class="chart-wrapper">
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <div class="chart-controls">
+                    <button onclick="updateLineChart()">Обновить график</button>
+                    <button onclick="randomizeLineData()">Случайные данные</button>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Месяц</th>
+                            <th>Продажи</th>
+                            <th>Расходы</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lineChartData">
+                        <tr>
+                            <td>Янв</td>
+                            <td><input type="number" value="120" data-month="0" data-type="sales"></td>
+                            <td><input type="number" value="80" data-month="0" data-type="expenses"></td>
+                        </tr>
+                        <tr>
+                            <td>Фев</td>
+                            <td><input type="number" value="150" data-month="1" data-type="sales"></td>
+                            <td><input type="number" value="90" data-month="1" data-type="expenses"></td>
+                        </tr>
+                        <tr>
+                            <td>Мар</td>
+                            <td><input type="number" value="180" data-month="2" data-type="sales"></td>
+                            <td><input type="number" value="110" data-month="2" data-type="expenses"></td>
+                        </tr>
+                        <tr>
+                            <td>Апр</td>
+                            <td><input type="number" value="210" data-month="3" data-type="sales"></td>
+                            <td><input type="number" value="120" data-month="3" data-type="expenses"></td>
+                        </tr>
+                        <tr>
+                            <td>Май</td>
+                            <td><input type="number" value="240" data-month="4" data-type="sales"></td>
+                            <td><input type="number" value="130" data-month="4" data-type="expenses"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="chart-box">
+                <h3>Столбчатая диаграмма</h3>
+                <div class="chart-wrapper">
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div class="chart-controls">
+                    <button onclick="updateBarChart()">Обновить график</button>
+                    <button onclick="randomizeBarData()">Случайные данные</button>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Отдел</th>
+                            <th>Показатель</th>
+                        </tr>
+                    </thead>
+                    <tbody id="barChartData">
+                        <tr>
+                            <td>Финансы</td>
+                            <td><input type="number" value="85" data-department="finance"></td>
+                        </tr>
+                        <tr>
+                            <td>Продажи</td>
+                            <td><input type="number" value="72" data-department="sales"></td>
+                        </tr>
+                        <tr>
+                            <td>Маркетинг</td>
+                            <td><input type="number" value="68" data-department="marketing"></td>
+                        </tr>
+                        <tr>
+                            <td>Логистика</td>
+                            <td><input type="number" value="79" data-department="logistics"></td>
+                        </tr>
+                        <tr>
+                            <td>IT</td>
+                            <td><input type="number" value="91" data-department="it"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2023 Газпром. Все права защищены.</p>
+        <p>Внутренний портал для сотрудников</p>
+    </footer>
+
+    <script>
+        // Инициализация графиков
+        let lineChart, barChart;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Линейный график
+            const lineCtx = document.getElementById('lineChart').getContext('2d');
+            lineChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май'],
+                    datasets: [
+                        {
+                            label: 'Продажи',
+                            data: [120, 150, 180, 210, 240],
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: 'Расходы',
+                            data: [80, 90, 110, 120, 130],
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Столбчатая диаграмма
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Финансы', 'Продажи', 'Маркетинг', 'Логистика', 'IT'],
+                    datasets: [{
+                        label: 'Показатель эффективности',
+                        data: [85, 72, 68, 79, 91],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)',
+                            'rgba(255, 159, 64, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Обновление линейного графика
+        function updateLineChart() {
+            const salesData = [];
+            const expensesData = [];
+            
+            document.querySelectorAll('#lineChartData input[data-type="sales"]').forEach(input => {
+                salesData.push(parseFloat(input.value));
+            });
+            
+            document.querySelectorAll('#lineChartData input[data-type="expenses"]').forEach(input => {
+                expensesData.push(parseFloat(input.value));
+            });
+            
+            lineChart.data.datasets[0].data = salesData;
+            lineChart.data.datasets[1].data = expensesData;
+            lineChart.update();
+        }
+        
+        // Обновление столбчатой диаграммы
+        function updateBarChart() {
+            const performanceData = [];
+            
+            document.querySelectorAll('#barChartData input').forEach(input => {
+                performanceData.push(parseFloat(input.value));
+            });
+            
+            barChart.data.datasets[0].data = performanceData;
+            barChart.update();
+        }
+        
+        // Случайные данные для линейного графика
+        function randomizeLineData() {
+            document.querySelectorAll('#lineChartData input').forEach(input => {
+                input.value = Math.floor(Math.random() * 200) + 50;
+            });
+            updateLineChart();
+        }
+        
+        // Случайные данные для столбчатой диаграммы
+        function randomizeBarData() {
+            document.querySelectorAll('#barChartData input').forEach(input => {
+                input.value = Math.floor(Math.random() * 50) + 50;
+            });
+            updateBarChart();
+        }
+    </script>
+</body>
+</html>
