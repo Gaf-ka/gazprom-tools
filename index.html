@@ -10,47 +10,51 @@
 </head>
 <body>
     <header class="header">
-        <div class="header-container">
-            <div class="logo">
-                <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром" class="logo-img">
-                <div class="logo-text">
-                    <span class="logo-title">Газпром</span>
-                    <span class="logo-subtitle">Внутренний портал</span>
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Внутренний портал</span>
+                    </div>
                 </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="index.html" class="nav-link active">Главная</a></li>
+                        <li class="nav-item"><a href="office-tools/index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
-            
-            <nav class="main-nav">
-                <ul class="nav-list">
-                    <li class="nav-item"><a href="index.html" class="nav-link active">Главная</a></li>
-                    <li class="nav-item"><a href="office-tools/index.html" class="nav-link">Инструменты</a></li>
-                    <li class="nav-item"><a href="trainers/index.html" class="nav-link">Тренажёры</a></li>
-                    <li class="nav-item"><a href="visualization/index.html" class="nav-link">Аналитика</a></li>
-                    <li class="nav-item"><a href="ai-assistant/index.html" class="nav-link">Помощник</a></li>
-                </ul>
-            </nav>
-            
-            <button class="mobile-menu-btn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
         </div>
     </header>
 
     <main class="main">
         <section class="hero">
             <div class="container">
-                <div class="hero-content animate__animated animate__fadeIn">
-                    <h1 class="hero-title">Инновационные решения для эффективной работы</h1>
-                    <p class="hero-text">Доступ к современным инструментам для анализа данных, обучения и автоматизации рабочих процессов</p>
-                    <div class="hero-buttons">
-                        <a href="office-tools/index.html" class="btn btn-primary">Начать работу</a>
-                        <a href="#features" class="btn btn-outline">Узнать больше</a>
+                <div class="hero-wrapper">
+                    <div class="hero-content animate__animated animate__fadeIn">
+                        <h1 class="hero-title">Инновационные решения для эффективной работы</h1>
+                        <p class="hero-text">Доступ к современным инструментам для анализа данных, обучения и автоматизации рабочих процессов</p>
+                        <div class="hero-buttons">
+                            <a href="office-tools/index.html" class="btn btn-primary">Начать работу</a>
+                            <a href="#features" class="btn btn-outline">Узнать больше</a>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="hero-image">
-                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Офис">
+                    
+                    <div class="hero-image">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Нефтегазовая промышленность" class="animate__animated animate__fadeInRight">
+                    </div>
                 </div>
             </div>
         </section>
@@ -65,7 +69,7 @@
                 <div class="features-grid">
                     <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.1s">
                         <div class="feature-icon">
-                            <img src="https://www.svgrepo.com/show/530084/tools.svg" alt="Инструменты">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2933/2933245.png" alt="Инструменты">
                         </div>
                         <h3 class="feature-title">Офисные инструменты</h3>
                         <p class="feature-text">Расширенный набор инструментов для повседневной работы: калькуляторы, конвертеры, генераторы отчетов</p>
@@ -74,7 +78,7 @@
                     
                     <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.2s">
                         <div class="feature-icon">
-                            <img src="https://www.svgrepo.com/show/530084/training.svg" alt="Тренажёры">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2936/2936886.png" alt="Тренажёры">
                         </div>
                         <h3 class="feature-title">Тренажёры</h3>
                         <p class="feature-text">10+ интерактивных тренажёров для обучения и повышения квалификации сотрудников</p>
@@ -83,7 +87,7 @@
                     
                     <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.3s">
                         <div class="feature-icon">
-                            <img src="https://www.svgrepo.com/show/530084/analytics.svg" alt="Аналитика">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2933/2933245.png" alt="Аналитика">
                         </div>
                         <h3 class="feature-title">Аналитика данных</h3>
                         <p class="feature-text">Мощные инструменты визуализации данных с поддержкой импорта из Excel и CSV</p>
@@ -92,7 +96,7 @@
                     
                     <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.4s">
                         <div class="feature-icon">
-                            <img src="https://www.svgrepo.com/show/530084/assistant.svg" alt="Помощник">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2936/2936775.png" alt="Помощник">
                         </div>
                         <h3 class="feature-title">ИИ помощник</h3>
                         <p class="feature-text">Интеллектуальный ассистент для быстрого поиска информации и решения рабочих вопросов</p>
@@ -182,9 +186,9 @@
                     <h4 class="footer-title">Навигация</h4>
                     <ul class="footer-links">
                         <li><a href="index.html" class="footer-link">Главная</a></li>
-                        <li><a href="about.html" class="footer-link">О компании</a></li>
                         <li><a href="office-tools/index.html" class="footer-link">Инструменты</a></li>
                         <li><a href="trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="visualization/index.html" class="footer-link">Аналитика</a></li>
                     </ul>
                 </div>
                 
