@@ -104,6 +104,8 @@ img {
     padding: 15px 0;
 }
 
+
+
 .logo {
     display: flex;
     align-items: center;
@@ -394,13 +396,20 @@ img {
     justify-content: center;
     background-color: var(--primary-light);
     border-radius: 50%;
+    font-size: 2rem;
+    color: var(--primary-color);
 }
 
 .feature-icon img {
     width: 40px;
     height: 40px;
 }
-
+.feature-icon i {
+    transition: transform 0.3s ease;
+}
+.feature-card:hover .feature-icon i {
+    transform: scale(1.2);
+}
 .feature-title {
     font-size: 1.3rem;
     margin-bottom: 15px;
