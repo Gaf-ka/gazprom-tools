@@ -46,6 +46,7 @@ img {
 }
 
 .container {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
@@ -167,10 +168,11 @@ img {
 }
 
 .user-avatar {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     overflow: hidden;
+    border: 2px solid var(--primary-light);
 }
 
 .user-avatar img {
@@ -216,6 +218,7 @@ img {
 .hero-content {
     flex: 1;
     max-width: 600px;
+    padding-right: 40px;
 }
 
 .hero-title {
@@ -259,6 +262,7 @@ img {
 .section-header {
     text-align: center;
     margin-bottom: 60px;
+    padding: 0 20px;
 }
 
 .section-title {
@@ -475,39 +479,7 @@ img {
     padding-left: 5px;
 }
 
-.footer-social {
-    display: flex;
-    gap: 15px;
-}
-
-.social-link {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    background-color: #333;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-}
-
-.social-link:hover {
-    background-color: var(--primary-color);
-    transform: translateY(-3px);
-}
-
-.social-link img {
-    width: 20px;
-    height: 20px;
-    filter: brightness(0) invert(1);
-}
-
-.footer-contacts {
-    list-style: none;
-}
-
-.contact-item {
+.footer-contacts .contact-item {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -515,10 +487,10 @@ img {
     color: #aaa;
 }
 
-.contact-item img {
-    width: 20px;
-    height: 20px;
-    filter: brightness(0) invert(0.7);
+.footer-contacts .contact-icon {
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
 }
 
 .footer-bottom {
@@ -531,6 +503,12 @@ img {
 
 .footer-bottom p {
     margin-bottom: 10px;
+}
+
+.footer-bottom .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
 }
 
 /* Animations */
@@ -550,6 +528,7 @@ img {
     .hero-content {
         max-width: 100%;
         margin-bottom: 40px;
+        padding-right: 0;
     }
     
     .hero-buttons {
@@ -619,5 +598,10 @@ img {
     
     .footer-container {
         grid-template-columns: 1fr;
+    }
+    
+    .footer-bottom .footer-links {
+        flex-direction: column;
+        gap: 5px;
     }
 }

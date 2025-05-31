@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set current year in footer
     document.querySelector('.footer-bottom p').textContent = 
-        document.querySelector('.footer-bottom p').textContent.replace('2025', new Date().getFullYear());
+        `© ${new Date().getFullYear()} ПАО "Газпром". Все права защищены.`;
     
     // Highlight current page in navigation
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
