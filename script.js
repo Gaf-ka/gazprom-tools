@@ -2,10 +2,12 @@
 const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
 const mainNav = document.querySelector('.main-nav');
 
-mobileMenuBtn.addEventListener('click', () => {
-    mobileMenuBtn.classList.toggle('active');
-    mainNav.classList.toggle('active');
-});
+if (mobileMenuBtn && mainNav) {
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileMenuBtn.classList.toggle('active');
+        mainNav.classList.toggle('active');
+    });
+}
 
 // Stats counter animation
 function animateValue(obj, start, end, duration) {
@@ -13,7 +15,7 @@ function animateValue(obj, start, end, duration) {
     const step = (timestamp) => {
         if (!startTimestamp) startTimestamp = timestamp;
         const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        obj.textContent = Math.floor(progress * (end - start) + start);
         if (progress < 1) {
             window.requestAnimationFrame(step);
         }
@@ -26,6 +28,8 @@ const statNumbers = document.querySelectorAll('.stat-number');
 const statsSection = document.querySelector('.stats');
 
 function checkStatsInView() {
+    if (!statsSection) return;
+    
     const rect = statsSection.getBoundingClientRect();
     const isInView = (rect.top <= window.innerHeight && rect.bottom >= 0);
     
@@ -65,9 +69,44 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // Close mobile menu when clicking on a link
 document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', () => {
-        if (mainNav.classList.contains('active')) {
+        if (mainNav && mainNav.classList.contains('active')) {
             mobileMenuBtn.classList.remove('active');
             mainNav.classList.remove('active');
         }
+    });
+});
+
+// File upload handler for charts and diagrams
+document.querySelectorAll('.file-upload').forEach(upload => {
+    upload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const fileName = document.getElementById('file-name');
+        if (fileName) {
+            fileName.textContent = file.name;
+        }
+        
+        // Here you would process the file and update the chart
+        // This is a placeholder for actual file processing logic
+        console.log('File selected:', file.name);
+    });
+});
+
+// Initialize tooltips
+document.querySelectorAll('[data-tooltip]').forEach(el => {
+    el.addEventListener('mouseenter', function() {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = this.getAttribute('data-tooltip');
+        document.body.appendChild(tooltip);
+        
+        const rect = this.getBoundingClientRect();
+        tooltip.style.left = `${rect.left + rect.width/2 - tooltip.offsetWidth/2}px`;
+        tooltip.style.top = `${rect.top - tooltip.offsetHeight - 5}px`;
+        
+        this.addEventListener('mouseleave', () => {
+            tooltip.remove();
+        }, { once: true });
     });
 });
