@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор отчетов - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        .report-generator {
+            max-width: 1000px;
+            margin: 2rem auto;
+        }
+        
+        .report-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .report-preview {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            min-height: 500px;
+        }
+        
+        .template-selector {
+            margin-bottom: 2rem;
+        }
+        
+        .template-options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .template-option {
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 200px;
+        }
+        
+        .template-option:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .template-option.selected {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .template-option img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .report-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        .report-content {
+            margin-top: 2rem;
+        }
+        
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        .report-table th, .report-table td {
+            border: 1px solid var(--gray);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .report-table th {
+            background-color: var(--primary-light);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Генератор отчетов</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Генератор отчетов</h1>
+                <p class="section-subtitle">Создавайте профессиональные отчеты в различных форматах</p>
+            </div>
+        </section>
+
+        <section class="report-generator">
+            <div class="container">
+                <div class="template-selector">
+                    <h3>Выберите шаблон отчета</h3>
+                    <div class="template-options">
+                        <div class="template-option selected" data-template="financial">
+                            <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Финансовый отчет">
+                            <h4>Финансовый отчет</h4>
+                        </div>
+                        <div class="template-option" data-template="production">
+                            <img src="https://images.unsplash.com/photo-1581093450021-4a7360e9a6a8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Производственный отчет">
+                            <h4>Производственный отчет</h4>
+                        </div>
+                        <div class="template-option" data-template="sales">
+                            <img src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Отчет по продажам">
+                            <h4>Отчет по продажам</h4>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="report-controls">
+                    <button class="btn btn-primary" onclick="generatePDF()">
+                        <i class="fas fa-file-pdf"></i> Скачать PDF
+                    </button>
+                    <button class="btn btn-primary" onclick="generateExcel()">
+                        <i class="fas fa-file-excel"></i> Скачать Excel
+                    </button>
+                    <div style="flex-grow: 1;"></div>
+                    <button class="btn" onclick="loadSampleData()">
+                        <i class="fas fa-database"></i> Загрузить пример данных
+                    </button>
+                </div>
+                
+                <div class="report-preview" id="report-preview">
+                    <h2 class="report-title" id="report-title">Финансовый отчет за Q1 2025</h2>
+                    <div class="report-content">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Показатель</th>
+                                    <th>Январь</th>
+                                    <th>Февраль</th>
+                                    <th>Март</th>
+                                    <th>Итого</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-data">
+                                <!-- Данные будут загружены через JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="../visualization/index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Инициализация jsPDF
+        const { jsPDF } = window.jspdf;
+        
+        // Загрузка данных примера
+        function loadSampleData() {
+            const data = [
+                { name: "Добыча газа (млн м³)", jan: 1250, feb: 1320, mar: 1400 },
+                { name: "Реализация газа (млн м³)", jan: 1180, feb: 1250, mar: 1320 },
+                { name: "Выручка (млн руб)", jan: 45200, feb: 47800, mar: 50300 },
+                { name: "Расходы (млн руб)", jan: 28500, feb: 29300, mar: 30200 },
+                { name: "Прибыль (млн руб)", jan: 16700, feb: 18500, mar: 20100 }
+            ];
+            
+            const tableBody = document.getElementById('report-data');
+            tableBody.innerHTML = '';
+            
+            data.forEach(item => {
+                const total = item.jan + item.feb + item.mar;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.jan.toLocaleString()}</td>
+                    <td>${item.feb.toLocaleString()}</td>
+                    <td>${item.mar.toLocaleString()}</td>
+                    <td><strong>${total.toLocaleString()}</strong></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Генерация PDF
+        function generatePDF() {
+            const doc = new jsPDF();
+            const title = document.getElementById('report-title').textContent;
+            
+            doc.setFontSize(18);
+            doc.text(title, 14, 20);
+            
+            // Добавляем таблицу
+            doc.autoTable({
+                html: '#report-preview table',
+                startY: 30,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [0, 166, 80], // Цвет как в стилях
+                    textColor: 255
+                }
+            });
+            
+            doc.save(`${title}.pdf`);
+        }
+        
+        // Генерация Excel
+        function generateExcel() {
+            const table = document.getElementById('report-preview').querySelector('table');
+            const workbook = XLSX.utils.table_to_book(table);
+            const title = document.getElementById('report-title').textContent;
+            XLSX.writeFile(workbook, `${title}.xlsx`);
+        }
+        
+        // Выбор шаблона
+        document.querySelectorAll('.template-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.template-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+                const template = this.getAttribute('data-template');
+                const titleMap = {
+                    'financial': 'Финансовый отчет за Q1 2025',
+                    'production': 'Производственный отчет за Q1 2025',
+                    'sales': 'Отчет по продажам за Q1 2025'
+                };
+                
+                document.getElementById('report-title').textContent = titleMap[template];
+                loadSampleData(); // Загружаем данные для выбранного шаблона
+            });
+        });
+        
+        // Загружаем данные при старте
+        document.addEventListener('DOMContentLoaded', loadSampleData);
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

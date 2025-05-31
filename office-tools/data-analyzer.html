@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализатор данных - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .data-analyzer {
+            max-width: 1200px;
+            margin: 2rem auto;
+        }
+        
+        .analyzer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .data-input {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+        }
+        
+        .data-results {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid var(--gray);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: var(--primary-light);
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin-top: 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-card {
+            background-color: var(--primary-light);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Анализатор данных</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Анализатор данных</h1>
+                <p class="section-subtitle">Быстрый анализ табличных данных с базовой статистикой и визуализацией</p>
+            </div>
+        </section>
+
+        <section class="data-analyzer">
+            <div class="container">
+                <div class="analyzer-grid">
+                    <div class="data-input">
+                        <h3>Входные данные</h3>
+                        <div class="form-group">
+                            <label for="data-columns">Количество столбцов:</label>
+                            <select id="data-columns" class="form-control" onchange="updateTableStructure()">
+                                <option value="2">2</option>
+                                <option value="3" selected>3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="data-rows">Количество строк:</label>
+                            <select id="data-rows" class="form-control" onchange="updateTableStructure()">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="loadSampleData()">
+                            <i class="fas fa-database"></i> Загрузить пример данных
+                        </button>
+                        
+                        <table class="data-table" id="input-table">
+                            <thead>
+                                <tr id="header-row">
+                                    <th>Показатель</th>
+                                    <th>2022</th>
+                                    <th>2023</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Данные будут загружены через JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="data-results">
+                        <h3>Результаты анализа</h3>
+                        
+                        <div class="stats-grid" id="stats-container">
+                            <!-- Статистика будет загружена через JS -->
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="analysis-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="../visualization/index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let analysisChart = null;
+        
+        // Обновление структуры таблицы
+        function updateTableStructure() {
+            const columns = parseInt(document.getElementById('data-columns').value);
+            const rows = parseInt(document.getElementById('data-rows').value);
+            
+            // Обновляем заголовки
+            const headerRow = document.getElementById('header-row');
+            headerRow.innerHTML = '<th>Показатель</th>';
+            
+            for (let i = 1; i < columns; i++) {
+                headerRow.innerHTML += `<th>${2022 + i}</th>`;
+            }
+            
+            // Обновляем тело таблицы
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            
+            for (let i = 0; i < rows; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td><input type="text" value="Показатель ${i + 1}"></td>`;
+                
+                for (let j = 1; j < columns; j++) {
+                    row.innerHTML += `<td><input type="number" value="${Math.floor(Math.random() * 1000)}"></td>`;
+                }
+                
+                tableBody.appendChild(row);
+            }
+            
+            analyzeData();
+        }
+        
+        // Загрузка примера данных
+        function loadSampleData() {
+            const sampleData = [
+                ["Добыча газа", 12500, 13200, 14000],
+                ["Реализация газа", 11800, 12500, 13200],
+                ["Выручка", 45200, 47800, 50300],
+                ["Расходы", 28500, 29300, 30200],
+                ["Прибыль", 16700, 18500, 20100],
+                ["Капитальные вложения", 8900, 9200, 9500],
+                ["Численность персонала", 478, 482, 490],
+                ["Производительность", 26.2, 27.4, 28.6],
+                ["Доля на рынке", 17.2, 17.8, 18.3],
+                ["ROI", 12.5, 13.2, 14.1]
+            ];
+            
+            document.getElementById('data-columns').value = "4";
+            document.getElementById('data-rows').value = "10";
+            updateTableStructure();
+            
+            const tableBody = document.getElementById('table-body');
+            const inputs = tableBody.querySelectorAll('input');
+            
+            let inputIndex = 0;
+            sampleData.forEach(row => {
+                row.forEach(value => {
+                    if (inputIndex < inputs.length) {
+                        inputs[inputIndex].value = value;
+                        inputIndex++;
+                    }
+                });
+            });
+            
+            analyzeData();
+        }
+        
+        // Анализ данных
+        function analyzeData() {
+            const table = document.getElementById('input-table');
+            const rows = table.querySelectorAll('tbody tr');
+            const headers = table.querySelectorAll('thead th');
+            
+            if (rows.length === 0 || headers.length < 2) return;
+            
+            const statsContainer = document.getElementById('stats-container');
+            statsContainer.innerHTML = '';
+            
+            // Собираем данные по столбцам
+            const columns = [];
+            for (let i = 1; i < headers.length; i++) {
+                columns.push({
+                    name: headers[i].textContent,
+                    values: [],
+                    sum: 0,
+                    min: Infinity,
+                    max: -Infinity
+                });
+            }
+            
+            // Заполняем данные
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                for (let i = 1; i < cells.length && i - 1 < columns.length; i++) {
+                    const value = parseFloat(cells[i].querySelector('input').value) || 0;
+                    columns[i - 1].values.push(value);
+                    columns[i - 1].sum += value;
+                    columns[i - 1].min = Math.min(columns[i - 1].min, value);
+                    columns[i - 1].max = Math.max(columns[i - 1].max, value);
+                }
+            });
+            
+            // Рассчитываем статистику
+            columns.forEach(col => {
+                col.avg = col.sum / col.values.length;
+                
+                // Дисперсия
+                let variance = 0;
+                col.values.forEach(val => {
+                    variance += Math.pow(val - col.avg, 2);
+                });
+                col.variance = variance / col.values.length;
+                col.stdDev = Math.sqrt(col.variance);
+            });
+            
+            // Отображаем статистику
+            columns.forEach(col => {
+                statsContainer.innerHTML += `
+                    <div class="stat-card">
+                        <div class="stat-value">${col.name}</div>
+                        <div class="stat-label">Среднее: ${col.avg.toFixed(2)}</div>
+                        <div class="stat-label">Мин/Макс: ${col.min.toFixed(2)} / ${col.max.toFixed(2)}</div>
+                        <div class="stat-label">Ст. отклонение: ${col.stdDev.toFixed(2)}</div>
+                    </div>
+                `;
+            });
+            
+            // Обновляем график
+            updateChart(columns);
+        }
+        
+        // Обновление графика
+        function updateChart(columns) {
+            const ctx = document.getElementById('analysis-chart').getContext('2d');
+            const labels = [];
+            const datasets = [];
+            
+            // Первый столбец - это названия показателей
+            const tableBody = document.getElementById('table-body');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const firstCell = row.querySelector('td:first-child input');
+                if (firstCell) {
+                    labels.push(firstCell.value);
+                }
+            });
+            
+        }
+    
