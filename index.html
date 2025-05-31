@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Газпром - Внутренний портал</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
     <header class="header">
@@ -14,100 +14,147 @@
             <div class="logo">
                 <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром" class="logo-img">
                 <div class="logo-text">
-                    <h1>Газпром</h1>
-                    <p>Внутренний портал для сотрудников</p>
+                    <span class="logo-title">Газпром</span>
+                    <span class="logo-subtitle">Внутренний портал</span>
                 </div>
             </div>
             
-            <nav class="nav">
+            <nav class="main-nav">
                 <ul class="nav-list">
-                    <li class="nav-item"><a href="index.html" class="nav-link active"><i class="fas fa-home"></i> Главная</a></li>
-                    <li class="nav-item"><a href="office-tools/index.html" class="nav-link"><i class="fas fa-tools"></i> Инструменты</a></li>
-                    <li class="nav-item"><a href="trainers/index.html" class="nav-link"><i class="fas fa-graduation-cap"></i> Тренажёры</a></li>
-                    <li class="nav-item"><a href="visualization/index.html" class="nav-link"><i class="fas fa-chart-bar"></i> Аналитика</a></li>
-                    <li class="nav-item"><a href="ai-assistant/index.html" class="nav-link"><i class="fas fa-robot"></i> Помощник</a></li>
+                    <li class="nav-item"><a href="index.html" class="nav-link active">Главная</a></li>
+                    <li class="nav-item"><a href="office-tools/index.html" class="nav-link">Инструменты</a></li>
+                    <li class="nav-item"><a href="trainers/index.html" class="nav-link">Тренажёры</a></li>
+                    <li class="nav-item"><a href="visualization/index.html" class="nav-link">Аналитика</a></li>
+                    <li class="nav-item"><a href="ai-assistant/index.html" class="nav-link">Помощник</a></li>
                 </ul>
             </nav>
             
             <div class="user-panel">
-                <div class="user-greeting">Добро пожаловать, сотрудник!</div>
-                <div class="current-date">25 мая 2025</div>
+                <div class="user-avatar">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Профиль">
+                </div>
+                <span class="user-name">Сотрудник</span>
             </div>
+            
+            <button class="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </header>
 
     <main class="main">
         <section class="hero">
-            <div class="hero-content">
-                <h2 class="hero-title">Эффективные инструменты для вашей работы</h2>
-                <p class="hero-text">Оптимизируйте рабочие процессы с помощью современных решений</p>
+            <div class="hero-content animate__animated animate__fadeIn">
+                <h1 class="hero-title">Инновационные решения для эффективной работы</h1>
+                <p class="hero-text">Доступ к современным инструментам для анализа данных, обучения и автоматизации рабочих процессов</p>
                 <div class="hero-buttons">
                     <a href="office-tools/index.html" class="btn btn-primary">Начать работу</a>
-                    <a href="about/index.html" class="btn btn-secondary">О компании</a>
+                    <a href="#features" class="btn btn-outline">Узнать больше</a>
                 </div>
             </div>
+            
             <div class="hero-image">
-                <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb" alt="Рабочий процесс" class="hero-img">
+                <img src="https://www.gazprom.com/f/i/press-center/photoreports/2023/09/0919/01.jpg" alt="Газпром" class="animate__animated animate__fadeInRight">
             </div>
         </section>
 
-        <section class="features">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-tools"></i>
-                </div>
-                <h3 class="feature-title">Офисные инструменты</h3>
-                <p class="feature-text">Конвертеры, калькуляторы и другие полезные утилиты для ежедневной работы</p>
-                <a href="office-tools/index.html" class="feature-link">Подробнее <i class="fas fa-arrow-right"></i></a>
+        <section class="features" id="features">
+            <div class="section-header">
+                <h2 class="section-title">Наши возможности</h2>
+                <p class="section-subtitle">Все инструменты для комфортной работы в одном месте</p>
             </div>
             
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-graduation-cap"></i>
+            <div class="features-grid">
+                <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.1s">
+                    <div class="feature-icon">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2933/2933245.png" alt="Инструменты">
+                    </div>
+                    <h3 class="feature-title">Офисные инструменты</h3>
+                    <p class="feature-text">Расширенный набор инструментов для повседневной работы: калькуляторы, конвертеры, генераторы отчетов</p>
+                    <a href="office-tools/index.html" class="feature-link">Подробнее →</a>
                 </div>
-                <h3 class="feature-title">Тренажёры</h3>
-                <p class="feature-text">10 специализированных тренажёров для профессионального развития</p>
-                <a href="trainers/index.html" class="feature-link">Подробнее <i class="fas fa-arrow-right"></i></a>
+                
+                <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.2s">
+                    <div class="feature-icon">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2936/2936886.png" alt="Тренажёры">
+                    </div>
+                    <h3 class="feature-title">Тренажёры</h3>
+                    <p class="feature-text">10+ интерактивных тренажёров для обучения и повышения квалификации сотрудников</p>
+                    <a href="trainers/index.html" class="feature-link">Подробнее →</a>
+                </div>
+                
+                <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.3s">
+                    <div class="feature-icon">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2933/2933245.png" alt="Аналитика">
+                    </div>
+                    <h3 class="feature-title">Аналитика данных</h3>
+                    <p class="feature-text">Мощные инструменты визуализации данных с поддержкой импорта из Excel и CSV</p>
+                    <a href="visualization/index.html" class="feature-link">Подробнее →</a>
+                </div>
+                
+                <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.4s">
+                    <div class="feature-icon">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2936/2936775.png" alt="Помощник">
+                    </div>
+                    <h3 class="feature-title">ИИ помощник</h3>
+                    <p class="feature-text">Интеллектуальный ассистент для быстрого поиска информации и решения рабочих вопросов</p>
+                    <a href="ai-assistant/index.html" class="feature-link">Подробнее →</a>
+                </div>
             </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-line"></i>
+        </section>
+
+        <section class="stats">
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-number" data-count="25">0</div>
+                    <div class="stat-text">Инструментов для работы</div>
                 </div>
-                <h3 class="feature-title">Аналитика данных</h3>
-                <p class="feature-text">Визуализация и анализ данных с возможностью импорта файлов</p>
-                <a href="visualization/index.html" class="feature-link">Подробнее <i class="fas fa-arrow-right"></i></a>
+                
+                <div class="stat-item">
+                    <div class="stat-number" data-count="10">0</div>
+                    <div class="stat-text">Тренажёров</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-number" data-count="15">0</div>
+                    <div class="stat-text">Видов визуализации</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-number" data-count="24">0</div>
+                    <div class="stat-text">/7 поддержка</div>
+                </div>
             </div>
         </section>
 
         <section class="news">
-            <h2 class="section-title">Новости компании</h2>
-            <div class="news-container">
-                <div class="news-card">
-                    <img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d8" alt="Новость 1" class="news-image">
-                    <div class="news-content">
-                        <h3 class="news-title">Инновации в добыче газа</h3>
-                        <p class="news-date">20 мая 2025</p>
-                        <p class="news-text">Внедрение новых технологий повысило эффективность добычи на 15%</p>
-                    </div>
+            <div class="section-header">
+                <h2 class="section-title">Новости компании</h2>
+                <p class="section-subtitle">Следите за важными событиями и обновлениями</p>
+            </div>
+            
+            <div class="news-slider">
+                <div class="news-item">
+                    <div class="news-date">15 мая 2025</div>
+                    <h3 class="news-title">Запуск новой платформы для сотрудников</h3>
+                    <p class="news-text">Представляем обновленный внутренний портал с расширенными возможностями для работы и обучения</p>
+                    <a href="#" class="news-link">Читать далее</a>
                 </div>
                 
-                <div class="news-card">
-                    <img src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d" alt="Новость 2" class="news-image">
-                    <div class="news-content">
-                        <h3 class="news-title">Экологические инициативы</h3>
-                        <p class="news-date">15 мая 2025</p>
-                        <p class="news-text">Газпром инвестирует 50 млрд рублей в экологические проекты</p>
-                    </div>
+                <div class="news-item">
+                    <div class="news-date">28 апреля 2025</div>
+                    <h3 class="news-title">Итоги первого квартала 2025 года</h3>
+                    <p class="news-text">Компания демонстрирует устойчивый рост ключевых показателей в начале года</p>
+                    <a href="#" class="news-link">Читать далее</a>
                 </div>
                 
-                <div class="news-card">
-                    <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85" alt="Новость 3" class="news-image">
-                    <div class="news-content">
-                        <h3 class="news-title">Корпоративные мероприятия</h3>
-                        <p class="news-date">10 мая 2025</p>
-                        <p class="news-text">Запланированы летние корпоративные мероприятия для сотрудников</p>
-                    </div>
+                <div class="news-item">
+                    <div class="news-date">12 апреля 2025</div>
+                    <h3 class="news-title">Новые программы обучения</h3>
+                    <p class="news-text">Доступны новые курсы повышения квалификации для сотрудников всех подразделений</p>
+                    <a href="#" class="news-link">Читать далее</a>
                 </div>
             </div>
         </section>
@@ -115,51 +162,63 @@
 
     <footer class="footer">
         <div class="footer-container">
-            <div class="footer-section">
+            <div class="footer-column">
                 <h4 class="footer-title">Газпром</h4>
-                <p class="footer-text">Крупнейшая газовая компания мира, обеспечивающая энергетическую безопасность страны</p>
+                <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
                 <div class="footer-social">
-                    <a href="#" class="social-link"><i class="fab fa-vk"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="social-link"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Twitter"></a>
+                    <a href="#" class="social-link"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111509.png" alt="Telegram"></a>
+                    <a href="#" class="social-link"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="YouTube"></a>
                 </div>
             </div>
             
-            <div class="footer-section">
+            <div class="footer-column">
                 <h4 class="footer-title">Разделы</h4>
                 <ul class="footer-links">
                     <li><a href="index.html" class="footer-link">Главная</a></li>
-                    <li><a href="office-tools/index.html" class="footer-link">Офисные инструменты</a></li>
+                    <li><a href="about.html" class="footer-link">О компании</a></li>
+                    <li><a href="office-tools/index.html" class="footer-link">Инструменты</a></li>
                     <li><a href="trainers/index.html" class="footer-link">Тренажёры</a></li>
-                    <li><a href="visualization/index.html" class="footer-link">Аналитика данных</a></li>
-                    <li><a href="ai-assistant/index.html" class="footer-link">ИИ помощник</a></li>
+                    <li><a href="visualization/index.html" class="footer-link">Аналитика</a></li>
                 </ul>
             </div>
             
-            <div class="footer-section">
-                <h4 class="footer-title">О компании</h4>
+            <div class="footer-column">
+                <h4 class="footer-title">Ресурсы</h4>
                 <ul class="footer-links">
-                    <li><a href="about/index.html" class="footer-link">О Газпроме</a></li>
-                    <li><a href="about/branches.html" class="footer-link">Филиалы</a></li>
-                    <li><a href="about/map.html" class="footer-link">Карта объектов</a></li>
+                    <li><a href="#" class="footer-link">Документы</a></li>
+                    <li><a href="#" class="footer-link">Обучение</a></li>
+                    <li><a href="#" class="footer-link">Техподдержка</a></li>
                     <li><a href="#" class="footer-link">Вакансии</a></li>
                     <li><a href="#" class="footer-link">Контакты</a></li>
                 </ul>
             </div>
             
-            <div class="footer-section">
-                <h4 class="footer-title">Правовая информация</h4>
-                <ul class="footer-links">
-                    <li><a href="#" class="footer-link">Пользовательское соглашение</a></li>
-                    <li><a href="#" class="footer-link">Политика конфиденциальности</a></li>
-                    <li><a href="#" class="footer-link">Cookie</a></li>
+            <div class="footer-column">
+                <h4 class="footer-title">Контакты</h4>
+                <ul class="footer-contacts">
+                    <li class="contact-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/484/484167.png" alt="Телефон">
+                        <span>+7 (495) 719-30-01</span>
+                    </li>
+                    <li class="contact-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/542/542689.png" alt="Email">
+                        <span>portal@gazprom.ru</span>
+                    </li>
+                    <li class="contact-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/684/684809.png" alt="Адрес">
+                        <span>Москва, ул. Наметкина, 16</span>
+                    </li>
                 </ul>
             </div>
         </div>
         
         <div class="footer-bottom">
-            <p class="copyright">© 2025 ПАО «Газпром». Все права защищены.</p>
-            <p class="footer-info">Внутренний портал для сотрудников компании</p>
+            <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Политика конфиденциальности</a>
+                <a href="#" class="footer-link">Условия использования</a>
+            </div>
         </div>
     </footer>
 
