@@ -1,86 +1,73 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Mobile menu toggle
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const mainNav = document.querySelector('.main-nav');
-    
-    mobileMenuBtn.addEventListener('click', function() {
-        this.classList.toggle('active');
-        mainNav.classList.toggle('active');
-    });
-    
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-            
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop - 80,
-                    behavior: 'smooth'
-                });
-                
-                // Close mobile menu if open
-                if (mainNav.classList.contains('active')) {
-                    mobileMenuBtn.classList.remove('active');
-                    mainNav.classList.remove('active');
-                }
-            }
-        });
-    });
-    
-    // Animate stats counters
-    const statNumbers = document.querySelectorAll('.stat-number');
-    const statsSection = document.querySelector('.stats');
-    
-    function animateStats() {
-        const sectionPosition = statsSection.getBoundingClientRect().top;
-        const screenPosition = window.innerHeight / 1.3;
-        
-        if (sectionPosition < screenPosition) {
-            statNumbers.forEach(stat => {
-                const target = parseInt(stat.getAttribute('data-count'));
-                const duration = 2000;
-                const step = target / (duration / 16);
-                let current = 0;
-                
-                const counter = setInterval(() => {
-                    current += step;
-                    if (current >= target) {
-                        clearInterval(counter);
-                        stat.textContent = target;
-                    } else {
-                        stat.textContent = Math.floor(current);
-                    }
-                }, 16);
-                
-                stat.style.animation = 'countUp 0.5s ease-out forwards';
-            });
-            
-            // Remove event listener after animation
-            window.removeEventListener('scroll', animateStats);
+// Mobile menu toggle
+const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+const mainNav = document.querySelector('.main-nav');
+
+mobileMenuBtn.addEventListener('click', () => {
+    mobileMenuBtn.classList.toggle('active');
+    mainNav.classList.toggle('active');
+});
+
+// Stats counter animation
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
         }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// Initialize stats counter when in view
+const statNumbers = document.querySelectorAll('.stat-number');
+const statsSection = document.querySelector('.stats');
+
+function checkStatsInView() {
+    const rect = statsSection.getBoundingClientRect();
+    const isInView = (rect.top <= window.innerHeight && rect.bottom >= 0);
+    
+    if (isInView) {
+        statNumbers.forEach(stat => {
+            const target = parseInt(stat.getAttribute('data-count'));
+            animateValue(stat, 0, target, 2000);
+        });
+        // Remove event listener after animation
+        window.removeEventListener('scroll', checkStatsInView);
     }
-    
-    window.addEventListener('scroll', animateStats);
-    
-    // Set current year in footer
-    document.querySelector('.footer-bottom p').textContent = 
-        `© ${new Date().getFullYear()} ПАО "Газпром". Все права защищены.`;
-    
-    // Highlight current page in navigation
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    const navLinks = document.querySelectorAll('.nav-link');
-    
-    navLinks.forEach(link => {
-        const linkPage = link.getAttribute('href').split('/').pop();
-        if (currentPage === linkPage || 
-            (currentPage === 'index.html' && linkPage === '') ||
-            (currentPage === '' && linkPage === 'index.html')) {
-            link.classList.add('active');
+}
+
+// Add scroll event listener
+window.addEventListener('scroll', checkStatsInView);
+
+// Check on initial load
+document.addEventListener('DOMContentLoaded', checkStatsInView);
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+            targetElement.scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+    });
+});
+
+// Close mobile menu when clicking on a link
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        if (mainNav.classList.contains('active')) {
+            mobileMenuBtn.classList.remove('active');
+            mainNav.classList.remove('active');
         }
     });
 });
