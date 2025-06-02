@@ -6,41 +6,44 @@
     <title>О компании - Газпром</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
     <header class="header">
-        <div class="header-container">
-            <div class="logo">
-                <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром" class="logo-img">
-                <div class="logo-text">
-                    <span class="logo-title">Газпром</span>
-                    <span class="logo-subtitle">Внутренний портал</span>
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Внутренний портал</span>
+                    </div>
                 </div>
-            </div>
-            
-            <nav class="main-nav">
-                <ul class="nav-list">
-                    <li class="nav-item"><a href="index.html" class="nav-link">Главная</a></li>
-                    <li class="nav-item"><a href="about.html" class="nav-link active">О компании</a></li>
-                    <li class="nav-item"><a href="office-tools/index.html" class="nav-link">Инструменты</a></li>
-                    <li class="nav-item"><a href="trainers/index.html" class="nav-link">Тренажёры</a></li>
-                    <li class="nav-item"><a href="visualization/index.html" class="nav-link">Аналитика</a></li>
-                </ul>
-            </nav>
-            
-            <div class="user-panel">
-                <div class="user-avatar">
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Профиль">
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="about.html" class="nav-link active">О компании</a></li>
+                        <li class="nav-item"><a href="office-tools/index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="visualization/index.html" class="nav-link">Аналитика</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="user-panel">
+                    <div class="user-avatar">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Профиль">
+                    </div>
+                    <span class="user-name">Сотрудник</span>
                 </div>
-                <span class="user-name">Сотрудник</span>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
-            
-            <button class="mobile-menu-btn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
         </div>
     </header>
 
@@ -153,63 +156,65 @@
     </main>
 
     <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-column">
-                <h4 class="footer-title">Газпром</h4>
-                <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
-                <div class="footer-social">
-                    <a href="#" class="social-link"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Twitter"></a>
-                    <a href="#" class="social-link"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111509.png" alt="Telegram"></a>
-                    <a href="#" class="social-link"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="YouTube"></a>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Разделы</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html" class="footer-link">Главная</a></li>
+                        <li><a href="about.html" class="footer-link">О компании</a></li>
+                        <li><a href="office-tools/index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="visualization/index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Ресурсы</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" class="footer-link">Документы</a></li>
+                        <li><a href="#" class="footer-link">Обучение</a></li>
+                        <li><a href="#" class="footer-link">Техподдержка</a></li>
+                        <li><a href="#" class="footer-link">Вакансии</a></li>
+                        <li><a href="#" class="footer-link">Контакты</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon"><i class="fas fa-phone"></i></span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon"><i class="fas fa-envelope"></i></span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
             
-            <div class="footer-column">
-                <h4 class="footer-title">Разделы</h4>
-                <ul class="footer-links">
-                    <li><a href="index.html" class="footer-link">Главная</a></li>
-                    <li><a href="about.html" class="footer-link">О компании</a></li>
-                    <li><a href="office-tools/index.html" class="footer-link">Инструменты</a></li>
-                    <li><a href="trainers/index.html" class="footer-link">Тренажёры</a></li>
-                    <li><a href="visualization/index.html" class="footer-link">Аналитика</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-column">
-                <h4 class="footer-title">Ресурсы</h4>
-                <ul class="footer-links">
-                    <li><a href="#" class="footer-link">Документы</a></li>
-                    <li><a href="#" class="footer-link">Обучение</a></li>
-                    <li><a href="#" class="footer-link">Техподдержка</a></li>
-                    <li><a href="#" class="footer-link">Вакансии</a></li>
-                    <li><a href="#" class="footer-link">Контакты</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-column">
-                <h4 class="footer-title">Контакты</h4>
-                <ul class="footer-contacts">
-                    <li class="contact-item">
-                        <img src="https://cdn-icons-png.flaticon.com/512/484/484167.png" alt="Телефон">
-                        <span>+7 (495) 719-30-01</span>
-                    </li>
-                    <li class="contact-item">
-                        <img src="https://cdn-icons-png.flaticon.com/512/542/542689.png" alt="Email">
-                        <span>portal@gazprom.ru</span>
-                    </li>
-                    <li class="contact-item">
-                        <img src="https://cdn-icons-png.flaticon.com/512/684/684809.png" alt="Адрес">
-                        <span>Москва, ул. Наметкина, 16</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>© 2025 ПАО "Газпром". Все права защищены.</p>
-            <div class="footer-links">
-                <a href="#" class="footer-link">Политика конфиденциальности</a>
-                <a href="#" class="footer-link">Условия использования</a>
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
             </div>
         </div>
     </footer>
