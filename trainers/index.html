@@ -7,6 +7,66 @@
     <link rel="stylesheet" href="../style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .trainers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .trainer-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .trainer-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .trainer-image {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .trainer-content {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .trainer-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+        }
+        
+        .trainer-description {
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 25px;
+            flex: 1;
+        }
+        
+        .trainer-link {
+            margin-top: auto;
+        }
+        
+        .safety { background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1607513746994-51f730a44832?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'); }
+        .excel { background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'); }
+        .correspondence { background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'); }
+        .analysis { background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'); }
+        .teamwork { background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'); }
+        .creative { background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'); }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -49,59 +109,59 @@
 
         <section class="tools-section">
             <div class="container">
-                <div class="tools-grid">
-                    <div class="tool-card animate__animated animate__fadeInUp">
-                        <div class="tool-icon">
-                            <i class="fas fa-shield-alt"></i>
+                <div class="trainers-grid">
+                    <div class="trainer-card">
+                        <div class="trainer-image safety"></div>
+                        <div class="trainer-content">
+                            <h3 class="trainer-title">Техника безопасности</h3>
+                            <p class="trainer-description">Интерактивный тренажёр по технике безопасности на рабочем месте</p>
+                            <a href="safety.html" class="btn btn-primary trainer-link">Открыть</a>
                         </div>
-                        <h3 class="tool-title">Техника безопасности</h3>
-                        <p class="tool-description">Интерактивный тренажёр по технике безопасности на рабочем месте</p>
-                        <a href="safety.html" class="btn btn-primary">Открыть</a>
                     </div>
                     
-                    <div class="tool-card animate__animated animate__fadeInUp">
-                        <div class="tool-icon">
-                            <i class="fas fa-file-excel"></i>
+                    <div class="trainer-card">
+                        <div class="trainer-image excel"></div>
+                        <div class="trainer-content">
+                            <h3 class="trainer-title">Excel для начинающих</h3>
+                            <p class="trainer-description">Освойте основные функции Excel с помощью интерактивных упражнений</p>
+                            <a href="excel.html" class="btn btn-primary trainer-link">Открыть</a>
                         </div>
-                        <h3 class="tool-title">Excel для начинающих</h3>
-                        <p class="tool-description">Освойте основные функции Excel с помощью интерактивных упражнений</p>
-                        <a href="excel.html" class="btn btn-primary">Открыть</a>
                     </div>
                     
-                    <div class="tool-card animate__animated animate__fadeInUp">
-                        <div class="tool-icon">
-                            <i class="fas fa-envelope"></i>
+                    <div class="trainer-card">
+                        <div class="trainer-image correspondence"></div>
+                        <div class="trainer-content">
+                            <h3 class="trainer-title">Деловая переписка</h3>
+                            <p class="trainer-description">Тренажёр по составлению деловых писем и документов</p>
+                            <a href="correspondence.html" class="btn btn-primary trainer-link">Открыть</a>
                         </div>
-                        <h3 class="tool-title">Деловая переписка</h3>
-                        <p class="tool-description">Тренажёр по составлению деловых писем и документов</p>
-                        <a href="#" class="btn btn-primary">Скоро</a>
                     </div>
                     
-                    <div class="tool-card animate__animated animate__fadeInUp">
-                        <div class="tool-icon">
-                            <i class="fas fa-chart-line"></i>
+                    <div class="trainer-card">
+                        <div class="trainer-image analysis"></div>
+                        <div class="trainer-content">
+                            <h3 class="trainer-title">Анализ данных</h3>
+                            <p class="trainer-description">Научитесь анализировать данные и принимать решения на их основе</p>
+                            <a href="data-analysis.html" class="btn btn-primary trainer-link">Открыть</a>
                         </div>
-                        <h3 class="tool-title">Анализ данных</h3>
-                        <p class="tool-description">Научитесь анализировать данные и принимать решения на их основе</p>
-                        <a href="#" class="btn btn-primary">Скоро</a>
                     </div>
                     
-                    <div class="tool-card animate__animated animate__fadeInUp">
-                        <div class="tool-icon">
-                            <i class="fas fa-users"></i>
+                    <div class="trainer-card">
+                        <div class="trainer-image teamwork"></div>
+                        <div class="trainer-content">
+                            <h3 class="trainer-title">Командная работа</h3>
+                            <p class="trainer-description">Тренинг по эффективной командной работе и коммуникации</p>
+                            <a href="teamwork.html" class="btn btn-primary trainer-link">Открыть</a>
                         </div>
-                        <h3 class="tool-title">Командная работа</h3>
-                        <p class="tool-description">Тренинг по эффективной командной работе и коммуникации</p>
-                        <a href="#" class="btn btn-primary">Скоро</a>
                     </div>
                     
-                    <div class="tool-card animate__animated animate__fadeInUp">
-                        <div class="tool-icon">
-                            <i class="fas fa-lightbulb"></i>
+                    <div class="trainer-card">
+                        <div class="trainer-image creative"></div>
+                        <div class="trainer-content">
+                            <h3 class="trainer-title">Креативное мышление</h3>
+                            <p class="trainer-description">Развитие креативного мышления и решение нестандартных задач</p>
+                            <a href="creative-thinking.html" class="btn btn-primary trainer-link">Открыть</a>
                         </div>
-                        <h3 class="tool-title">Креативное мышление</h3>
-                        <p class="tool-description">Развитие креативного мышления и решение нестандартных задач</p>
-                        <a href="#" class="btn btn-primary">Скоро</a>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Креативное мышление - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .creative-trainer {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        
+        .trainer-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .trainer-header h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .technique-container {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .technique-title {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .technique-description {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        
+        .exercise-container {
+            margin-bottom: 2rem;
+        }
+        
+        .exercise-task {
+            font-weight: 500;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: var(--primary-light);
+            border-radius: 6px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .solution-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--gray);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            min-height: 100px;
+            font-family: inherit;
+        }
+        
+        .solutions-container {
+            margin-top: 1.5rem;
+            display: none;
+        }
+        
+        .solutions-container.active {
+            display: block;
+        }
+        
+        .solution-example {
+            padding: 1rem;
+            background-color: white;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .solution-example h4 {
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+        
+        .progress-container {
+            margin-top: 1.5rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: var(--gray);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Креативное мышление</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="../office-tools/index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link active">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="creative-trainer">
+                <div class="trainer-header">
+                    <h2>Тренажёр креативного мышления</h2>
+                    <p>Развивайте нестандартное мышление и находите innovative решения</p>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress" id="progress"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">Упражнение 1 из 5</div>
+                </div>
+                
+                <div class="technique-container" id="technique-container">
+                    <!-- Техники и упражнения будут загружаться здесь -->
+                </div>
+                
+                <div class="exercise-container" id="exercise-container">
+                    <!-- Упражнения будут загружаться здесь -->
+                </div>
+                
+                <div class="btn-container">
+                    <button onclick="prevExercise()" class="btn" id="prev-btn" disabled>Назад</button>
+                    <button onclick="nextExercise()" class="btn btn-primary" id="next-btn">Далее</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+    <script>
+        const exercises = [
+            {
+                technique: "Метод шести шляп",
+                description: "Этот метод позволяет рассмотреть проблему с шести разных perspectives: факты (белая), эмоции (красная), критика (чёрная), оптимизм (жёлтая), creativity (зелёная) и управление процессом (синяя).",
+                task: "Представьте, что вам нужно увеличить продажи газа на 15% в следующем квартале. Напишите по одному предложению для каждой 'шляпы'.",
+                solutions: [
+                    {
+                        title: "Белая шляпа (факты)",
+                        text: "Текущий объём продаж составляет X млн м³ в квартал, основные клиенты - промышленные предприятия и ЖКХ."
+                    },
+                    {
+                        title: "Красная шляпа (эмоции)",
+                        text: "Мы чувствуем, что упускаем возможности на рынке частных потребителей."
+                    },
+                    {
+                        title: "Чёрная шляпа (критика)",
+                        text: "Увеличение продаж может потребовать дополнительных инвестиций в маркетинг и логистику."
+                    },
+                    {
+                        title: "Жёлтая шляпа (оптимизм)",
+                        text: "Новые экологичные тарифы могут привлечь больше клиентов, заботящихся о природе."
+                    },
+                    {
+                        title: "Зелёная шляпа (креативность)",
+                        text: "Можно создать программу лояльности с бонусами за длительное сотрудничество."
+                    },
+                    {
+                        title: "Синяя шляпа (управление)",
+                        text: "Нужно создать рабочую группу для разработки комплексного плана увеличения продаж."
+                    }
+                ]
+            },
+            {
+                technique: "Мозговой штурм",
+                description: "Генерируйте как можно больше идей, не оценивая их на этом этапе. Количество важнее качества!",
+                task: "За 5 минут придумайте как можно больше нестандартных способов использования газовых труб (кроме транспортировки газа).",
+                solutions: [
+                    {
+                        title: "Примеры решений",
+                        text: "1) Использовать как элементы конструкций для детских площадок; 2) Создать музыкальный инструмент; 3) Использовать для системы охлаждения; 4) Сделать арт-объекты; 5) Использовать как элементы мебели."
+                    }
+                ]
+            },
+            {
+                technique: "SCAMPER",
+                description: "Метод, который предлагает семь подходов к изменению идеи: Заменить, Комбинировать, Адаптировать, Модифицировать, Применить по-другому, Устранить, Переставить.",
+                task: "Примените метод SCAMPER к услуге доставки газа для частных домов. Придумайте по одной идее для каждого подхода.",
+                solutions: [
+                    {
+                        title: "Примеры решений",
+                        text: "Заменить: газовые баллоны на более экологичные варианты; Комбинировать: доставку газа с услугами по обслуживанию оборудования; Адаптировать: систему доставки для отдалённых регионов; Модифицировать: форму баллонов для удобства хранения; Применить по-другому: использовать инфраструктуру для доставки других товаров; Устранить: бумажный документооборот; Переставить: процесс доставки для минимизации времени."
+                    }
+                ]
+            },
+            {
+                technique: "Обратная задача",
+                description: "Попробуйте сформулировать задачу наоборот - как добиться противоположного результата, а затем придумайте, как это можно использовать.",
+                task: "Как сделать так, чтобы клиенты как можно реже покупали наш газ? А теперь подумайте, как эти идеи можно перевернуть для увеличения продаж.",
+                solutions: [
+                    {
+                        title: "Примеры решений",
+                        text: "1) Сделать цены очень высокими → ввести гибкую систему скидок; 2) Ухудшить качество сервиса → улучшить клиентский сервис; 3) Сделать подключение сложным → упростить процедуру подключения; 4) Не предоставлять информацию → усилить маркетинг и информирование."
+                    }
+                ]
+            },
+            {
+                technique: "Аналогии",
+                description: "Ищите аналогии в других сферах и применяйте их к своей задаче.",
+                task: "Придумайте, какие решения из сферы интернет-маркетинга можно применить для увеличения продаж газа.",
+                solutions: [
+                    {
+                        title: "Примеры решений",
+                        text: "1) Программа лояльности как в авиакомпаниях; 2) Персонализированные предложения как в онлайн-магазинах; 3) Геймификация как в мобильных приложениях; 4) Контент-маркетинг с полезными советами по экономии; 5) Реферальная программа для привлечения новых клиентов."
+                    }
+                ]
+            }
+        ];
+        
+        let currentExercise = 0;
+        let userSolutions = new Array(exercises.length);
+        
+        function loadExercise() {
+            const exercise = exercises[currentExercise];
+            const techniqueContainer = document.getElementById('technique-container');
+            const exerciseContainer = document.getElementById('exercise-container');
+            
+            techniqueContainer.innerHTML = `
+                <h3 class="technique-title">${exercise.technique}</h3>
+                <div class="technique-description">${exercise.description}</div>
+            `;
+            
+            exerciseContainer.innerHTML = `
+                <div class="exercise-task">${exercise.task}</div>
+                <textarea class="solution-input" id="solution-input" placeholder="Запишите свои идеи здесь...">${userSolutions[currentExercise] || ''}</textarea>
+                <button onclick="showSolutions()" class="btn">Показать примеры решений</button>
+                <div class="solutions-container" id="solutions-container">
+                    ${exercise.solutions.map(solution => `
+                        <div class="solution-example">
+                            <h4>${solution.title}</h4>
+                            <p>${solution.text}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            // Обновление прогресса
+            document.getElementById('progress').style.width = `${(currentExercise / exercises.length) * 100}%`;
+            document.getElementById('progress-text').textContent = `Упражнение ${currentExercise + 1} из ${exercises.length}`;
+            
+            // Обновление кнопок
+            document.getElementById('prev-btn').disabled = currentExercise === 0;
+            document.getElementById('next-btn').textContent = currentExercise === exercises.length - 1 ? 'Завершить' : 'Далее';
+        }
+        
+        function showSolutions() {
+            document.getElementById('solutions-container').classList.add('active');
+        }
+        
+        function saveSolution() {
+            userSolutions[currentExercise] = document.getElementById('solution-input').value;
+        }
+        
+        function nextExercise() {
+            saveSolution();
+            
+            if (currentExercise < exercises.length - 1) {
+                currentExercise++;
+                loadExercise();
+            } else {
+                showResults();
+            }
+        }
+        
+        function prevExercise() {
+            saveSolution();
+            
+            if (currentExercise > 0) {
+                currentExercise--;
+                loadExercise();
+            }
+        }
+        
+        function showResults() {
+            const completedExercises = userSolutions.filter(s => s && s.trim() !== '').length;
+            
+            document.getElementById('technique-container').innerHTML = `
+                <div style="text-align: center;">
+                    <h3>Тренажёр завершён!</h3>
+                    <p>Вы выполнили ${completedExercises} из ${exercises.length} упражнений.</p>
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color); margin: 1rem 0;">
+                        ${Math.round((completedExercises / exercises.length) * 100)}%
+                    </div>
+                    
+                    <div style="background-color: #f5f5f5; padding: 1rem; border-radius: 6px; margin: 1rem 0;">
+                        Креативное мышление - это навык, который развивается с практикой. Продолжайте тренироваться!
+                    </div>
+                    
+                    <button onclick="restartTrainer()" class="btn btn-primary">Пройти снова</button>
+                </div>
+            `;
+            
+            document.getElementById('exercise-container').innerHTML = '';
+            document.getElementById('prev-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('progress').style.width = '100%';
+        }
+        
+        function restartTrainer() {
+            currentExercise = 0;
+            userSolutions = new Array(exercises.length);
+            loadExercise();
+            
+            document.getElementById('prev-btn').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+            document.getElementById('prev-btn').disabled = true;
+            document.getElementById('next-btn').textContent = 'Далее';
+        }
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', loadExercise);
+    </script>
+</body>
+</html>

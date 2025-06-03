@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {{additional_styles}}
 </head>
 <body>
     <header class="header">
@@ -22,11 +23,12 @@
                 
                 <nav class="main-nav">
                     <ul class="nav-list">
-                        <li class="nav-item"><a href="index.html" class="nav-link {{home-active}}">Главная</a></li>
-                        <li class="nav-item"><a href="office-tools/index.html" class="nav-link {{tools-active}}">Инструменты</a></li>
-                        <li class="nav-item"><a href="trainers/index.html" class="nav-link {{trainers-active}}">Тренажёры</a></li>
-                        <li class="nav-item"><a href="visualization/index.html" class="nav-link {{viz-active}}">Аналитика</a></li>
-                        <li class="nav-item"><a href="ai-assistant/index.html" class="nav-link {{ai-active}}">Помощник</a></li>
+                        <li class="nav-item"><a href="../index.html" class="nav-link {{home-active}}">Главная</a></li>
+                        <li class="nav-item"><a href="about.html" class="nav-link {{about-active}}">О компании</a></li>
+                        <li class="nav-item"><a href="../office-tools/index.html" class="nav-link {{tools-active}}">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link {{trainers-active}}">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link {{viz-active}}">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link {{ai-active}}">Помощник</a></li>
                     </ul>
                 </nav>
                 
@@ -54,10 +56,11 @@
                 <div class="footer-column">
                     <h4 class="footer-title">Навигация</h4>
                     <ul class="footer-links">
-                        <li><a href="index.html" class="footer-link">Главная</a></li>
-                        <li><a href="office-tools/index.html" class="footer-link">Инструменты</a></li>
-                        <li><a href="trainers/index.html" class="footer-link">Тренажёры</a></li>
-                        <li><a href="visualization/index.html" class="footer-link">Аналитика</a></li>
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="about.html" class="footer-link">О компании</a></li>
+                        <li><a href="../office-tools/index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="../visualization/index.html" class="footer-link">Аналитика</a></li>
                     </ul>
                 </div>
                 
@@ -90,6 +93,7 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    {{additional_scripts}}
+    <script src="../script.js"></script>
 </body>
 </html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Деловая переписка - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .correspondence-trainer {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        
+        .trainer-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .trainer-header h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .scenario-container {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .scenario-text {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        
+        .email-editor {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .email-field {
+            margin-bottom: 1rem;
+        }
+        
+        .email-field label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .email-field input, 
+        .email-field textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        
+        .email-field textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .evaluation {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            display: none;
+        }
+        
+        .evaluation.active {
+            display: block;
+        }
+        
+        .evaluation h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .evaluation-criteria {
+            margin-bottom: 1rem;
+        }
+        
+        .criterion {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .criterion-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .criterion.correct .criterion-icon {
+            color: green;
+        }
+        
+        .criterion.incorrect .criterion-icon {
+            color: red;
+        }
+        
+        .evaluation-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 4px;
+        }
+        
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .btn-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Деловая переписка</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="../office-tools/index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link active">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="correspondence-trainer">
+                <div class="trainer-header">
+                    <h2>Тренажёр деловой переписки</h2>
+                    <p>Научитесь составлять профессиональные деловые письма</p>
+                </div>
+                
+                <div class="scenario-container">
+                    <h3>Ситуация</h3>
+                    <div class="scenario-text">
+                        <p>Вы работаете менеджером проекта в ПАО "Газпром". Вам необходимо написать письмо партнёру - компании "ЭнергоСтрой" с просьбой перенести сроки поставки оборудования с 15 июня на 25 июня из-за задержки согласования технической документации.</p>
+                        <p>Письмо должно быть вежливым, содержать объяснение причины переноса и предложение обсудить возможные варианты.</p>
+                    </div>
+                </div>
+                
+                <div class="email-editor">
+                    <h3>Составьте письмо</h3>
+                    
+                    <div class="email-field">
+                        <label for="email-subject">Тема письма:</label>
+                        <input type="text" id="email-subject" placeholder="Введите тему письма">
+                    </div>
+                    
+                    <div class="email-field">
+                        <label for="email-salutation">Обращение:</label>
+                        <input type="text" id="email-salutation" placeholder="Уважаемый Иван Иванович!">
+                    </div>
+                    
+                    <div class="email-field">
+                        <label for="email-body">Текст письма:</label>
+                        <textarea id="email-body" placeholder="Напишите текст письма..."></textarea>
+                    </div>
+                    
+                    <div class="email-field">
+                        <label for="email-closing">Завершение:</label>
+                        <input type="text" id="email-closing" placeholder="С уважением, [Ваше имя]">
+                    </div>
+                    
+                    <div class="btn-container">
+                        <button onclick="evaluateEmail()" class="btn btn-primary">Проверить письмо</button>
+                        <button onclick="showExample()" class="btn btn-outline">Посмотреть пример</button>
+                    </div>
+                </div>
+                
+                <div class="evaluation" id="evaluation">
+                    <h3>Оценка вашего письма</h3>
+                    
+                    <div class="evaluation-criteria">
+                        <div class="criterion" id="criterion-subject">
+                            <span class="criterion-icon">✓</span>
+                            <span>Тема письма четко отражает его содержание</span>
+                        </div>
+                        <div class="criterion" id="criterion-salutation">
+                            <span class="criterion-icon">✓</span>
+                            <span>Правильное официальное обращение</span>
+                        </div>
+                        <div class="criterion" id="criterion-structure">
+                            <span class="criterion-icon">✓</span>
+                            <span>Логичная структура письма</span>
+                        </div>
+                        <div class="criterion" id="criterion-reason">
+                            <span class="criterion-icon">✓</span>
+                            <span>Указана причина переноса сроков</span>
+                        </div>
+                        <div class="criterion" id="criterion-polite">
+                            <span class="criterion-icon">✓</span>
+                            <span>Вежливый тон письма</span>
+                        </div>
+                        <div class="criterion" id="criterion-closing">
+                            <span class="criterion-icon">✓</span>
+                            <span>Правильное завершение письма</span>
+                        </div>
+                    </div>
+                    
+                    <div class="evaluation-feedback" id="evaluation-feedback">
+                        Ваше письмо будет проанализировано здесь.
+                    </div>
+                    
+                    <button onclick="tryAgain()" class="btn">Попробовать ещё раз</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+    <script>
+        function evaluateEmail() {
+            const evaluation = document.getElementById('evaluation');
+            const subject = document.getElementById('email-subject').value.toLowerCase();
+            const salutation = document.getElementById('email-salutation').value;
+            const body = document.getElementById('email-body').value.toLowerCase();
+            const closing = document.getElementById('email-closing').value;
+            
+            // Проверка критериев
+            checkCriterion('subject', subject.includes('перенос') && subject.includes('срок'));
+            checkCriterion('salutation', salutation.includes('Уважаем') || salutation.includes('Глубокоуважаем'));
+            checkCriterion('structure', body.includes('просим') && body.includes('причина') && body.includes('предлагаем'));
+            checkCriterion('reason', body.includes('задержк') || body.includes('согласован'));
+            checkCriterion('polite', !body.includes('!!') && !body.includes('??') && 
+                         (body.includes('просим') || body.includes('предлагаем') || body.includes('будем признательны')));
+            checkCriterion('closing', closing.includes('уважен') || closing.includes('искренне'));
+            
+            // Формирование фидбэка
+            let feedback = '';
+            const correctCount = document.querySelectorAll('.criterion.correct').length;
+            
+            if (correctCount === 6) {
+                feedback = 'Отличное письмо! Вы полностью соблюли правила деловой переписки.';
+            } else if (correctCount >= 4) {
+                feedback = 'Хорошее письмо, но есть несколько недочётов. Обратите внимание на выделенные критерии.';
+            } else {
+                feedback = 'Письмо требует доработки. Изучите рекомендации по деловой переписке и попробуйте ещё раз.';
+            }
+            
+            document.getElementById('evaluation-feedback').textContent = feedback;
+            evaluation.classList.add('active');
+        }
+        
+        function checkCriterion(id, isCorrect) {
+            const criterion = document.getElementById(`criterion-${id}`);
+            criterion.classList.toggle('correct', isCorrect);
+            criterion.classList.toggle('incorrect', !isCorrect);
+            
+            const icon = criterion.querySelector('.criterion-icon');
+            icon.textContent = isCorrect ? '✓' : '✗';
+        }
+        
+        function showExample() {
+            document.getElementById('email-subject').value = 'Перенос сроков поставки оборудования';
+            document.getElementById('email-salutation').value = 'Уважаемый Иван Иванович!';
+            document.getElementById('email-body').value = 'В связи с задержкой согласования технической документации, просим перенести срок поставки оборудования с 15 июня на 25 июня.\n\nПриносим извинения за возможные неудобства и готовы обсудить возможные варианты компенсации.\n\nПросим подтвердить возможность переноса сроков или предложить альтернативное решение.';
+            document.getElementById('email-closing').value = 'С уважением, Алексей Петров, менеджер проекта ПАО "Газпром"';
+        }
+        
+        function tryAgain() {
+            document.getElementById('evaluation').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
