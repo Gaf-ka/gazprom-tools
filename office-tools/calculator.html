@@ -5,6 +5,136 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Калькулятор - Газпром</title>
     <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .calculator-section {
+            padding: 40px 0;
+        }
+        
+        .calculator-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .calculator {
+            max-width: 400px;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .calculator-display {
+            padding: 1.5rem;
+            background-color: var(--light-gray);
+            text-align: right;
+            font-size: 1.5rem;
+            border-bottom: 1px solid var(--gray);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background-color: var(--gray);
+        }
+        
+        .calculator button {
+            border: none;
+            padding: 1rem;
+            font-size: 1.2rem;
+            background-color: white;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .calculator button:hover {
+            background-color: var(--light-gray);
+        }
+        
+        .calculator button.operator {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .calculator button.operator:hover {
+            background-color: #e6b800;
+        }
+        
+        .calculator button.equals {
+            background-color: var(--primary-color);
+            color: white;
+            grid-column: span 2;
+        }
+        
+        .calculator button.equals:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .financial-calculator {
+            background-color: var(--white);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+        
+        .financial-calculator h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary-dark);
+            border-bottom: 1px solid var(--gray);
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .financial-result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--light-gray);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .financial-result p {
+            margin-bottom: 0.5rem;
+        }
+        
+        .financial-result strong {
+            color: var(--primary-dark);
+        }
+        
+        @media (max-width: 768px) {
+            .calculator-wrapper {
+                grid-template-columns: 1fr;
+            }
+            
+            .calculator {
+                max-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -45,54 +175,68 @@
             </div>
         </section>
 
-        <div class="calculator">
-            <div class="calculator-display" id="display">0</div>
-            <div class="calculator-buttons">
-                <button onclick="clearDisplay()">C</button>
-                <button onclick="appendToDisplay('(')">(</button>
-                <button onclick="appendToDisplay(')')">)</button>
-                <button onclick="appendToDisplay('/')" class="operator">/</button>
-                
-                <button onclick="appendToDisplay('7')">7</button>
-                <button onclick="appendToDisplay('8')">8</button>
-                <button onclick="appendToDisplay('9')">9</button>
-                <button onclick="appendToDisplay('*')" class="operator">×</button>
-                
-                <button onclick="appendToDisplay('4')">4</button>
-                <button onclick="appendToDisplay('5')">5</button>
-                <button onclick="appendToDisplay('6')">6</button>
-                <button onclick="appendToDisplay('-')" class="operator">-</button>
-                
-                <button onclick="appendToDisplay('1')">1</button>
-                <button onclick="appendToDisplay('2')">2</button>
-                <button onclick="appendToDisplay('3')">3</button>
-                <button onclick="appendToDisplay('+')" class="operator">+</button>
-                
-                <button onclick="appendToDisplay('0')">0</button>
-                <button onclick="appendToDisplay('.')">.</button>
-                <button onclick="calculate()" class="equals">=</button>
-            </div>
-        </div>
+        <section class="calculator-section">
+            <div class="container">
+                <div class="calculator-wrapper">
+                    <div>
+                        <div class="calculator">
+                            <div class="calculator-display" id="display">0</div>
+                            <div class="calculator-buttons">
+                                <button onclick="clearDisplay()">C</button>
+                                <button onclick="appendToDisplay('(')">(</button>
+                                <button onclick="appendToDisplay(')')">)</button>
+                                <button onclick="appendToDisplay('/')" class="operator">/</button>
+                                
+                                <button onclick="appendToDisplay('7')">7</button>
+                                <button onclick="appendToDisplay('8')">8</button>
+                                <button onclick="appendToDisplay('9')">9</button>
+                                <button onclick="appendToDisplay('*')" class="operator">×</button>
+                                
+                                <button onclick="appendToDisplay('4')">4</button>
+                                <button onclick="appendToDisplay('5')">5</button>
+                                <button onclick="appendToDisplay('6')">6</button>
+                                <button onclick="appendToDisplay('-')" class="operator">-</button>
+                                
+                                <button onclick="appendToDisplay('1')">1</button>
+                                <button onclick="appendToDisplay('2')">2</button>
+                                <button onclick="appendToDisplay('3')">3</button>
+                                <button onclick="appendToDisplay('+')" class="operator">+</button>
+                                
+                                <button onclick="appendToDisplay('0')">0</button>
+                                <button onclick="appendToDisplay('.')">.</button>
+                                <button onclick="calculate()" class="equals">=</button>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="financial-calculator">
-            <h3>Финансовый калькулятор</h3>
-            <div>
-                <label for="principal">Основная сумма (руб):</label>
-                <input type="number" id="principal" placeholder="100000">
-                
-                <label for="rate">Годовая процентная ставка (%):</label>
-                <input type="number" id="rate" placeholder="10">
-                
-                <label for="time">Срок (лет):</label>
-                <input type="number" id="time" placeholder="5">
-                
-                <button onclick="calculateInterest()" class="btn btn-primary">Рассчитать</button>
-                
-                <div class="financial-result" id="interestResult">
-                    Результаты расчета появятся здесь
+                    <div class="financial-calculator">
+                        <h3>Финансовый калькулятор</h3>
+                        <div class="form-group">
+                            <label for="principal">Основная сумма (руб):</label>
+                            <input type="number" id="principal" placeholder="100000">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rate">Годовая процентная ставка (%):</label>
+                            <input type="number" id="rate" placeholder="10">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="time">Срок (лет):</label>
+                            <input type="number" id="time" placeholder="5">
+                        </div>
+                        
+                        <button onclick="calculateInterest()" class="btn btn-primary">
+                            <i class="fas fa-calculator"></i> Рассчитать
+                        </button>
+                        
+                        <div class="financial-result" id="interestResult">
+                            <p>Результаты расчета появятся здесь</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
     </main>
 
     <footer class="footer">
@@ -181,7 +325,7 @@
             const time = parseFloat(document.getElementById('time').value);
             
             if (isNaN(principal) || isNaN(rate) || isNaN(time)) {
-                document.getElementById('interestResult').innerHTML = 'Пожалуйста, введите корректные числа во все поля.';
+                document.getElementById('interestResult').innerHTML = '<p style="color: red;">Пожалуйста, введите корректные числа во все поля.</p>';
                 return;
             }
             
