@@ -92,6 +92,25 @@
         .report-table th {
             background-color: var(--primary-light);
         }
+        
+        .data-input {
+            margin-top: 2rem;
+        }
+        
+        .data-input textarea {
+            width: 100%;
+            height: 200px;
+            padding: 1rem;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .data-format-info {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -109,7 +128,7 @@
                 <nav class="main-nav">
                     <ul class="nav-list">
                         <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
-                        <li class="nav-item"><a href="index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link active">Инструменты</a></li>
                         <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
                         <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
                         <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
@@ -160,9 +179,33 @@
                     <button class="btn btn-primary" onclick="generateExcel()">
                         <i class="fas fa-file-excel"></i> Скачать Excel
                     </button>
+                    <button class="btn btn-primary" onclick="generateWord()">
+                        <i class="fas fa-file-word"></i> Скачать Word
+                    </button>
                     <div style="flex-grow: 1;"></div>
                     <button class="btn" onclick="loadSampleData()">
                         <i class="fas fa-database"></i> Загрузить пример данных
+                    </button>
+                </div>
+                
+                <div class="data-input">
+                    <h3>Введите данные для отчета (JSON формат)</h3>
+                    <textarea id="report-data-input" placeholder='{
+  "title": "Финансовый отчет за Q1 2025",
+  "headers": ["Показатель", "Январь", "Февраль", "Март", "Итого"],
+  "rows": [
+    ["Добыча газа (млн м³)", 1250, 1320, 1400, 3970],
+    ["Реализация газа (млн м³)", 1180, 1250, 1320, 3750],
+    ["Выручка (млн руб)", 45200, 47800, 50300, 143300],
+    ["Расходы (млн руб)", 28500, 29300, 30200, 88000],
+    ["Прибыль (млн руб)", 16700, 18500, 20100, 55300]
+  ]
+}'></textarea>
+                    <div class="data-format-info">
+                        Формат данных: JSON объект с полями title (заголовок), headers (заголовки столбцов), rows (строки данных)
+                    </div>
+                    <button class="btn btn-primary" onclick="updateReportFromInput()" style="margin-top: 1rem;">
+                        <i class="fas fa-sync-alt"></i> Обновить отчет
                     </button>
                 </div>
                 
@@ -171,7 +214,7 @@
                     <div class="report-content">
                         <table class="report-table">
                             <thead>
-                                <tr>
+                                <tr id="report-headers">
                                     <th>Показатель</th>
                                     <th>Январь</th>
                                     <th>Февраль</th>
@@ -179,7 +222,7 @@
                                     <th>Итого</th>
                                 </tr>
                             </thead>
-                            <tbody id="report-data">
+                            <tbody id="report-rows">
                                 <!-- Данные будут загружены через JS -->
                             </tbody>
                         </table>
@@ -239,45 +282,118 @@
     <script>
         // Инициализация jsPDF
         const { jsPDF } = window.jspdf;
+        let currentTemplate = 'financial';
+        let reportData = {
+            title: "Финансовый отчет за Q1 2025",
+            headers: ["Показатель", "Январь", "Февраль", "Март", "Итого"],
+            rows: [
+                ["Добыча газа (млн м³)", 1250, 1320, 1400, 3970],
+                ["Реализация газа (млн м³)", 1180, 1250, 1320, 3750],
+                ["Выручка (млн руб)", 45200, 47800, 50300, 143300],
+                ["Расходы (млн руб)", 28500, 29300, 30200, 88000],
+                ["Прибыль (млн руб)", 16700, 18500, 20100, 55300]
+            ]
+        };
         
         // Загрузка данных примера
         function loadSampleData() {
-            const data = [
-                { name: "Добыча газа (млн м³)", jan: 1250, feb: 1320, mar: 1400 },
-                { name: "Реализация газа (млн м³)", jan: 1180, feb: 1250, mar: 1320 },
-                { name: "Выручка (млн руб)", jan: 45200, feb: 47800, mar: 50300 },
-                { name: "Расходы (млн руб)", jan: 28500, feb: 29300, mar: 30200 },
-                { name: "Прибыль (млн руб)", jan: 16700, feb: 18500, mar: 20100 }
-            ];
+            const templateData = {
+                financial: {
+                    title: "Финансовый отчет за Q1 2025",
+                    headers: ["Показатель", "Январь", "Февраль", "Март", "Итого"],
+                    rows: [
+                        ["Добыча газа (млн м³)", 1250, 1320, 1400, 3970],
+                        ["Реализация газа (млн м³)", 1180, 1250, 1320, 3750],
+                        ["Выручка (млн руб)", 45200, 47800, 50300, 143300],
+                        ["Расходы (млн руб)", 28500, 29300, 30200, 88000],
+                        ["Прибыль (млн руб)", 16700, 18500, 20100, 55300]
+                    ]
+                },
+                production: {
+                    title: "Производственный отчет за Q1 2025",
+                    headers: ["Показатель", "Январь", "Февраль", "Март", "Итого"],
+                    rows: [
+                        ["Добыча нефти (тыс. тонн)", 1250, 1320, 1400, 3970],
+                        ["Добыча газа (млн м³)", 45200, 47800, 50300, 143300],
+                        ["Переработка нефти (тыс. тонн)", 28500, 29300, 30200, 88000],
+                        ["Производство ГСМ (тыс. тонн)", 16700, 18500, 20100, 55300]
+                    ]
+                },
+                sales: {
+                    title: "Отчет по продажам за Q1 2025",
+                    headers: ["Регион", "Январь", "Февраль", "Март", "Итого"],
+                    rows: [
+                        ["Центральный", 1250, 1320, 1400, 3970],
+                        ["Северо-Западный", 1180, 1250, 1320, 3750],
+                        ["Южный", 4520, 4780, 5030, 14330],
+                        ["Приволжский", 2850, 2930, 3020, 8800],
+                        ["Уральский", 1670, 1850, 2010, 5530]
+                    ]
+                }
+            };
             
-            const tableBody = document.getElementById('report-data');
-            tableBody.innerHTML = '';
+            reportData = templateData[currentTemplate];
+            document.getElementById('report-data-input').value = JSON.stringify(reportData, null, 2);
+            updateReport();
+        }
+        
+        // Обновление отчета из поля ввода
+        function updateReportFromInput() {
+            try {
+                const inputData = document.getElementById('report-data-input').value;
+                reportData = JSON.parse(inputData);
+                updateReport();
+            } catch (e) {
+                alert('Ошибка в формате данных: ' + e.message);
+            }
+        }
+        
+        // Обновление отчета
+        function updateReport() {
+            document.getElementById('report-title').textContent = reportData.title;
             
-            data.forEach(item => {
-                const total = item.jan + item.feb + item.mar;
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.name}</td>
-                    <td>${item.jan.toLocaleString()}</td>
-                    <td>${item.feb.toLocaleString()}</td>
-                    <td>${item.mar.toLocaleString()}</td>
-                    <td><strong>${total.toLocaleString()}</strong></td>
-                `;
-                tableBody.appendChild(row);
+            const headersRow = document.getElementById('report-headers');
+            headersRow.innerHTML = '';
+            reportData.headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headersRow.appendChild(th);
+            });
+            
+            const rowsBody = document.getElementById('report-rows');
+            rowsBody.innerHTML = '';
+            reportData.rows.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach((cell, index) => {
+                    const td = document.createElement('td');
+                    // Форматируем числа с разделителями
+                    if (typeof cell === 'number') {
+                        td.textContent = cell.toLocaleString();
+                    } else {
+                        td.textContent = cell;
+                    }
+                    // Выделяем итоговые ячейки
+                    if (index === row.length - 1) {
+                        td.style.fontWeight = 'bold';
+                    }
+                    tr.appendChild(td);
+                });
+                rowsBody.appendChild(tr);
             });
         }
         
         // Генерация PDF
         function generatePDF() {
             const doc = new jsPDF();
-            const title = document.getElementById('report-title').textContent;
+            const title = reportData.title;
             
             doc.setFontSize(18);
             doc.text(title, 14, 20);
             
             // Добавляем таблицу
             doc.autoTable({
-                html: '#report-preview table',
+                head: [reportData.headers],
+                body: reportData.rows,
                 startY: 30,
                 theme: 'grid',
                 headStyles: {
@@ -291,10 +407,73 @@
         
         // Генерация Excel
         function generateExcel() {
-            const table = document.getElementById('report-preview').querySelector('table');
-            const workbook = XLSX.utils.table_to_book(table);
-            const title = document.getElementById('report-title').textContent;
-            XLSX.writeFile(workbook, `${title}.xlsx`);
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.aoa_to_sheet([
+                [reportData.title],
+                [],
+                reportData.headers,
+                ...reportData.rows
+            ]);
+            
+            // Объединяем ячейки для заголовка
+            worksheet['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: reportData.headers.length - 1 } }
+            ];
+            
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Отчет");
+            XLSX.writeFile(workbook, `${reportData.title}.xlsx`);
+        }
+        
+        // Генерация Word (через HTML)
+        function generateWord() {
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${reportData.title}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; }
+                        h1 { color: #006644; }
+                        table { border-collapse: collapse; width: 100%; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #00a650; color: white; }
+                        .total { font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${reportData.title}</h1>
+                    <table>
+                        <thead>
+                            <tr>
+                                ${reportData.headers.map(h => `<th>${h}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reportData.rows.map(row => `
+                                <tr>
+                                    ${row.map((cell, i) => 
+                                        `<td${i === row.length - 1 ? ' class="total"' : ''}>${
+                                            typeof cell === 'number' ? cell.toLocaleString() : cell
+                                        }</td>`
+                                    ).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([htmlContent], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${reportData.title}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
         
         // Выбор шаблона
@@ -305,15 +484,8 @@
                 });
                 this.classList.add('selected');
                 
-                const template = this.getAttribute('data-template');
-                const titleMap = {
-                    'financial': 'Финансовый отчет за Q1 2025',
-                    'production': 'Производственный отчет за Q1 2025',
-                    'sales': 'Отчет по продажам за Q1 2025'
-                };
-                
-                document.getElementById('report-title').textContent = titleMap[template];
-                loadSampleData(); // Загружаем данные для выбранного шаблона
+                currentTemplate = this.getAttribute('data-template');
+                loadSampleData();
             });
         });
         
