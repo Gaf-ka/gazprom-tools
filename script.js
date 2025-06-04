@@ -110,3 +110,51 @@ document.querySelectorAll('[data-tooltip]').forEach(el => {
         }, { once: true });
     });
 });
+// PDF Editor functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация инструментов, если они есть на странице
+    if (document.getElementById('pdfEditor')) {
+        initPdfEditor();
+    }
+    
+    if (document.getElementById('wordEditor')) {
+        initWordEditor();
+    }
+});
+
+function initPdfEditor() {
+    // Здесь будет код для инициализации PDF редактора
+    console.log('PDF Editor initialized');
+}
+
+function initWordEditor() {
+    // Здесь будет код для инициализации Word редактора
+    console.log('Word Editor initialized');
+}
+
+// Drag and drop для всех инструментов
+document.querySelectorAll('.file-upload-area').forEach(area => {
+    area.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = 'var(--primary-color)';
+        this.style.backgroundColor = 'var(--primary-light)';
+    });
+    
+    area.addEventListener('dragleave', function() {
+        this.style.borderColor = '#ccc';
+        this.style.backgroundColor = 'transparent';
+    });
+    
+    area.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ccc';
+        this.style.backgroundColor = 'transparent';
+        
+        const fileInput = this.querySelector('input[type="file"]');
+        if (fileInput && e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        }
+    });
+});

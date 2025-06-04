@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор PDF - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tool-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+        }
+        
+        .tool-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .tool-title {
+            font-size: 1.75rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .tool-subtitle {
+            color: var(--dark-gray);
+            margin-bottom: 1.5rem;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .file-upload-area i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload-area p {
+            margin-bottom: 0.5rem;
+        }
+        
+        .file-upload-area input {
+            display: none;
+        }
+        
+        .selected-files {
+            margin-top: 1.5rem;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .file-item-name {
+            flex: 1;
+            margin-right: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .file-item-remove {
+            color: #ff4444;
+            cursor: pointer;
+        }
+        
+        .tool-options {
+            margin-top: 1.5rem;
+        }
+        
+        .option-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .option-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .option-group select, 
+        .option-group input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .action-buttons .btn {
+            flex: 1;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .status-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .status-message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            display: block;
+        }
+        
+        .status-message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            display: block;
+        }
+        
+        .pages-preview {
+            margin-top: 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .page-thumbnail {
+            display: inline-block;
+            margin: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .page-thumbnail:hover {
+            transform: scale(1.05);
+        }
+        
+        .page-thumbnail.selected {
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+        
+        .page-thumbnail img {
+            width: 100px;
+            height: 140px;
+            object-fit: cover;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+        }
+        
+        .page-number {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Редактор PDF</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Редактор PDF</h1>
+                <p class="section-subtitle">Удаление страниц, объединение файлов и конвертация PDF документов</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="tool-container">
+                    <div class="tool-header">
+                        <h2 class="tool-title">Редактирование PDF</h2>
+                        <p class="tool-subtitle">Загрузите PDF файл для редактирования</p>
+                    </div>
+                    
+                    <div class="file-upload-area" id="uploadArea">
+                        <i class="fas fa-file-pdf"></i>
+                        <p>Перетащите сюда PDF файлы или</p>
+                        <button class="btn btn-outline">Выбрать файлы</button>
+                        <input type="file" id="fileInput" accept=".pdf" multiple>
+                    </div>
+                    
+                    <div class="selected-files" id="selectedFiles">
+                        <!-- Файлы будут отображаться здесь -->
+                    </div>
+                    
+                    <div class="tool-options">
+                        <div class="option-group">
+                            <label for="actionType">Выберите действие:</label>
+                            <select id="actionType">
+                                <option value="remove">Удалить страницы</option>
+                                <option value="merge">Объединить PDF</option>
+                                <option value="convert">Конвертировать в другой формат</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group" id="removeOptions">
+                            <label>Выберите страницы для удаления:</label>
+                            <div class="pages-preview" id="pagesPreview">
+                                <!-- Миниатюры страниц будут отображаться здесь -->
+                                <p class="empty-message">Загрузите PDF файл для просмотра страниц</p>
+                            </div>
+                        </div>
+                        
+                        <div class="option-group" id="convertOptions" style="display: none;">
+                            <label for="outputFormat">Формат для конвертации:</label>
+                            <select id="outputFormat">
+                                <option value="docx">Word (.docx)</option>
+                                <option value="xlsx">Excel (.xlsx)</option>
+                                <option value="jpg">Изображения (.jpg)</option>
+                                <option value="png">Изображения (.png)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="processBtn">Обработать</button>
+                        <button class="btn btn-outline" id="resetBtn">Сбросить</button>
+                    </div>
+                    
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-bar-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <div class="status-message" id="statusMessage"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="../visualization/index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Обработка загрузки файлов
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectedFiles = document.getElementById('selectedFiles');
+        const actionType = document.getElementById('actionType');
+        const removeOptions = document.getElementById('removeOptions');
+        const convertOptions = document.getElementById('convertOptions');
+        const pagesPreview = document.getElementById('pagesPreview');
+        const processBtn = document.getElementById('processBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        let uploadedFiles = [];
+        
+        // Обработчики событий для загрузки файлов
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = (--primary-color);
+            uploadArea.style.backgroundColor = (--primary-light);
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#ccc';
+            uploadArea.style.backgroundColor = 'transparent';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ccc';
+            uploadArea.style.backgroundColor = 'transparent';
+            
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+        
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                handleFiles(fileInput.files);
+            }
+        });
+        
+        // Обработка выбранных файлов
+        function handleFiles(files) {
+            uploadedFiles = Array.from(files);
+            
+            // Очищаем список файлов
+            selectedFiles.innerHTML = '';
+            
+            // Добавляем каждый файл в список
+            uploadedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div class="file-item-name" title="${file.name}">${file.name}</div>
+                    <div class="file-item-remove" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </div>
+                `;
+                selectedFiles.appendChild(fileItem);
+                
+                // Показываем превью страниц для первого PDF файла
+                if (index === 0 && file.type === 'application/pdf') {
+                    showPdfPreview(file);
+                }
+            });
+            
+            // Добавляем обработчики для удаления файлов
+            document.querySelectorAll('.file-item-remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                    uploadedFiles.splice(index, 1);
+                    handleFiles(uploadedFiles);
+                });
+            });
+        }
+        
+        // Показываем превью страниц PDF (заглушка - в реальном приложении используйте PDF.js)
+        function showPdfPreview(file) {
+            pagesPreview.innerHTML = '<p>Загрузка превью страниц...</p>';
+            
+            // В реальном приложении здесь будет код для извлечения страниц PDF
+            // Для демонстрации используем заглушку
+            setTimeout(() => {
+                pagesPreview.innerHTML = '';
+                
+                // Создаем миниатюры для 5 страниц (заглушка)
+                for (let i = 1; i <= 5; i++) {
+                    const pageThumb = document.createElement('div');
+                    pageThumb.className = 'page-thumbnail';
+                    pageThumb.setAttribute('data-page', i);
+                    pageThumb.innerHTML = `
+                        <img src="https://via.placeholder.com/100x140/ffffff/cccccc?text=Страница+${i}" alt="Страница ${i}">
+                        <div class="page-number">Страница ${i}</div>
+                    `;
+                    pagesPreview.appendChild(pageThumb);
+                    
+                    // Добавляем обработчик для выбора страниц
+                    pageThumb.addEventListener('click', function() {
+                        this.classList.toggle('selected');
+                    });
+                }
+            }, 1000);
+        }
+        
+        // Изменение типа действия
+        actionType.addEventListener('change', function() {
+            if (this.value === 'remove') {
+                removeOptions.style.display = 'block';
+                convertOptions.style.display = 'none';
+            } else if (this.value === 'convert') {
+                removeOptions.style.display = 'none';
+                convertOptions.style.display = 'block';
+            } else {
+                removeOptions.style.display = 'none';
+                convertOptions.style.display = 'none';
+            }
+        });
+        
+        // Обработка файлов
+        processBtn.addEventListener('click', function() {
+            if (uploadedFiles.length === 0) {
+                showStatus('Пожалуйста, загрузите файлы для обработки', 'error');
+                return;
+            }
+            
+            progressBar.style.display = 'block';
+            statusMessage.style.display = 'none';
+            
+            // Симуляция обработки файлов
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                progressFill.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    showStatus('Файлы успешно обработаны!', 'success');
+                    
+                    // В реальном приложении здесь будет код для скачивания результата
+                    setTimeout(() => {
+                        alert('Файл готов к скачиванию!');
+                    }, 500);
+                }
+            }, 100);
+        });
+        
+        // Сброс формы
+        resetBtn.addEventListener('click', function() {
+            uploadedFiles = [];
+            selectedFiles.innerHTML = '';
+            fileInput.value = '';
+            pagesPreview.innerHTML = '<p class="empty-message">Загрузите PDF файл для просмотра страниц</p>';
+            progressBar.style.display = 'none';
+            statusMessage.style.display = 'none';
+            progressFill.style.width = '0%';
+        });
+        
+        // Показать статус
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message ' + type;
+            statusMessage.style.display = 'block';
+        }
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

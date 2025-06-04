@@ -51,6 +51,130 @@
             color: var(--dark-gray);
             flex-grow: 1;
         }
+
+        /* File upload styles */
+        .file-upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+
+        .file-upload-area i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area p {
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload-area input {
+            display: none;
+        }
+
+        .selected-files {
+            margin-top: 1.5rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-item-name {
+            flex: 1;
+            margin-right: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-item-remove {
+            color: #ff4444;
+            cursor: pointer;
+        }
+
+        .tool-options {
+            margin-top: 1.5rem;
+        }
+
+        .option-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .option-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .option-group select, 
+        .option-group input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .status-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .status-message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            display: block;
+        }
+
+        .status-message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -88,7 +212,7 @@
         <section class="section-header">
             <div class="container">
                 <h1 class="section-title">Офисные инструменты</h1>
-                <p class="section-subtitle">Все необходимые инструменты для эффективной работы</p>
+                <p class="section-subtitle">Все необходимые инструменты для эффективной работы с документами</p>
             </div>
         </section>
 
@@ -113,26 +237,40 @@
                         <a href="converter.html" class="btn btn-primary">Открыть</a>
                     </div>
                     
-                    
-                    
                     <div class="tool-card">
                         <div class="tool-icon">
-                            <i class="fas fa-file-excel"></i>
+                            <i class="fas fa-file-pdf"></i>
                         </div>
-                        <h3 class="tool-title">Генератор отчетов</h3>
-                        <p class="tool-description">Создание стандартных отчетов в различных форматах (PDF, Excel, Word)</p>
-                        <a href="report-generator.html" class="btn btn-primary">Открыть</a>
+                        <h3 class="tool-title">Редактор PDF</h3>
+                        <p class="tool-description">Удаление страниц, объединение PDF файлов и конвертация в другие форматы</p>
+                        <a href="pdf-editor.html" class="btn btn-primary">Открыть</a>
                     </div>
                     
-
+                    <div class="tool-card">
+                        <div class="tool-icon">
+                            <i class="fas fa-file-word"></i>
+                        </div>
+                        <h3 class="tool-title">Редактор Word</h3>
+                        <p class="tool-description">Удаление страниц, объединение документов и конвертация в другие форматы</p>
+                        <a href="word-editor.html" class="btn btn-primary">Открыть</a>
+                    </div>
                     
                     <div class="tool-card">
                         <div class="tool-icon">
-                            <i class="fas fa-clock"></i>
+                            <i class="fas fa-file-export"></i>
                         </div>
-                        <h3 class="tool-title">Тайм-менеджер</h3>
-                        <p class="tool-description">Инструмент для учета рабочего времени и планирования задач</p>
-                        <a href="time-manager.html" class="btn btn-primary">Открыть</a>
+                        <h3 class="tool-title">Конвертер документов</h3>
+                        <p class="tool-description">Преобразование файлов между различными форматами (PDF, Word, Excel и др.)</p>
+                        <a href="document-converter.html" class="btn btn-primary">Открыть</a>
+                    </div>
+                    
+                    <div class="tool-card">
+                        <div class="tool-icon">
+                            <i class="fas fa-file-archive"></i>
+                        </div>
+                        <h3 class="tool-title">Объединение файлов</h3>
+                        <p class="tool-description">Склейка нескольких файлов в один документ (PDF или Word)</p>
+                        <a href="file-merger.html" class="btn btn-primary">Открыть</a>
                     </div>
                 </div>
             </div>
@@ -185,7 +323,6 @@
             </div>
         </div>
     </footer>
-
     <script src="../script.js"></script>
 </body>
 </html>
