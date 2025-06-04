@@ -6,10 +6,12 @@
     <title>Диаграммы - Газпром</title>
     <link rel="stylesheet" href="../style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         .diagram-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 2rem;
             margin-top: 2rem;
         }
@@ -28,17 +30,18 @@
         
         .diagram-wrapper {
             position: relative;
-            height: 300px;
+            height: 400px;
             width: 100%;
         }
         
         .diagram-controls {
             margin-top: 1rem;
             display: flex;
+            flex-wrap: wrap;
             gap: 0.5rem;
         }
         
-        .diagram-controls button {
+        .diagram-controls button, .diagram-controls select, .diagram-controls input {
             padding: 0.5rem 1rem;
             background-color: var(--primary-color);
             color: white;
@@ -67,235 +70,514 @@
             background-color: #f2f2f2;
         }
         
-        .data-table input {
+        .data-table input, .data-table select {
             width: 100%;
-            border: none;
+            border: 1px solid #ddd;
             text-align: center;
+            padding: 0.25rem;
         }
         
-        @media (max-width: 768px) {
-            .diagram-container {
-                grid-template-columns: 1fr;
-            }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .settings-panel {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        
+        .settings-group {
+            margin-bottom: 1rem;
+        }
+        
+        .settings-group label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .color-picker input {
+            width: 40px;
+            height: 30px;
+            padding: 0;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            flex: 1;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <img src="https://www.gazprom.com/f/i/logo.png" alt="Газпром">
-            <h1>Диаграммы данных</h1>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Диаграммы данных</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="../office-tools/index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link active">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
         </div>
-        <nav>
-            <ul>
-                <li><a href="../index.html">Главная</a></li>
-                <li><a href="../office-tools/index.html">Офисные инструменты</a></li>
-                <li><a href="../trainers/index.html">Тренажёры</a></li>
-                <li><a href="index.html">Визуализация данных</a></li>
-                <li><a href="../ai-assistant/index.html">ИИ помощник</a></li>
-            </ul>
-        </nav>
     </header>
 
-    <main>
-        <section class="welcome">
-            <h2>Диаграммы данных</h2>
-            <p>Создавайте и настраивайте различные типы диаграмм для визуализации ваших данных.</p>
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Диаграммы данных</h1>
+                <p class="section-subtitle">Создавайте и настраивайте различные типы диаграмм</p>
+            </div>
         </section>
 
-        <div class="diagram-container">
-            <div class="diagram-box">
-                <h3>Круговая диаграмма</h3>
-                <div class="diagram-wrapper">
-                    <canvas id="pieChart"></canvas>
+        <div class="container">
+            <div class="diagram-container">
+                <div class="diagram-box">
+                    <h3>Настройки диаграммы</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="diagramType">Тип диаграммы:</label>
+                            <select id="diagramType" onchange="changeDiagramType()">
+                                <option value="pie">Круговая</option>
+                                <option value="doughnut">Кольцевая</option>
+                                <option value="polarArea">Полярная</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="diagramTitle">Заголовок:</label>
+                            <input type="text" id="diagramTitle" value="Моя диаграмма" onchange="updateDiagramSettings()">
+                        </div>
+                    </div>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <p>Перетащите сюда CSV или Excel файл или</p>
+                        <button class="btn btn-outline">Выбрать файл</button>
+                        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+                    </div>
+                    
+                    <div class="diagram-controls">
+                        <button onclick="addDataItem()"><i class="fas fa-plus"></i> Добавить элемент</button>
+                        <button onclick="removeDataItem()"><i class="fas fa-minus"></i> Удалить элемент</button>
+                    </div>
+                    
+                    <div class="diagram-wrapper">
+                        <canvas id="myDiagram"></canvas>
+                    </div>
+                    
+                    <div class="settings-panel">
+                        <h4>Настройки отображения</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="showLegend" checked onchange="updateDiagramSettings()"> 
+                                    Показывать легенду
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="showValues" checked onchange="updateDiagramSettings()"> 
+                                    Показывать значения
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Редактирование данных</h3>
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Метка</th>
+                                <th>Значение</th>
+                                <th>Цвет</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="diagramData">
+                            <tr>
+                                <td><input type="text" value="Категория 1" data-index="0"></td>
+                                <td><input type="number" value="30" data-index="0"></td>
+                                <td><input type="color" value="#3e95cd" data-index="0" onchange="updateColors()"></td>
+                                <td><button onclick="editItem(0)"><i class="fas fa-edit"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" value="Категория 2" data-index="1"></td>
+                                <td><input type="number" value="20" data-index="1"></td>
+                                <td><input type="color" value="#8e5ea2" data-index="1" onchange="updateColors()"></td>
+                                <td><button onclick="editItem(1)"><i class="fas fa-edit"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" value="Категория 3" data-index="2"></td>
+                                <td><input type="number" value="15" data-index="2"></td>
+                                <td><input type="color" value="#3cba9f" data-index="2" onchange="updateColors()"></td>
+                                <td><button onclick="editItem(2)"><i class="fas fa-edit"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="diagram-controls">
-                    <button onclick="updatePieChart()">Обновить диаграмму</button>
-                    <button onclick="randomizePieData()">Случайные данные</button>
-                </div>
-                
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Категория</th>
-                            <th>Значение</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pieChartData">
-                        <tr>
-                            <td>Зарплаты</td>
-                            <td><input type="number" value="45" data-category="salaries"></td>
-                        </tr>
-                        <tr>
-                            <td>Оборудование</td>
-                            <td><input type="number" value="25" data-category="equipment"></td>
-                        </tr>
-                        <tr>
-                            <td>Аренда</td>
-                            <td><input type="number" value="15" data-category="rent"></td>
-                        </tr>
-                        <tr>
-                            <td>Командировки</td>
-                            <td><input type="number" value="10" data-category="travel"></td>
-                        </tr>
-                        <tr>
-                            <td>Прочее</td>
-                            <td><input type="number" value="5" data-category="other"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="diagram-box">
-                <h3>Кольцевая диаграмма</h3>
-                <div class="diagram-wrapper">
-                    <canvas id="doughnutChart"></canvas>
-                </div>
-                <div class="diagram-controls">
-                    <button onclick="updateDoughnutChart()">Обновить диаграмму</button>
-                    <button onclick="randomizeDoughnutData()">Случайные данные</button>
-                </div>
-                
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Регион</th>
-                            <th>Добыча</th>
-                        </tr>
-                    </thead>
-                    <tbody id="doughnutChartData">
-                        <tr>
-                            <td>Западная Сибирь</td>
-                            <td><input type="number" value="60" data-region="west-siberia"></td>
-                        </tr>
-                        <tr>
-                            <td>Восточная Сибирь</td>
-                            <td><input type="number" value="20" data-region="east-siberia"></td>
-                        </tr>
-                        <tr>
-                            <td>Дальний Восток</td>
-                            <td><input type="number" value="10" data-region="far-east"></td>
-                        </tr>
-                        <tr>
-                            <td>Европейская часть</td>
-                            <td><input type="number" value="10" data-region="europe"></td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </main>
 
-    <footer>
-        <p>© 2023 Газпром. Все права защищены.</p>
-        <p>Внутренний портал для сотрудников</p>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="../office-tools/index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <script>
-        // Инициализация диаграмм
-        let pieChart, doughnutChart;
+        let myDiagram;
+        let labels = ['Категория 1', 'Категория 2', 'Категория 3'];
+        let data = [30, 20, 15];
+        let backgroundColors = ['#3e95cd', '#8e5ea2', '#3cba9f'];
         
         document.addEventListener('DOMContentLoaded', function() {
-            // Круговая диаграмма
-            const pieCtx = document.getElementById('pieChart').getContext('2d');
-            pieChart = new Chart(pieCtx, {
+            initializeDiagram();
+            setupEventListeners();
+        });
+        
+        function initializeDiagram() {
+            const ctx = document.getElementById('myDiagram').getContext('2d');
+            
+            myDiagram = new Chart(ctx, {
                 type: 'pie',
                 data: {
-                    labels: ['Зарплаты', 'Оборудование', 'Аренда', 'Командировки', 'Прочее'],
+                    labels: labels,
                     datasets: [{
-                        data: [45, 25, 15, 10, 5],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.6)',
-                            'rgba(54, 162, 235, 0.6)',
-                            'rgba(255, 206, 86, 0.6)',
-                            'rgba(75, 192, 192, 0.6)',
-                            'rgba(153, 102, 255, 0.6)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-            
-            // Кольцевая диаграмма
-            const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
-            doughnutChart = new Chart(doughnutCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Западная Сибирь', 'Восточная Сибирь', 'Дальний Восток', 'Европейская часть'],
-                    datasets: [{
-                        data: [60, 20, 10, 10],
-                        backgroundColor: [
-                            'rgba(54, 162, 235, 0.6)',
-                            'rgba(255, 206, 86, 0.6)',
-                            'rgba(75, 192, 192, 0.6)',
-                            'rgba(153, 102, 255, 0.6)'
-                        ],
-                        borderColor: [
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)'
-                        ],
+                        data: data,
+                        backgroundColor: backgroundColors,
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '70%'
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: document.getElementById('diagramTitle').value,
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            display: document.getElementById('showLegend').checked,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw} (${Math.round(context.parsed * 100 / context.dataset.data.reduce((a, b) => a + b, 0))}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: document.getElementById('showValues').checked,
+                            formatter: (value, ctx) => {
+                                const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = (value * 100 / sum).toFixed(1) + '%';
+                                return percentage;
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
                 }
             });
-        });
-        
-        // Обновление круговой диаграммы
-        function updatePieChart() {
-            const pieData = [];
-            
-            document.querySelectorAll('#pieChartData input').forEach(input => {
-                pieData.push(parseFloat(input.value));
-            });
-            
-            pieChart.data.datasets[0].data = pieData;
-            pieChart.update();
         }
         
-        // Обновление кольцевой диаграммы
-        function updateDoughnutChart() {
-            const doughnutData = [];
+        function setupEventListeners() {
+            // Обработка загрузки файлов
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
             
-            document.querySelectorAll('#doughnutChartData input').forEach(input => {
-                doughnutData.push(parseFloat(input.value));
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary-color)';
+                uploadArea.style.backgroundColor = 'var(--primary-light)';
             });
             
-            doughnutChart.data.datasets[0].data = doughnutData;
-            doughnutChart.update();
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileUpload(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    handleFileUpload(fileInput.files[0]);
+                }
+            });
+            
+            // Обработка изменений в таблице
+            document.getElementById('dataTable').addEventListener('input', function(e) {
+                if (e.target.tagName === 'INPUT' && e.target.type !== 'color') {
+                    updateDiagramFromTable();
+                }
+            });
         }
         
-        // Случайные данные для круговой диаграммы
-        function randomizePieData() {
-            document.querySelectorAll('#pieChartData input').forEach(input => {
-                input.value = Math.floor(Math.random() * 40) + 5;
-            });
-            updatePieChart();
+        function handleFileUpload(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const fileData = e.target.result;
+                
+                if (file.name.endsWith('.csv')) {
+                    parseCSV(fileData);
+                } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                    parseExcel(fileData);
+                }
+            };
+            
+            if (file.name.endsWith('.csv')) {
+                reader.readAsText(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
         }
         
-        // Случайные данные для кольцевой диаграммы
-        function randomizeDoughnutData() {
-            document.querySelectorAll('#doughnutChartData input').forEach(input => {
-                input.value = Math.floor(Math.random() * 50) + 5;
+        function parseCSV(data) {
+            Papa.parse(data, {
+                header: true,
+                complete: function(results) {
+                    if (results.data.length > 0) {
+                        // Очищаем текущие данные
+                        labels = [];
+                        data = [];
+                        backgroundColors = [];
+                        
+                        results.data.forEach(row => {
+                            if (row.label && row.value) {
+                                labels.push(row.label);
+                                data.push(parseFloat(row.value) || 0);
+                                backgroundColors.push(getRandomColor());
+                            }
+                        });
+                        
+                        updateTableFromData();
+                        updateDiagram();
+                    }
+                }
             });
-            updateDoughnutChart();
+        }
+        
+        function parseExcel(data) {
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+            
+            if (jsonData.length > 0) {
+                // Очищаем текущие данные
+                labels = [];
+                data = [];
+                backgroundColors = [];
+                
+                jsonData.forEach(row => {
+                    if (row.label && row.value) {
+                        labels.push(row.label);
+                        data.push(parseFloat(row.value) || 0);
+                        backgroundColors.push(getRandomColor());
+                    }
+                });
+                
+                updateTableFromData();
+                updateDiagram();
+            }
+        }
+        
+        function updateTableFromData() {
+            const tableBody = document.getElementById('diagramData');
+            
+            // Очищаем таблицу
+            tableBody.innerHTML = '';
+            
+            // Добавляем строки с данными
+            labels.forEach((label, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="text" value="${label}" data-index="${index}"></td>
+                    <td><input type="number" value="${data[index]}" data-index="${index}"></td>
+                    <td><input type="color" value="${backgroundColors[index]}" data-index="${index}" onchange="updateColors()"></td>
+                    <td><button onclick="editItem(${index})"><i class="fas fa-edit"></i></button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function updateDiagramFromTable() {
+            // Обновляем метки и данные
+            const labelInputs = document.querySelectorAll('#diagramData td:nth-child(1) input');
+            const valueInputs = document.querySelectorAll('#diagramData td:nth-child(2) input');
+            
+            labels = Array.from(labelInputs).map(input => input.value);
+            data = Array.from(valueInputs).map(input => parseFloat(input.value) || 0);
+            
+            updateDiagram();
+        }
+        
+        function updateColors() {
+            const colorInputs = document.querySelectorAll('#diagramData td:nth-child(3) input');
+            backgroundColors = Array.from(colorInputs).map(input => input.value);
+            updateDiagram();
+        }
+        
+        function addDataItem() {
+            const newIndex = labels.length;
+            labels.push(`Категория ${newIndex + 1}`);
+            data.push(10);
+            backgroundColors.push(getRandomColor());
+            
+            updateTableFromData();
+            updateDiagram();
+        }
+        
+        function removeDataItem() {
+            if (labels.length > 1) {
+                labels.pop();
+                data.pop();
+                backgroundColors.pop();
+                
+                updateTableFromData();
+                updateDiagram();
+            } else {
+                alert('Должен остаться хотя бы один элемент');
+            }
+        }
+        
+        function editItem(index) {
+            const newLabel = prompt('Введите новое название для элемента:', labels[index]);
+            if (newLabel !== null) {
+                labels[index] = newLabel;
+                updateTableFromData();
+                updateDiagram();
+            }
+        }
+        
+        function changeDiagramType() {
+            myDiagram.config.type = document.getElementById('diagramType').value;
+            updateDiagram();
+        }
+        
+        function updateDiagramSettings() {
+            myDiagram.options.plugins.title.text = document.getElementById('diagramTitle').value;
+            myDiagram.options.plugins.legend.display = document.getElementById('showLegend').checked;
+            
+            if (myDiagram.options.plugins.datalabels) {
+                myDiagram.options.plugins.datalabels.display = document.getElementById('showValues').checked;
+            }
+            
+            updateDiagram();
+        }
+        
+        function updateDiagram() {
+            myDiagram.data.labels = labels;
+            myDiagram.data.datasets[0].data = data;
+            myDiagram.data.datasets[0].backgroundColor = backgroundColors;
+            myDiagram.update();
+        }
+        
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
         }
     </script>
 </body>
