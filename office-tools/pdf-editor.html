@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="../style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
     <style>
         .tool-container {
             max-width: 800px;
@@ -104,7 +106,7 @@
         }
         
         .option-group select, 
-        .option-group input[type="number"] {
+        .option-group input[type="text"] {
             width: 100%;
             padding: 0.5rem;
             border: 1px solid #ddd;
@@ -181,7 +183,7 @@
             box-shadow: 0 0 0 2px var(--primary-color);
         }
         
-        .page-thumbnail img {
+        .page-thumbnail canvas {
             width: 100px;
             height: 140px;
             object-fit: cover;
@@ -192,6 +194,12 @@
         .page-number {
             font-size: 0.8rem;
             margin-top: 0.25rem;
+        }
+        
+        .download-link {
+            display: none;
+            margin-top: 1rem;
+            text-align: center;
         }
     </style>
 </head>
@@ -230,7 +238,7 @@
         <section class="section-header">
             <div class="container">
                 <h1 class="section-title">Редактор PDF</h1>
-                <p class="section-subtitle">Удаление страниц, объединение файлов и конвертация PDF документов</p>
+                <p class="section-subtitle">Удаление страниц и объединение PDF документов</p>
             </div>
         </section>
 
@@ -259,26 +267,18 @@
                             <select id="actionType">
                                 <option value="remove">Удалить страницы</option>
                                 <option value="merge">Объединить PDF</option>
-                                <option value="convert">Конвертировать в другой формат</option>
                             </select>
                         </div>
                         
                         <div class="option-group" id="removeOptions">
                             <label>Выберите страницы для удаления:</label>
                             <div class="pages-preview" id="pagesPreview">
-                                <!-- Миниатюры страниц будут отображаться здесь -->
                                 <p class="empty-message">Загрузите PDF файл для просмотра страниц</p>
                             </div>
                         </div>
                         
-                        <div class="option-group" id="convertOptions" style="display: none;">
-                            <label for="outputFormat">Формат для конвертации:</label>
-                            <select id="outputFormat">
-                                <option value="docx">Word (.docx)</option>
-                                <option value="xlsx">Excel (.xlsx)</option>
-                                <option value="jpg">Изображения (.jpg)</option>
-                                <option value="png">Изображения (.png)</option>
-                            </select>
+                        <div class="option-group" id="mergeOptions" style="display: none;">
+                            <p>Будут объединены все загруженные PDF файлы в порядке их загрузки.</p>
                         </div>
                     </div>
                     
@@ -292,6 +292,10 @@
                     </div>
                     
                     <div class="status-message" id="statusMessage"></div>
+                    
+                    <div class="download-link" id="downloadLink">
+                        <a href="#" class="btn btn-success" id="downloadBtn"><i class="fas fa-download"></i> Скачать результат</a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -345,29 +349,36 @@
     </footer>
     
     <script>
+        // Инициализация PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+        
         // Обработка загрузки файлов
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
         const selectedFiles = document.getElementById('selectedFiles');
         const actionType = document.getElementById('actionType');
         const removeOptions = document.getElementById('removeOptions');
-        const convertOptions = document.getElementById('convertOptions');
+        const mergeOptions = document.getElementById('mergeOptions');
         const pagesPreview = document.getElementById('pagesPreview');
         const processBtn = document.getElementById('processBtn');
         const resetBtn = document.getElementById('resetBtn');
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
         const statusMessage = document.getElementById('statusMessage');
+        const downloadLink = document.getElementById('downloadLink');
+        const downloadBtn = document.getElementById('downloadBtn');
         
         let uploadedFiles = [];
+        let pdfDocuments = [];
+        let resultPdfBytes = null;
         
         // Обработчики событий для загрузки файлов
         uploadArea.addEventListener('click', () => fileInput.click());
         
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = (--primary-color);
-            uploadArea.style.backgroundColor = (--primary-light);
+            uploadArea.style.borderColor = 'var(--primary-color)';
+            uploadArea.style.backgroundColor = 'var(--primary-light)';
         });
         
         uploadArea.addEventListener('dragleave', () => {
@@ -393,84 +404,129 @@
         });
         
         // Обработка выбранных файлов
-        function handleFiles(files) {
+        async function handleFiles(files) {
             uploadedFiles = Array.from(files);
+            pdfDocuments = [];
             
             // Очищаем список файлов
             selectedFiles.innerHTML = '';
+            pagesPreview.innerHTML = '<p>Загрузка файлов...</p>';
+            downloadLink.style.display = 'none';
+            resultPdfBytes = null;
             
             // Добавляем каждый файл в список
-            uploadedFiles.forEach((file, index) => {
+            for (let i = 0; i < uploadedFiles.length; i++) {
+                const file = uploadedFiles[i];
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
                 fileItem.innerHTML = `
                     <div class="file-item-name" title="${file.name}">${file.name}</div>
-                    <div class="file-item-remove" data-index="${index}">
+                    <div class="file-item-remove" data-index="${i}">
                         <i class="fas fa-times"></i>
                     </div>
                 `;
                 selectedFiles.appendChild(fileItem);
                 
-                // Показываем превью страниц для первого PDF файла
-                if (index === 0 && file.type === 'application/pdf') {
-                    showPdfPreview(file);
+                // Загружаем PDF для предпросмотра (только первый файл для удаления страниц)
+                if (i === 0 && actionType.value === 'remove') {
+                    try {
+                        const arrayBuffer = await file.arrayBuffer();
+                        const pdfDoc = await pdfjsLib.getDocument(arrayBuffer).promise;
+                        pdfDocuments.push(pdfDoc);
+                        showPdfPreview(pdfDoc);
+                    } catch (error) {
+                        showStatus('Ошибка при загрузке PDF файла', 'error');
+                        console.error(error);
+                    }
                 }
-            });
+            }
+            
+            // Для объединения загружаем все PDF
+            if (actionType.value === 'merge' && uploadedFiles.length > 0) {
+                try {
+                    for (let i = 0; i < uploadedFiles.length; i++) {
+                        const arrayBuffer = await uploadedFiles[i].arrayBuffer();
+                        const pdfDoc = await pdfjsLib.getDocument(arrayBuffer).promise;
+                        pdfDocuments.push(pdfDoc);
+                    }
+                    pagesPreview.innerHTML = `<p>Загружено ${uploadedFiles.length} PDF файлов для объединения.</p>`;
+                } catch (error) {
+                    showStatus('Ошибка при загрузке одного из PDF файлов', 'error');
+                    console.error(error);
+                }
+            }
             
             // Добавляем обработчики для удаления файлов
             document.querySelectorAll('.file-item-remove').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const index = parseInt(e.currentTarget.getAttribute('data-index'));
                     uploadedFiles.splice(index, 1);
+                    pdfDocuments.splice(index, 1);
                     handleFiles(uploadedFiles);
                 });
             });
         }
         
-        // Показываем превью страниц PDF (заглушка - в реальном приложении используйте PDF.js)
-        function showPdfPreview(file) {
-            pagesPreview.innerHTML = '<p>Загрузка превью страниц...</p>';
+        // Показываем превью страниц PDF
+        async function showPdfPreview(pdfDoc) {
+            pagesPreview.innerHTML = '';
             
-            // В реальном приложении здесь будет код для извлечения страниц PDF
-            // Для демонстрации используем заглушку
-            setTimeout(() => {
-                pagesPreview.innerHTML = '';
+            const numPages = pdfDoc.numPages;
+            
+            for (let i = 1; i <= numPages; i++) {
+                const page = await pdfDoc.getPage(i);
+                const viewport = page.getViewport({ scale: 0.2 });
                 
-                // Создаем миниатюры для 5 страниц (заглушка)
-                for (let i = 1; i <= 5; i++) {
-                    const pageThumb = document.createElement('div');
-                    pageThumb.className = 'page-thumbnail';
-                    pageThumb.setAttribute('data-page', i);
-                    pageThumb.innerHTML = `
-                        <img src="https://via.placeholder.com/100x140/ffffff/cccccc?text=Страница+${i}" alt="Страница ${i}">
-                        <div class="page-number">Страница ${i}</div>
-                    `;
-                    pagesPreview.appendChild(pageThumb);
-                    
-                    // Добавляем обработчик для выбора страниц
-                    pageThumb.addEventListener('click', function() {
-                        this.classList.toggle('selected');
-                    });
-                }
-            }, 1000);
+                const pageThumb = document.createElement('div');
+                pageThumb.className = 'page-thumbnail';
+                pageThumb.setAttribute('data-page', i);
+                
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                pageThumb.appendChild(canvas);
+                
+                const pageNumber = document.createElement('div');
+                pageNumber.className = 'page-number';
+                pageNumber.textContent = `Страница ${i}`;
+                pageThumb.appendChild(pageNumber);
+                
+                pagesPreview.appendChild(pageThumb);
+                
+                // Рендерим страницу
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+                
+                // Добавляем обработчик для выбора страниц
+                pageThumb.addEventListener('click', function() {
+                    this.classList.toggle('selected');
+                });
+            }
         }
         
         // Изменение типа действия
         actionType.addEventListener('change', function() {
             if (this.value === 'remove') {
                 removeOptions.style.display = 'block';
-                convertOptions.style.display = 'none';
-            } else if (this.value === 'convert') {
-                removeOptions.style.display = 'none';
-                convertOptions.style.display = 'block';
+                mergeOptions.style.display = 'none';
+                if (uploadedFiles.length > 0) {
+                    handleFiles(uploadedFiles);
+                }
             } else {
                 removeOptions.style.display = 'none';
-                convertOptions.style.display = 'none';
+                mergeOptions.style.display = 'block';
+                if (uploadedFiles.length > 0) {
+                    handleFiles(uploadedFiles);
+                }
             }
         });
         
         // Обработка файлов
-        processBtn.addEventListener('click', function() {
+        processBtn.addEventListener('click', async function() {
             if (uploadedFiles.length === 0) {
                 showStatus('Пожалуйста, загрузите файлы для обработки', 'error');
                 return;
@@ -478,33 +534,101 @@
             
             progressBar.style.display = 'block';
             statusMessage.style.display = 'none';
+            progressFill.style.width = '0%';
             
-            // Симуляция обработки файлов
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 5;
-                progressFill.style.width = `${progress}%`;
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    showStatus('Файлы успешно обработаны!', 'success');
-                    
-                    // В реальном приложении здесь будет код для скачивания результата
-                    setTimeout(() => {
-                        alert('Файл готов к скачиванию!');
-                    }, 500);
+            try {
+                if (actionType.value === 'remove') {
+                    await processRemovePages();
+                } else if (actionType.value === 'merge') {
+                    await processMergePdfs();
                 }
-            }, 100);
+                
+                progressFill.style.width = '100%';
+                showStatus('Файлы успешно обработаны!', 'success');
+                downloadLink.style.display = 'block';
+            } catch (error) {
+                console.error(error);
+                showStatus('Ошибка при обработке файлов', 'error');
+            }
+        });
+        
+        // Удаление страниц
+        async function processRemovePages() {
+            if (pdfDocuments.length === 0) return;
+            
+            const selectedPages = Array.from(document.querySelectorAll('.page-thumbnail.selected'))
+                .map(el => parseInt(el.getAttribute('data-page')));
+            
+            const pdfDoc = pdfDocuments[0];
+            const { PDFDocument } = PDFLib;
+            
+            // Создаем новый PDF
+            const newPdfDoc = await PDFDocument.create();
+            const existingPdfBytes = await uploadedFiles[0].arrayBuffer();
+            const existingPdfDoc = await PDFDocument.load(existingPdfBytes);
+            
+            const pageCount = existingPdfDoc.getPageCount();
+            for (let i = 0; i < pageCount; i++) {
+                if (!selectedPages.includes(i + 1)) {
+                    const [page] = await newPdfDoc.copyPages(existingPdfDoc, [i]);
+                    newPdfDoc.addPage(page);
+                }
+            }
+            
+            resultPdfBytes = await newPdfDoc.save();
+        }
+        
+        // Объединение PDF
+        async function processMergePdfs() {
+            if (pdfDocuments.length === 0) return;
+            
+            const { PDFDocument } = PDFLib;
+            const newPdfDoc = await PDFDocument.create();
+            
+            for (let i = 0; i < uploadedFiles.length; i++) {
+                const existingPdfBytes = await uploadedFiles[i].arrayBuffer();
+                const existingPdfDoc = await PDFDocument.load(existingPdfBytes);
+                
+                const pageCount = existingPdfDoc.getPageCount();
+                for (let j = 0; j < pageCount; j++) {
+                    const [page] = await newPdfDoc.copyPages(existingPdfDoc, [j]);
+                    newPdfDoc.addPage(page);
+                }
+            }
+            
+            resultPdfBytes = await newPdfDoc.save();
+        }
+        
+        // Скачивание результата
+        downloadBtn.addEventListener('click', function(e) {
+            if (!resultPdfBytes) {
+                e.preventDefault();
+                return;
+            }
+            
+            const blob = new Blob([resultPdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = actionType.value === 'remove' ? 'edited.pdf' : 'merged.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         });
         
         // Сброс формы
         resetBtn.addEventListener('click', function() {
             uploadedFiles = [];
+            pdfDocuments = [];
+            resultPdfBytes = null;
             selectedFiles.innerHTML = '';
             fileInput.value = '';
             pagesPreview.innerHTML = '<p class="empty-message">Загрузите PDF файл для просмотра страниц</p>';
             progressBar.style.display = 'none';
             statusMessage.style.display = 'none';
+            downloadLink.style.display = 'none';
             progressFill.style.width = '0%';
         });
         

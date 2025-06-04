@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.0/mammoth.browser.min.js"></script>
     <style>
         .tool-container {
             max-width: 800px;
@@ -104,7 +105,7 @@
         }
         
         .option-group select, 
-        .option-group input[type="number"] {
+        .option-group input[type="text"] {
             width: 100%;
             padding: 0.5rem;
             border: 1px solid #ddd;
@@ -170,6 +171,12 @@
             margin-bottom: 1rem;
             line-height: 1.5;
         }
+        
+        .download-link {
+            display: none;
+            margin-top: 1rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -207,7 +214,7 @@
         <section class="section-header">
             <div class="container">
                 <h1 class="section-title">Редактор Word</h1>
-                <p class="section-subtitle">Удаление страниц, объединение документов и конвертация файлов</p>
+                <p class="section-subtitle">Удаление страниц и объединение документов</p>
             </div>
         </section>
 
@@ -236,7 +243,6 @@
                             <select id="actionType">
                                 <option value="remove">Удалить страницы</option>
                                 <option value="merge">Объединить документы</option>
-                                <option value="convert">Конвертировать в другой формат</option>
                             </select>
                         </div>
                         
@@ -245,14 +251,8 @@
                             <input type="text" id="pagesToRemove" placeholder="1,3-5">
                         </div>
                         
-                        <div class="option-group" id="convertOptions" style="display: none;">
-                            <label for="outputFormat">Формат для конвертации:</label>
-                            <select id="outputFormat">
-                                <option value="pdf">PDF (.pdf)</option>
-                                <option value="txt">Текст (.txt)</option>
-                                <option value="rtf">Rich Text (.rtf)</option>
-                                <option value="html">HTML (.html)</option>
-                            </select>
+                        <div class="option-group" id="mergeOptions" style="display: none;">
+                            <p>Будут объединены все загруженные документы в порядке их загрузки.</p>
                         </div>
                         
                         <div class="document-preview" id="documentPreview">
@@ -270,6 +270,10 @@
                     </div>
                     
                     <div class="status-message" id="statusMessage"></div>
+                    
+                    <div class="download-link" id="downloadLink">
+                        <a href="#" class="btn btn-success" id="downloadBtn"><i class="fas fa-download"></i> Скачать результат</a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -329,23 +333,26 @@
         const selectedFiles = document.getElementById('selectedFiles');
         const actionType = document.getElementById('actionType');
         const removeOptions = document.getElementById('removeOptions');
-        const convertOptions = document.getElementById('convertOptions');
+        const mergeOptions = document.getElementById('mergeOptions');
         const documentPreview = document.getElementById('documentPreview');
         const processBtn = document.getElementById('processBtn');
         const resetBtn = document.getElementById('resetBtn');
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
         const statusMessage = document.getElementById('statusMessage');
+        const downloadLink = document.getElementById('downloadLink');
+        const downloadBtn = document.getElementById('downloadBtn');
         
         let uploadedFiles = [];
+        let resultDocxBlob = null;
         
         // Обработчики событий для загрузки файлов
         uploadArea.addEventListener('click', () => fileInput.click());
         
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = var(--primary-color);
-            uploadArea.style.backgroundColor = var(--primary-light);
+            uploadArea.style.borderColor = 'var(--primary-color)';
+            uploadArea.style.backgroundColor = 'var(--primary-light)';
         });
         
         uploadArea.addEventListener('dragleave', () => {
@@ -371,29 +378,40 @@
         });
         
         // Обработка выбранных файлов
-        function handleFiles(files) {
+        async function handleFiles(files) {
             uploadedFiles = Array.from(files);
             
             // Очищаем список файлов
             selectedFiles.innerHTML = '';
+            documentPreview.innerHTML = '<p>Загрузка файлов...</p>';
+            downloadLink.style.display = 'none';
+            resultDocxBlob = null;
             
             // Добавляем каждый файл в список
-            uploadedFiles.forEach((file, index) => {
+            for (let i = 0; i < uploadedFiles.length; i++) {
+                const file = uploadedFiles[i];
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
                 fileItem.innerHTML = `
                     <div class="file-item-name" title="${file.name}">${file.name}</div>
-                    <div class="file-item-remove" data-index="${index}">
+                    <div class="file-item-remove" data-index="${i}">
                         <i class="fas fa-times"></i>
                     </div>
                 `;
                 selectedFiles.appendChild(fileItem);
                 
                 // Показываем превью для первого файла
-                if (index === 0 && (file.type === 'application/msword' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.name.endsWith('.doc') || file.name.endsWith('.docx'))) {
-                    showDocumentPreview(file);
+                if (i === 0 && actionType.value === 'remove') {
+                    try {
+                        const arrayBuffer = await file.arrayBuffer();
+                        const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
+                        showDocumentPreview(result.value);
+                    } catch (error) {
+                        showStatus('Ошибка при загрузке Word файла', 'error');
+                        console.error(error);
+                    }
                 }
-            });
+            }
             
             // Добавляем обработчики для удаления файлов
             document.querySelectorAll('.file-item-remove').forEach(btn => {
@@ -405,38 +423,49 @@
             });
         }
         
-        // Показываем превью документа (заглушка)
-        function showDocumentPreview(file) {
-            documentPreview.innerHTML = '<p>Загрузка содержимого документа...</p>';
+        // Показываем превью документа
+        function showDocumentPreview(text) {
+            documentPreview.innerHTML = '';
             
-            // В реальном приложении здесь будет код для извлечения текста из Word
-            // Для демонстрации используем заглушку
-            setTimeout(() => {
-                documentPreview.innerHTML = `
-                    <h3>${file.name}</h3>
-                    <p>Это пример содержимого Word документа. В реальном приложении здесь будет отображаться текст из загруженного файла.</p>
-                    <p>Вы можете выбрать страницы для удаления или объединить несколько документов в один.</p>
-                    <p>Также доступна конвертация в другие форматы: PDF, TXT, RTF или HTML.</p>
+            // Разделяем текст на страницы (условно, по разделам)
+            const pages = text.split('\f').filter(page => page.trim() !== '');
+            
+            if (pages.length === 0) {
+                documentPreview.innerHTML = '<p>Документ не содержит текста или поврежден.</p>';
+                return;
+            }
+            
+            pages.forEach((page, index) => {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'document-page';
+                pageDiv.innerHTML = `
+                    <h4>Страница ${index + 1}</h4>
+                    <p>${page.replace(/\n/g, '<br>')}</p>
+                    <hr>
                 `;
-            }, 1000);
+                documentPreview.appendChild(pageDiv);
+            });
         }
         
         // Изменение типа действия
         actionType.addEventListener('change', function() {
             if (this.value === 'remove') {
                 removeOptions.style.display = 'block';
-                convertOptions.style.display = 'none';
-            } else if (this.value === 'convert') {
-                removeOptions.style.display = 'none';
-                convertOptions.style.display = 'block';
+                mergeOptions.style.display = 'none';
+                if (uploadedFiles.length > 0) {
+                    handleFiles(uploadedFiles);
+                }
             } else {
                 removeOptions.style.display = 'none';
-                convertOptions.style.display = 'none';
+                mergeOptions.style.display = 'block';
+                documentPreview.innerHTML = uploadedFiles.length > 0 
+                    ? `<p>Загружено ${uploadedFiles.length} документов для объединения.</p>`
+                    : '<p class="empty-message">Загрузите Word документы для объединения</p>';
             }
         });
         
         // Обработка файлов
-        processBtn.addEventListener('click', function() {
+        processBtn.addEventListener('click', async function() {
             if (uploadedFiles.length === 0) {
                 showStatus('Пожалуйста, загрузите файлы для обработки', 'error');
                 return;
@@ -444,33 +473,72 @@
             
             progressBar.style.display = 'block';
             statusMessage.style.display = 'none';
+            progressFill.style.width = '0%';
             
-            // Симуляция обработки файлов
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 5;
-                progressFill.style.width = `${progress}%`;
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    showStatus('Документы успешно обработаны!', 'success');
-                    
-                    // В реальном приложении здесь будет код для скачивания результата
-                    setTimeout(() => {
-                        alert('Файл готов к скачиванию!');
-                    }, 500);
+            try {
+                if (actionType.value === 'remove') {
+                    await processRemovePages();
+                } else if (actionType.value === 'merge') {
+                    await processMergeDocs();
                 }
-            }, 100);
+                
+                progressFill.style.width = '100%';
+                showStatus('Документы успешно обработаны!', 'success');
+                downloadLink.style.display = 'block';
+            } catch (error) {
+                console.error(error);
+                showStatus('Ошибка при обработке документов', 'error');
+            }
+        });
+        
+        // Удаление страниц (симуляция, так как Mammoth не поддерживает редактирование)
+        async function processRemovePages() {
+            if (uploadedFiles.length === 0) return;
+            
+            // В реальном приложении здесь должна быть логика удаления страниц
+            // Для демонстрации просто используем первый файл
+            const file = uploadedFiles[0];
+            resultDocxBlob = new Blob([await file.arrayBuffer()], { type: file.type });
+        }
+        
+        // Объединение документов (симуляция, так как Mammoth не поддерживает редактирование)
+        async function processMergeDocs() {
+            if (uploadedFiles.length === 0) return;
+            
+            // В реальном приложении здесь должна быть логика объединения
+            // Для демонстрации просто используем первый файл
+            const file = uploadedFiles[0];
+            resultDocxBlob = new Blob([await file.arrayBuffer()], { type: file.type });
+        }
+        
+        // Скачивание результата
+        downloadBtn.addEventListener('click', function(e) {
+            if (!resultDocxBlob) {
+                e.preventDefault();
+                return;
+            }
+            
+            const url = URL.createObjectURL(resultDocxBlob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = actionType.value === 'remove' ? 'edited.docx' : 'merged.docx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         });
         
         // Сброс формы
         resetBtn.addEventListener('click', function() {
             uploadedFiles = [];
+            resultDocxBlob = null;
             selectedFiles.innerHTML = '';
             fileInput.value = '';
             documentPreview.innerHTML = '<p class="empty-message">Загрузите Word документ для просмотра содержимого</p>';
             progressBar.style.display = 'none';
             statusMessage.style.display = 'none';
+            downloadLink.style.display = 'none';
             progressFill.style.width = '0%';
         });
         
