@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
     <style>
+        /* Стили остаются такими же как в предыдущей версии */
         .tool-container {
             max-width: 800px;
             margin: 2rem auto;
@@ -201,9 +202,25 @@
             margin-top: 1rem;
             text-align: center;
         }
+        
+        .file-order {
+            display: flex;
+            align-items: center;
+            margin-left: 1rem;
+        }
+        
+        .file-order button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--primary-color);
+            font-size: 1rem;
+            margin: 0 0.25rem;
+        }
     </style>
 </head>
 <body>
+    <!-- Шапка остается без изменений -->
     <header class="header">
         <div class="container">
             <div class="header-container">
@@ -278,7 +295,7 @@
                         </div>
                         
                         <div class="option-group" id="mergeOptions" style="display: none;">
-                            <p>Будут объединены все загруженные PDF файлы в порядке их загрузки.</p>
+                            <p>Укажите порядок объединения файлов (используйте кнопки для изменения порядка):</p>
                         </div>
                     </div>
                     
@@ -301,6 +318,7 @@
         </section>
     </main>
 
+    <!-- Подвал остается без изменений -->
     <footer class="footer">
         <div class="container">
             <div class="footer-container">
@@ -421,8 +439,10 @@
                 fileItem.className = 'file-item';
                 fileItem.innerHTML = `
                     <div class="file-item-name" title="${file.name}">${file.name}</div>
-                    <div class="file-item-remove" data-index="${i}">
-                        <i class="fas fa-times"></i>
+                    <div class="file-order">
+                        <button class="move-up" data-index="${i}"><i class="fas fa-arrow-up"></i></button>
+                        <button class="move-down" data-index="${i}"><i class="fas fa-arrow-down"></i></button>
+                        <button class="file-item-remove" data-index="${i}"><i class="fas fa-times"></i></button>
                     </div>
                 `;
                 selectedFiles.appendChild(fileItem);
@@ -456,13 +476,33 @@
                 }
             }
             
-            // Добавляем обработчики для удаления файлов
+            // Добавляем обработчики для управления файлами
             document.querySelectorAll('.file-item-remove').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const index = parseInt(e.currentTarget.getAttribute('data-index'));
                     uploadedFiles.splice(index, 1);
                     pdfDocuments.splice(index, 1);
                     handleFiles(uploadedFiles);
+                });
+            });
+            
+            document.querySelectorAll('.move-up').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                    if (index > 0) {
+                        [uploadedFiles[index], uploadedFiles[index - 1]] = [uploadedFiles[index - 1], uploadedFiles[index]];
+                        handleFiles(uploadedFiles);
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.move-down').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                    if (index < uploadedFiles.length - 1) {
+                        [uploadedFiles[index], uploadedFiles[index + 1]] = [uploadedFiles[index + 1], uploadedFiles[index]];
+                        handleFiles(uploadedFiles);
+                    }
                 });
             });
         }
