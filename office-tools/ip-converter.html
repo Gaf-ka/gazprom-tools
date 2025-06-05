@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конвертер IP - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .converter-section {
+            padding: 40px 0;
+        }
+        
+        .converter-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .converter-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .converter-box {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+        }
+        
+        .converter-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-dark);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .converter-result {
+            background-color: #f8f8f8;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            font-family: monospace;
+            min-height: 60px;
+        }
+        
+        .subnet-mask-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .subnet-mask-selector button {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            background-color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .subnet-mask-selector button:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary-color);
+        }
+        
+        .ip-binary {
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+        
+        .ip-segment {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .ip-info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .ip-info-table th, .ip-info-table td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        
+        .ip-info-table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Конвертер IP</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Конвертер IP-адресов</h1>
+                <p class="section-subtitle">Преобразование IP-адресов между различными форматами и расчет параметров подсетей</p>
+            </div>
+        </section>
+
+        <section class="converter-section">
+            <div class="container">
+                <div class="converter-container">
+                    <div class="converter-box">
+                        <h2 class="converter-title">Конвертер IP-адресов</h2>
+                        
+                        <div class="form-group">
+                            <label for="ip-address">IP-адрес</label>
+                            <input type="text" id="ip-address" placeholder="192.168.1.1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subnet-mask">Маска подсети</label>
+                            <input type="text" id="subnet-mask" placeholder="255.255.255.0 или /24">
+                            
+                            <div class="subnet-mask-selector">
+                                <button data-mask="255.255.255.0">/24</button>
+                                <button data-mask="255.255.0.0">/16</button>
+                                <button data-mask="255.0.0.0">/8</button>
+                                <button data-mask="255.255.255.128">/25</button>
+                                <button data-mask="255.255.255.192">/26</button>
+                                <button data-mask="255.255.255.224">/27</button>
+                                <button data-mask="255.255.255.240">/28</button>
+                                <button data-mask="255.255.255.248">/29</button>
+                                <button data-mask="255.255.255.252">/30</button>
+                                <button data-mask="255.255.254.0">/23</button>
+                                <button data-mask="255.255.252.0">/22</button>
+                                <button data-mask="255.255.248.0">/21</button>
+                            </div>
+                        </div>
+                        
+                        <button id="convert-ip" class="btn btn-primary">Конвертировать</button>
+                        
+                        <div class="converter-result" id="ip-result">
+                            Введите IP-адрес и маску подсети для получения информации
+                        </div>
+                    </div>
+                    
+                    <div class="converter-box">
+                        <h2 class="converter-title">Информация о подсети</h2>
+                        
+                        <div class="form-group">
+                            <label for="network-address">Адрес сети</label>
+                            <input type="text" id="network-address" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="broadcast-address">Широковещательный адрес</label>
+                            <input type="text" id="broadcast-address" readonly>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="first-host">Первый хост</label>
+                                <input type="text" id="first-host" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="last-host">Последний хост</label>
+                                <input type="text" id="last-host" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="hosts-count">Количество хостов</label>
+                            <input type="text" id="hosts-count" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>IP-адрес в двоичном виде</label>
+                            <div class="converter-result ip-binary" id="ip-binary"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Маска подсети в двоичном виде</label>
+                            <div class="converter-result ip-binary" id="mask-binary"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="converter-box" style="margin-top: 2rem;">
+                    <h2 class="converter-title">Дополнительная информация</h2>
+                    
+                    <table class="ip-info-table">
+                        <thead>
+                            <tr>
+                                <th>Тип адреса</th>
+                                <th>Диапазон</th>
+                                <th>Назначение</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Class A</td>
+                                <td>1.0.0.0 - 126.255.255.255</td>
+                                <td>Крупные сети</td>
+                            </tr>
+                            <tr>
+                                <td>Class B</td>
+                                <td>128.0.0.0 - 191.255.255.255</td>
+                                <td>Средние сети</td>
+                            </tr>
+                            <tr>
+                                <td>Class C</td>
+                                <td>192.0.0.0 - 223.255.255.255</td>
+                                <td>Малые сети</td>
+                            </tr>
+                            <tr>
+                                <td>Class D</td>
+                                <td>224.0.0.0 - 239.255.255.255</td>
+                                <td>Многоадресная рассылка</td>
+                            </tr>
+                            <tr>
+                                <td>Class E</td>
+                                <td>240.0.0.0 - 255.255.255.255</td>
+                                <td>Экспериментальные</td>
+                            </tr>
+                            <tr>
+                                <td>Private A</td>
+                                <td>10.0.0.0 - 10.255.255.255</td>
+                                <td>Локальные сети</td>
+                            </tr>
+                            <tr>
+                                <td>Private B</td>
+                                <td>172.16.0.0 - 172.31.255.255</td>
+                                <td>Локальные сети</td>
+                            </tr>
+                            <tr>
+                                <td>Private C</td>
+                                <td>192.168.0.0 - 192.168.255.255</td>
+                                <td>Локальные сети</td>
+                            </tr>
+                            <tr>
+                                <td>Loopback</td>
+                                <td>127.0.0.0 - 127.255.255.255</td>
+                                <td>Локальный интерфейс</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="../visualization/index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Helper functions for IP conversion
+        function ipToBinary(ip) {
+            return ip.split('.').map(octet => {
+                return parseInt(octet).toString(2).padStart(8, '0');
+            }).join('.');
+        }
+        
+        function isValidIP(ip) {
+            const octets = ip.split('.');
+            if (octets.length !== 4) return false;
+            
+            for (const octet of octets) {
+                const num = parseInt(octet);
+                if (isNaN(num) || num < 0 || num > 255) return false;
+            }
+            
+            return true;
+        }
+        
+        function isValidMask(mask) {
+            // Check for CIDR notation
+            if (mask.startsWith('/')) {
+                const cidr = parseInt(mask.substring(1));
+                return !isNaN(cidr) && cidr >= 0 && cidr <= 32;
+            }
+            
+            // Check for dotted decimal notation
+            if (!isValidIP(mask)) return false;
+            
+            // Check if mask is valid (continuous 1s followed by 0s)
+            const binary = mask.split('.').map(octet => {
+                return parseInt(octet).toString(2).padStart(8, '0');
+            }).join('');
+            
+            let foundZero = false;
+            for (const bit of binary) {
+                if (bit === '0') foundZero = true;
+                else if (foundZero && bit === '1') return false;
+            }
+            
+            return true;
+        }
+        
+        function cidrToMask(cidr) {
+            cidr = parseInt(cidr);
+            if (isNaN(cidr) || cidr < 0 || cidr > 32) return '';
+            
+            let mask = [];
+            for (let i = 0; i < 4; i++) {
+                const bits = Math.min(8, Math.max(0, cidr - i * 8));
+                mask.push((256 - Math.pow(2, 8 - bits)) & 255);
+            }
+            
+            return mask.join('.');
+        }
+        
+        function maskToCidr(mask) {
+            if (mask.startsWith('/')) return mask.substring(1);
+            
+            const binary = mask.split('.').map(octet => {
+                return parseInt(octet).toString(2).padStart(8, '0');
+            }).join('');
+            
+            return binary.split('1').length - 1;
+        }
+        
+        function calculateNetwork(ip, mask) {
+            const ipParts = ip.split('.').map(Number);
+            const maskParts = mask.split('.').map(Number);
+            
+            const networkParts = ipParts.map((part, i) => part & maskParts[i]);
+            return networkParts.join('.');
+        }
+        
+        function calculateBroadcast(ip, mask) {
+            const ipParts = ip.split('.').map(Number);
+            const maskParts = mask.split('.').map(Number);
+            
+            const broadcastParts = ipParts.map((part, i) => part | (255 - maskParts[i]));
+            return broadcastParts.join('.');
+        }
+        
+        function calculateHostRange(network, broadcast) {
+            const networkParts = network.split('.').map(Number);
+            const broadcastParts = broadcast.split('.').map(Number);
+            
+            // First host is network + 1
+            const firstParts = [...networkParts];
+            firstParts[3] += 1;
+            
+            // Last host is broadcast - 1
+            const lastParts = [...broadcastParts];
+            lastParts[3] -= 1;
+            
+            return {
+                first: firstParts.join('.'),
+                last: lastParts.join('.')
+            };
+        }
+        
+        function calculateHostCount(mask) {
+            const cidr = maskToCidr(mask);
+            return Math.pow(2, 32 - cidr) - 2;
+        }
+        
+        // Event listeners
+        document.getElementById('convert-ip').addEventListener('click', () => {
+            const ip = document.getElementById('ip-address').value.trim();
+            let mask = document.getElementById('subnet-mask').value.trim();
+            
+            if (!isValidIP(ip)) {
+                document.getElementById('ip-result').textContent = 'Ошибка: Неверный формат IP-адреса';
+                return;
+            }
+            
+            // Convert CIDR to dotted decimal if needed
+            if (mask.startsWith('/')) {
+                const cidr = mask.substring(1);
+                mask = cidrToMask(cidr);
+                document.getElementById('subnet-mask').value = mask;
+            }
+            
+            if (!isValidMask(mask)) {
+                document.getElementById('ip-result').textContent = 'Ошибка: Неверный формат маски подсети';
+                return;
+            }
+            
+            // Calculate network info
+            const network = calculateNetwork(ip, mask);
+            const broadcast = calculateBroadcast(ip, mask);
+            const hostRange = calculateHostRange(network, broadcast);
+            const hostCount = calculateHostCount(mask);
+            
+            // Update results
+            document.getElementById('network-address').value = network;
+            document.getElementById('broadcast-address').value = broadcast;
+            document.getElementById('first-host').value = hostRange.first;
+            document.getElementById('last-host').value = hostRange.last;
+            document.getElementById('hosts-count').value = hostCount > 0 ? hostCount : 'N/A';
+            
+            // Binary representations
+            document.getElementById('ip-binary').innerHTML = ipToBinary(ip).split('.').map(octet => 
+                `<span class="ip-segment">${octet}</span>`
+            ).join('.');
+            
+            document.getElementById('mask-binary').innerHTML = ipToBinary(mask).split('.').map(octet => 
+                `<span class="ip-segment">${octet}</span>`
+            ).join('.');
+            
+            // IP class info
+            const firstOctet = parseInt(ip.split('.')[0]);
+            let ipClass = '';
+            let ipType = 'Public';
+            
+            if (firstOctet >= 1 && firstOctet <= 126) ipClass = 'A';
+            else if (firstOctet >= 128 && firstOctet <= 191) ipClass = 'B';
+            else if (firstOctet >= 192 && firstOctet <= 223) ipClass = 'C';
+            else if (firstOctet >= 224 && firstOctet <= 239) ipClass = 'D';
+            else if (firstOctet >= 240 && firstOctet <= 255) ipClass = 'E';
+            
+            // Check for private IPs
+            if (ip.startsWith('10.')) ipType = 'Private';
+            else if (ip.startsWith('172.')) {
+                const secondOctet = parseInt(ip.split('.')[1]);
+                if (secondOctet >= 16 && secondOctet <= 31) ipType = 'Private';
+            }
+            else if (ip.startsWith('192.168.')) ipType = 'Private';
+            else if (ip.startsWith('127.')) ipType = 'Loopback';
+            
+            document.getElementById('ip-result').innerHTML = `
+                IP-адрес: <strong>${ip}</strong><br>
+                Маска подсети: <strong>${mask} (/${maskToCidr(mask)})</strong><br>
+                Класс адреса: <strong>${ipClass}</strong><br>
+                Тип адреса: <strong>${ipType}</strong>
+            `;
+        });
+        
+        // Subnet mask buttons
+        document.querySelectorAll('.subnet-mask-selector button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.getElementById('subnet-mask').value = button.getAttribute('data-mask');
+            });
+        });
+        
+        // Auto-convert when CIDR is entered
+        document.getElementById('subnet-mask').addEventListener('change', function() {
+            if (this.value.startsWith('/')) {
+                const mask = cidrToMask(this.value.substring(1));
+                if (mask) this.value = mask;
+            }
+        });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
