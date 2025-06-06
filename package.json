@@ -1,0 +1,11 @@
+{
+  "name": "gazprom-tools",
+  "version": "1.0.0",
+  "description": "Internal portal for Gazprom",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "replace-in-file": "^6.3.5"
+  }
+}

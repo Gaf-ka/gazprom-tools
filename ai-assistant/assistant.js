@@ -17,8 +17,8 @@ const defaultAnswers = [
     "Информация по вашему вопросу может быть доступна в других разделах портала."
 ];
 
-// Проверяем, есть ли API ключ в переменных окружения (для локальной разработки)
-const API_KEY = process.env.OPENAI_API_KEY || '';
+// API ключ будет заменен во время сборки GitHub Actions
+const API_KEY = "{{OPENAI_API_KEY}}";
 
 // Отправка сообщения
 async function sendMessage() {
@@ -27,24 +27,18 @@ async function sendMessage() {
     
     if (message === '') return;
     
-    // Добавляем сообщение пользователя в чат
     addMessage(message, 'user');
     userInput.value = '';
     
-    // Показываем индикатор набора сообщения
     showTypingIndicator();
     
     try {
-        // Получаем ответ
         const response = await getResponse(message);
-        
-        // Добавляем ответ в чат
         addMessage(response, 'assistant');
     } catch (error) {
         console.error('Ошибка при получении ответа:', error);
         addMessage("Произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте позже.", 'assistant');
     } finally {
-        // Убираем индикатор набора
         hideTypingIndicator();
     }
 }
@@ -101,7 +95,6 @@ function hideTypingIndicator() {
 
 // Получение ответа от помощника
 async function getResponse(question) {
-    // Приводим вопрос к нижнему регистру для поиска
     const lowerQuestion = question.toLowerCase();
     
     // Ищем точное совпадение в базе знаний
@@ -111,12 +104,12 @@ async function getResponse(question) {
         }
     }
     
-    // Если точного совпадения нет и есть API ключ, используем нейросеть
-    if (API_KEY) {
+    // Проверяем, что API_KEY был заменен (не содержит шаблонных скобок)
+    if (API_KEY && API_KEY !== "{{OPENAI_API_KEY}}") {
         return await getAIResponse(question);
     }
     
-    // Если API ключа нет, возвращаем случайный общий ответ
+    // Если API ключа нет или он не был заменен, возвращаем случайный общий ответ
     return defaultAnswers[Math.floor(Math.random() * defaultAnswers.length)];
 }
 
@@ -157,3 +150,18 @@ async function getAIResponse(question) {
         return "Произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте позже.";
     }
 }
+
+// Инициализация чата при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Добавляем приветственное сообщение, если чат пуст
+    const chatMessages = document.getElementById('chat-messages');
+    if (chatMessages.children.length === 0) {
+        addMessage("Здравствуйте! Я ваш виртуальный помощник. Могу ответить на вопросы о работе компании, внутренних инструментах и документах. Чем могу помочь?", 'assistant');
+    }
+    
+    // Назначаем обработчик для кнопки отправки
+    document.querySelector('.assistant-input button').addEventListener('click', sendMessage);
+    
+    // Назначаем обработчик для поля ввода
+    document.getElementById('user-input').addEventListener('keypress', handleKeyPress);
+});
