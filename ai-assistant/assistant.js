@@ -1,4 +1,4 @@
-// База знаний помощника
+// База знаний помощника (для быстрых ответов)
 const knowledgeBase = {
     "как пользоваться калькулятором": "Калькулятор находится в разделе 'Офисные инструменты'. Вы можете выполнять базовые арифметические операции, а также финансовые расчеты.",
     "техника безопасности": "Подробную информацию о технике безопасности вы можете найти в тренажере по технике безопасности в разделе 'Тренажёры'.",
@@ -9,68 +9,31 @@ const knowledgeBase = {
     "что такое газпром": "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти."
 };
 
-// Общие фразы, если вопрос не найден
-const defaultAnswers = [
-    "Извините, я не совсем понял ваш вопрос. Можете переформулировать?",
-    "Уточните, пожалуйста, ваш вопрос.",
-    "Я пока не могу ответить на этот вопрос. Попробуйте задать его иначе.",
-    "Информация по вашему вопросу может быть доступна в других разделах портала."
-];
-
-// API ключ будет заменен во время сборки GitHub Actions
+// API ключ (будет заменен GitHub Actions)
 const API_KEY = "{{OPENAI_API_KEY}}";
 
-// Отправка сообщения
-async function sendMessage() {
-    const userInput = document.getElementById('user-input');
-    const message = userInput.value.trim();
-    
-    if (message === '') return;
-    
-    addMessage(message, 'user');
-    userInput.value = '';
-    
-    showTypingIndicator();
-    
-    try {
-        const response = await getResponse(message);
-        addMessage(response, 'assistant');
-    } catch (error) {
-        console.error('Ошибка при получении ответа:', error);
-        addMessage("Произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте позже.", 'assistant');
-    } finally {
-        hideTypingIndicator();
-    }
-}
+// Элементы интерфейса
+const chatMessages = document.getElementById('chat-messages');
+const userInput = document.getElementById('user-input');
 
-// Обработка быстрых вопросов
-function askQuickQuestion(question) {
-    document.getElementById('user-input').value = question;
-    sendMessage();
-}
-
-// Обработка нажатия Enter
-function handleKeyPress(event) {
-    if (event.key === 'Enter') {
-        sendMessage();
+// Инициализация чата
+function initChat() {
+    if (chatMessages.children.length <= 1) {
+        addMessage("Здравствуйте! Я ваш виртуальный помощник. Могу ответить на вопросы о работе компании, внутренних инструментах и документах. Чем могу помочь?", 'assistant');
     }
 }
 
 // Добавление сообщения в чат
 function addMessage(text, sender) {
-    const chatMessages = document.getElementById('chat-messages');
     const messageElement = document.createElement('div');
     messageElement.className = `message ${sender}-message`;
     messageElement.textContent = text;
     chatMessages.appendChild(messageElement);
-    
-    // Прокрутка вниз
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Показать индикатор набора сообщения
+// Показать индикатор набора
 function showTypingIndicator() {
-    const chatMessages = document.getElementById('chat-messages');
     const typingElement = document.createElement('div');
     typingElement.className = 'typing-indicator';
     typingElement.id = 'typing-indicator';
@@ -80,40 +43,27 @@ function showTypingIndicator() {
         <div class="typing-dot"></div>
     `;
     chatMessages.appendChild(typingElement);
-    
-    // Прокрутка вниз
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Скрыть индикатор набора сообщения
+// Скрыть индикатор набора
 function hideTypingIndicator() {
     const typingElement = document.getElementById('typing-indicator');
-    if (typingElement) {
-        typingElement.remove();
-    }
+    if (typingElement) typingElement.remove();
 }
 
-// Получение ответа от помощника
-async function getResponse(question) {
+// Проверка быстрых вопросов
+function checkQuickQuestions(question) {
     const lowerQuestion = question.toLowerCase();
-    
-    // Ищем точное совпадение в базе знаний
     for (const [key, value] of Object.entries(knowledgeBase)) {
         if (lowerQuestion.includes(key.toLowerCase())) {
             return value;
         }
     }
-    
-    // Проверяем, что API_KEY был заменен (не содержит шаблонных скобок)
-    if (API_KEY && API_KEY !== "{{OPENAI_API_KEY}}") {
-        return await getAIResponse(question);
-    }
-    
-    // Если API ключа нет или он не был заменен, возвращаем случайный общий ответ
-    return defaultAnswers[Math.floor(Math.random() * defaultAnswers.length)];
+    return null;
 }
 
-// Получение ответа от нейросети
+// Отправка запроса к OpenAI
 async function getAIResponse(question) {
     try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -127,7 +77,7 @@ async function getAIResponse(question) {
                 messages: [
                     {
                         role: "system",
-                        content: "Ты помощник в компании Газпром. Отвечай кратко и по делу на русском языке. Если вопрос не связан с работой компании, вежливо откажись отвечать."
+                        content: "Ты помощник в компании Газпром. Отвечай кратко и по делу на русском языке. Если вопрос не связан с работой компании, вежливо откажись отвечать. Отвечай только по работе компании и её инструментам."
                     },
                     {
                         role: "user",
@@ -140,28 +90,65 @@ async function getAIResponse(question) {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Ошибка API: ${response.status}`);
         }
 
         const data = await response.json();
         return data.choices[0].message.content.trim();
     } catch (error) {
-        console.error('Error fetching AI response:', error);
-        return "Произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте позже.";
+        console.error('Ошибка OpenAI:', error);
+        return "Извините, произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте позже.";
     }
 }
 
-// Инициализация чата при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    // Добавляем приветственное сообщение, если чат пуст
-    const chatMessages = document.getElementById('chat-messages');
-    if (chatMessages.children.length === 0) {
-        addMessage("Здравствуйте! Я ваш виртуальный помощник. Могу ответить на вопросы о работе компании, внутренних инструментах и документах. Чем могу помочь?", 'assistant');
+// Обработка отправки сообщения
+async function sendMessage() {
+    const message = userInput.value.trim();
+    if (!message) return;
+    
+    userInput.value = '';
+    addMessage(message, 'user');
+    showTypingIndicator();
+    
+    try {
+        // Сначала проверяем быстрые вопросы
+        const quickAnswer = checkQuickQuestions(message);
+        if (quickAnswer) {
+            addMessage(quickAnswer, 'assistant');
+            return;
+        }
+        
+        // Если API ключ заменен (не шаблонный)
+        if (API_KEY && API_KEY !== "{{OPENAI_API_KEY}}") {
+            const aiResponse = await getAIResponse(message);
+            addMessage(aiResponse, 'assistant');
+        } else {
+            addMessage("Извините, сервис временно недоступен. Попробуйте задать другой вопрос.", 'assistant');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        addMessage("Произошла ошибка при обработке запроса. Пожалуйста, попробуйте позже.", 'assistant');
+    } finally {
+        hideTypingIndicator();
     }
+}
+
+// Быстрый вопрос
+function askQuickQuestion(question) {
+    userInput.value = question;
+    sendMessage();
+}
+
+// Обработка нажатия Enter
+function handleKeyPress(event) {
+    if (event.key === 'Enter') sendMessage();
+}
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    initChat();
     
-    // Назначаем обработчик для кнопки отправки
+    // Назначение обработчиков
     document.querySelector('.assistant-input button').addEventListener('click', sendMessage);
-    
-    // Назначаем обработчик для поля ввода
-    document.getElementById('user-input').addEventListener('keypress', handleKeyPress);
+    userInput.addEventListener('keypress', handleKeyPress);
 });
