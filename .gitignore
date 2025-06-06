@@ -7,7 +7,7 @@
 config.js
 # Логи
 *.log
-
+env
 # IDE
 .vscode
 .idea
