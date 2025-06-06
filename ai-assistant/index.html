@@ -60,6 +60,13 @@
                 <div class="message assistant-message">
                     Здравствуйте! Я ваш виртуальный помощник. Могу ответить на вопросы о работе компании, внутренних инструментах и документах. Чем могу помочь?
                 </div>
+                <div class="quick-questions">
+                    <p>Вы можете быстро спросить:</p>
+                    <button class="quick-question" onclick="sendQuickQuestion('Как пользоваться калькулятором?')">Как пользоваться калькулятором?</button>
+                    <button class="quick-question" onclick="sendQuickQuestion('Где найти информацию по технике безопасности?')">Где найти информацию по технике безопасности?</button>
+                    <button class="quick-question" onclick="sendQuickQuestion('Как создать отчет?')">Как создать отчет?</button>
+                    <button class="quick-question" onclick="sendQuickQuestion('Контакты службы поддержки')">Контакты службы поддержки</button>
+                </div>
             </div>
             
             <div class="assistant-input">
@@ -120,7 +127,6 @@
     <script>
         // База знаний помощника
         const knowledgeBase = {
-            "привет": "Здравствуйте! Чем могу помочь?",
             "как пользоваться калькулятором": "Калькулятор находится в разделе 'Офисные инструменты'. Вы можете выполнять базовые арифметические операции, а также финансовые расчеты.",
             "техника безопасности": "Подробную информацию о технике безопасности вы можете найти в тренажере по технике безопасности в разделе 'Тренажёры'.",
             "визуализация данных": "В разделе 'Визуализация данных' вы можете создавать графики и диаграммы. Доступны линейные, столбчатые, круговые и кольцевые диаграммы.",
@@ -138,8 +144,18 @@
             "Информация по вашему вопросу может быть доступна в других разделах портала."
         ];
         
+        // API ключ для OpenAI
+        const OPENAI_API_KEY = "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";
+        
+        // Отправка быстрого вопроса
+        function sendQuickQuestion(question) {
+            const userInput = document.getElementById('user-input');
+            userInput.value = question;
+            sendMessage();
+        }
+        
         // Отправка сообщения
-        function sendMessage() {
+        async function sendMessage() {
             const userInput = document.getElementById('user-input');
             const message = userInput.value.trim();
             
@@ -152,17 +168,27 @@
             // Показываем индикатор набора сообщения
             showTypingIndicator();
             
-            // Имитация задержки ответа
-            setTimeout(() => {
-                // Убираем индикатор набора
+            try {
+                // Проверяем, есть ли ответ в базе знаний
+                const quickResponse = getQuickResponse(message);
+                
+                if (quickResponse) {
+                    // Если есть быстрый ответ - используем его
+                    setTimeout(() => {
+                        hideTypingIndicator();
+                        addMessage(quickResponse, 'assistant');
+                    }, 500);
+                } else {
+                    // Если нет - обращаемся к нейросети
+                    const aiResponse = await getAIResponse(message);
+                    hideTypingIndicator();
+                    addMessage(aiResponse, 'assistant');
+                }
+            } catch (error) {
                 hideTypingIndicator();
-                
-                // Получаем ответ
-                const response = getResponse(message);
-                
-                // Добавляем ответ в чат
-                addMessage(response, 'assistant');
-            }, 1000 + Math.random() * 2000);
+                addMessage("Произошла ошибка при обращении к сервису. Попробуйте позже.", 'assistant');
+                console.error("Ошибка при запросе к API:", error);
+            }
         }
         
         // Обработка нажатия Enter
@@ -209,9 +235,8 @@
             }
         }
         
-        // Получение ответа от помощника
-        function getResponse(question) {
-            // Приводим вопрос к нижнему регистру для поиска
+        // Получение быстрого ответа из базы знаний
+        function getQuickResponse(question) {
             const lowerQuestion = question.toLowerCase();
             
             // Ищем точное совпадение в базе знаний
@@ -221,8 +246,46 @@
                 }
             }
             
-            // Если точного совпадения нет, возвращаем случайный общий ответ
-            return defaultAnswers[Math.floor(Math.random() * defaultAnswers.length)];
+            return null;
+        }
+        
+        // Получение ответа от нейросети
+        async function getAIResponse(question) {
+            try {
+                const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-3.5-turbo",
+                        messages: [
+                            {
+                                role: "system",
+                                content: "Ты помощник в компании Газпром. Отвечай кратко и по делу на русском языке. Если вопрос не связан с работой компании, вежливо сообщи, что можешь отвечать только на вопросы, связанные с деятельностью Газпрома."
+                            },
+                            {
+                                role: "user",
+                                content: question
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 500
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    return data.choices[0].message.content;
+                } else {
+                    return defaultAnswers[Math.floor(Math.random() * defaultAnswers.length)];
+                }
+            } catch (error) {
+                console.error("Ошибка при запросе к OpenAI API:", error);
+                return "Произошла ошибка при обработке запроса. Пожалуйста, попробуйте позже.";
+            }
         }
     </script>
 </body>
