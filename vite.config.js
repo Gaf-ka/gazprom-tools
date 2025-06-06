@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
 export default defineConfig({
-  base: '/', // Измените на имя вашего репозитория, если нужно
+  base: '/gazprom-tools', 
   build: {
     rollupOptions: {
       input: {
