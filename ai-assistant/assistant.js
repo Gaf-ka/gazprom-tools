@@ -10,7 +10,7 @@ const knowledgeBase = {
 };
 
 // API ключ (будет заменен GitHub Actions)
-const API_KEY = "{{OPENAI_API_KEY}}";
+const API_KEY = window.OPENAI_API_KEY || "{{OPENAI_API_KEY}}";
 
 // Элементы интерфейса
 const chatMessages = document.getElementById('chat-messages');
