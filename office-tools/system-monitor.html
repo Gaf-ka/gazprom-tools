@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Монитор ресурсов - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .monitor-section {
+            padding: 40px 0;
+        }
+        
+        .monitor-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .monitor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .monitor-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .monitor-box {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+        }
+        
+        .monitor-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-dark);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-item {
+            padding: 1rem;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+        }
+        
+        .info-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .process-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+        
+        .process-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .process-table th, .process-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .process-table th {
+            position: sticky;
+            top: 0;
+            background-color: var(--white);
+            font-weight: 500;
+        }
+        
+        .process-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .process-name {
+            font-weight: 500;
+        }
+        
+        .process-pid {
+            color: var(--dark-gray);
+            font-family: monospace;
+        }
+        
+        .process-cpu {
+            color: #e53935;
+        }
+        
+        .process-memory {
+            color: #3949ab;
+        }
+        
+        .sort-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .sort-header:hover {
+            color: var(--primary-color);
+        }
+        
+        .sort-icon {
+            margin-left: 5px;
+        }
+        
+        .refresh-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+        
+        .refresh-rate {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .refresh-rate select {
+            padding: 0.25rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Монитор ресурсов</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Монитор системных ресурсов</h1>
+                <p class="section-subtitle">Отслеживание использования процессора, памяти, диска и сетевых интерфейсов</p>
+            </div>
+        </section>
+
+        <section class="monitor-section">
+            <div class="container">
+                <div class="monitor-container">
+                    <div class="monitor-grid">
+                        <div class="monitor-box">
+                            <h2 class="monitor-title">Использование процессора</h2>
+                            
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Ядра</div>
+                                    <div class="info-value" id="cpu-cores">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Текущая загрузка</div>
+                                    <div class="info-value" id="cpu-usage">-</div>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-container">
+                                <canvas id="cpu-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="monitor-box">
+                            <h2 class="monitor-title">Использование памяти</h2>
+                            
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Всего памяти</div>
+                                    <div class="info-value" id="memory-total">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Используется</div>
+                                    <div class="info-value" id="memory-used">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Свободно</div>
+                                    <div class="info-value" id="memory-free">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Использование</div>
+                                    <div class="info-value" id="memory-percent">-</div>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-container">
+                                <canvas id="memory-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="monitor-box">
+                            <h2 class="monitor-title">Дисковое пространство</h2>
+                            
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Всего</div>
+                                    <div class="info-value" id="disk-total">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Используется</div>
+                                    <div class="info-value" id="disk-used">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Свободно</div>
+                                    <div class="info-value" id="disk-free">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Использование</div>
+                                    <div class="info-value" id="disk-percent">-</div>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-container">
+                                <canvas id="disk-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="monitor-box">
+                            <h2 class="monitor-title">Сетевая активность</h2>
+                            
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Входящий трафик</div>
+                                    <div class="info-value" id="network-in">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Исходящий трафик</div>
+                                    <div class="info-value" id="network-out">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Скорость входящая</div>
+                                    <div class="info-value" id="network-speed-in">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Скорость исходящая</div>
+                                    <div class="info-value" id="network-speed-out">-</div>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-container">
+                                <canvas id="network-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="monitor-box" style="margin-top: 2rem;">
+                        <div class="refresh-controls">
+                            <h2 class="monitor-title">Процессы</h2>
+                            <div class="refresh-rate">
+                                <span>Обновление:</span>
+                                <select id="refresh-interval">
+                                    <option value="1000">1 сек</option>
+                                    <option value="2000">2 сек</option>
+                                    <option value="5000" selected>5 сек</option>
+                                    <option value="10000">10 сек</option>
+                                </select>
+                                <button id="refresh-btn" class="btn btn-primary">Обновить</button>
+                            </div>
+                        </div>
+                        
+                        <div class="process-list">
+                            <table class="process-table">
+                                <thead>
+                                    <tr>
+                                        <th class="sort-header" data-sort="name">
+                                            Процесс <span class="sort-icon">↓</span>
+                                        </th>
+                                        <th class="sort-header" data-sort="pid">PID</th>
+                                        <th class="sort-header" data-sort="cpu">
+                                            ЦП, % <span class="sort-icon"></span>
+                                        </th>
+                                        <th class="sort-header" data-sort="memory">
+                                            Память <span class="sort-icon"></span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="process-list">
+                                    <tr>
+                                        <td colspan="4">Загрузка данных...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="../visualization/index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Charts
+        let cpuChart, memoryChart, diskChart, networkChart;
+        let cpuData = [], memoryData = [], diskData = [], networkInData = [], networkOutData = [];
+        const maxDataPoints = 30;
+        
+        // Process sorting
+        let sortColumn = 'cpu';
+        let sortDirection = 'desc';
+        
+        // Refresh interval
+        let refreshInterval = 5000;
+        let refreshTimer;
+        
+        // Initialize charts
+        function initCharts() {
+            // CPU Chart
+            const cpuCtx = document.getElementById('cpu-chart').getContext('2d');
+            cpuChart = new Chart(cpuCtx, {
+                type: 'line',
+                data: {
+                    labels: Array(maxDataPoints).fill(''),
+                    datasets: [{
+                        label: 'Использование ЦП',
+                        data: cpuData,
+                        borderColor: '#e53935',
+                        backgroundColor: 'rgba(229, 57, 53, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 0
+                    }
+                }
+            });
+            
+            // Memory Chart
+            const memoryCtx = document.getElementById('memory-chart').getContext('2d');
+            memoryChart = new Chart(memoryCtx, {
+                type: 'line',
+                data: {
+                    labels: Array(maxDataPoints).fill(''),
+                    datasets: [{
+                        label: 'Использование памяти',
+                        data: memoryData,
+                        borderColor: '#3949ab',
+                        backgroundColor: 'rgba(57, 73, 171, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 0
+                    }
+                }
+            });
+            
+            // Disk Chart
+            const diskCtx = document.getElementById('disk-chart').getContext('2d');
+            diskChart = new Chart(diskCtx, {
+                type: 'line',
+                data: {
+                    labels: Array(maxDataPoints).fill(''),
+                    datasets: [{
+                        label: 'Использование диска',
+                        data: diskData,
+                        borderColor: '#43a047',
+                        backgroundColor: 'rgba(67, 160, 71, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 0
+                    }
+                }
+            });
+            
+            // Network Chart
+            const networkCtx = document.getElementById('network-chart').getContext('2d');
+            networkChart = new Chart(networkCtx, {
+                type: 'line',
+                data: {
+                    labels: Array(maxDataPoints).fill(''),
+                    datasets: [
+                        {
+                            label: 'Входящий трафик',
+                            data: networkInData,
+                            borderColor: '#8e24aa',
+                            backgroundColor: 'rgba(142, 36, 170, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: 'Исходящий трафик',
+                            data: networkOutData,
+                            borderColor: '#fb8c00',
+                            backgroundColor: 'rgba(251, 140, 0, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatBytes(value) + '/s';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += formatBytes(context.parsed.y) + '/s';
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 0
+                    }
+                }
+            });
+            
+            // Initialize data arrays
+            for (let i = 0; i < maxDataPoints; i++) {
+                cpuData.push(0);
+                memoryData.push(0);
+                diskData.push(0);
+                networkInData.push(0);
+                networkOutData.push(0);
+            }
+        }
+        
+        // Format bytes to human readable
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 B';
+            
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+        
+        // Update system info
+        function updateSystemInfo() {
+            // Simulate data (in a real app, this would be API calls)
+            const cpuUsage = Math.min(100, Math.max(0, Math.random() * 30 + 10 + Math.sin(Date.now() / 5000) * 15));
+            const memoryTotal = 16 * 1024 * 1024 * 1024; // 16 GB
+            const memoryUsed = memoryTotal * (0.3 + Math.random() * 0.2);
+            const diskTotal = 500 * 1024 * 1024 * 1024; // 500 GB
+            const diskUsed = diskTotal * (0.4 + Math.random() * 0.1);
+            const networkIn = Math.random() * 5 * 1024 * 1024; // 0-5 MB
+            const networkOut = Math.random() * 2 * 1024 * 1024; // 0-2 MB
+            
+            // Update CPU info
+            document.getElementById('cpu-cores').textContent = navigator.hardwareConcurrency || '4';
+            document.getElementById('cpu-usage').textContent = cpuUsage.toFixed(1) + '%';
+            
+            // Update memory info
+            document.getElementById('memory-total').textContent = formatBytes(memoryTotal);
+            document.getElementById('memory-used').textContent = formatBytes(memoryUsed);
+            document.getElementById('memory-free').textContent = formatBytes(memoryTotal - memoryUsed);
+            const memoryPercent = (memoryUsed / memoryTotal * 100).toFixed(1);
+            document.getElementById('memory-percent').textContent = memoryPercent + '%';
+            
+            // Update disk info
+            document.getElementById('disk-total').textContent = formatBytes(diskTotal);
+            document.getElementById('disk-used').textContent = formatBytes(diskUsed);
+            document.getElementById('disk-free').textContent = formatBytes(diskTotal - diskUsed);
+            const diskPercent = (diskUsed / diskTotal * 100).toFixed(1);
+            document.getElementById('disk-percent').textContent = diskPercent + '%';
+            
+            // Update network info
+            document.getElementById('network-in').textContent = formatBytes(networkIn * 5);
+            document.getElementById('network-out').textContent = formatBytes(networkOut * 5);
+            document.getElementById('network-speed-in').textContent = formatBytes(networkIn) + '/s';
+            document.getElementById('network-speed-out').textContent = formatBytes(networkOut) + '/s';
+            
+            // Update charts
+            cpuData.push(cpuUsage);
+            cpuData.shift();
+            cpuChart.update();
+            
+            memoryData.push(memoryPercent);
+            memoryData.shift();
+            memoryChart.update();
+            
+            diskData.push(diskPercent);
+            diskData.shift();
+            diskChart.update();
+            
+            networkInData.push(networkIn);
+            networkInData.shift();
+            networkOutData.push(networkOut);
+            networkOutData.shift();
+            networkChart.update();
+            
+            // Update process list
+            updateProcessList();
+        }
+        
+        // Update process list
+        function updateProcessList() {
+            // Generate random processes
+            const processes = [];
+            const processNames = [
+                'chrome.exe', 'firefox.exe', 'explorer.exe', 'svchost.exe', 
+                'wininit.exe', 'lsass.exe', 'services.exe', 'System', 
+                'node.exe', 'mysqld.exe', 'nginx.exe', 'php-fpm.exe',
+                'java.exe', 'python.exe', 'powershell.exe', 'cmd.exe'
+            ];
+            
+            for (let i = 0; i < 20; i++) {
+                const name = processNames[Math.floor(Math.random() * processNames.length)];
+                const pid = Math.floor(Math.random() * 30000) + 1000;
+                const cpu = (Math.random() * 10).toFixed(1);
+                const memory = Math.floor(Math.random() * 500) + 10;
+                
+                processes.push({
+                    name: name,
+                    pid: pid,
+                    cpu: parseFloat(cpu),
+                    memory: memory * 1024 * 1024 // Convert to bytes
+                });
+            }
+            
+            // Sort processes
+            processes.sort((a, b) => {
+                if (sortDirection === 'asc') {
+                    return a[sortColumn] > b[sortColumn] ? 1 : -1;
+                } else {
+                    return a[sortColumn] < b[sortColumn] ? 1 : -1;
+                }
+            });
+            
+            // Render process list
+            const processList = document.getElementById('process-list');
+            processList.innerHTML = '';
+            
+            processes.forEach(process => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td class="process-name">${process.name}</td>
+                    <td class="process-pid">${process.pid}</td>
+                    <td class="process-cpu">${process.cpu}%</td>
+                    <td class="process-memory">${formatBytes(process.memory)}</td>
+                `;
+                
+                processList.appendChild(row);
+            });
+        }
+        
+        // Set up sort headers
+        function setupSortHeaders() {
+            document.querySelectorAll('.sort-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const column = header.getAttribute('data-sort');
+                    const icon = header.querySelector('.sort-icon');
+                    
+                    // Reset all other headers
+                    document.querySelectorAll('.sort-header').forEach(h => {
+                        if (h !== header) {
+                            h.querySelector('.sort-icon').textContent = '';
+                        }
+                    });
+                    
+                    // Toggle sort direction
+                    if (sortColumn === column) {
+                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortColumn = column;
+                        sortDirection = 'desc';
+                    }
+                    
+                    // Update icon
+                    icon.textContent = sortDirection === 'asc' ? '↑' : '↓';
+                    
+                    // Update process list
+                    updateProcessList();
+                });
+            });
+        }
+        
+        // Set up refresh controls
+        function setupRefreshControls() {
+            const refreshIntervalSelect = document.getElementById('refresh-interval');
+            const refreshBtn = document.getElementById('refresh-btn');
+            
+            refreshIntervalSelect.addEventListener('change', () => {
+                refreshInterval = parseInt(refreshIntervalSelect.value);
+                setupRefreshTimer();
+            });
+            
+            refreshBtn.addEventListener('click', () => {
+                updateSystemInfo();
+            });
+        }
+        
+        // Set up refresh timer
+        function setupRefreshTimer() {
+            clearInterval(refreshTimer);
+            refreshTimer = setInterval(updateSystemInfo, refreshInterval);
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            setupSortHeaders();
+            setupRefreshControls();
+            setupRefreshTimer();
+            updateSystemInfo();
+        });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
