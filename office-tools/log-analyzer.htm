@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализатор логов - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tool-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+        }
+        
+        .tool-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .tool-title {
+            font-size: 1.75rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .tool-subtitle {
+            color: var(--dark-gray);
+            margin-bottom: 1.5rem;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .file-upload-area i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload-area p {
+            margin-bottom: 0.5rem;
+        }
+        
+        .file-upload-area input {
+            display: none;
+        }
+        
+        .selected-file {
+            margin-top: 1.5rem;
+            padding: 0.75rem;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-name {
+            flex: 1;
+            margin-right: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .file-remove {
+            color: #ff4444;
+            cursor: pointer;
+        }
+        
+        .analyzer-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .filter-panel {
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            height: 500px;
+            overflow-y: auto;
+        }
+        
+        .log-viewer {
+            background-color: var(--white);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            height: 500px;
+            overflow-y: auto;
+            padding: 1rem;
+            font-family: monospace;
+            white-space: pre;
+            font-size: 0.9rem;
+        }
+        
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-group h4 {
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .filter-option {
+            margin-bottom: 0.5rem;
+        }
+        
+        .filter-option label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .filter-option input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        
+        .filter-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem;
+            border-radius: 3px;
+        }
+        
+        .log-entry.error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .log-entry.warning {
+            background-color: #fff8e1;
+            color: #f57f17;
+        }
+        
+        .log-entry.info {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .log-entry.debug {
+            background-color: #f5f5f5;
+            color: #424242;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .stat-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .action-buttons .btn {
+            flex: 1;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .status-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .status-message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            display: block;
+        }
+        
+        .status-message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Анализатор логов</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Анализатор логов</h1>
+                <p class="section-subtitle">Анализ и фильтрация лог-файлов серверов и приложений</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="tool-container">
+                    <div class="tool-header">
+                        <h2 class="tool-title">Анализ лог-файлов</h2>
+                        <p class="tool-subtitle">Загрузите лог-файл для анализа и фильтрации</p>
+                    </div>
+                    
+                    <div class="file-upload-area" id="uploadArea">
+                        <i class="fas fa-file-alt"></i>
+                        <p>Перетащите сюда лог-файл или</p>
+                        <button class="btn btn-outline">Выбрать файл</button>
+                        <input type="file" id="fileInput">
+                    </div>
+                    
+                    <div id="selectedFileContainer" style="display: none;">
+                        <div class="selected-file">
+                            <div class="file-name" id="fileName"></div>
+                            <div class="file-remove" id="removeFile"><i class="fas fa-times"></i></div>
+                        </div>
+                    </div>
+                    
+                    <div class="analyzer-container">
+                        <div class="filter-panel">
+                            <div class="filter-group">
+                                <h4>Уровни логов</h4>
+                                <div class="filter-option">
+                                    <label>
+                                        <input type="checkbox" name="logLevel" value="error" checked> Ошибки
+                                    </label>
+                                </div>
+                                <div class="filter-option">
+                                    <label>
+                                        <input type="checkbox" name="logLevel" value="warning" checked> Предупреждения
+                                    </label>
+                                </div>
+                                <div class="filter-option">
+                                    <label>
+                                        <input type="checkbox" name="logLevel" value="info" checked> Информация
+                                    </label>
+                                </div>
+                                <div class="filter-option">
+                                    <label>
+                                        <input type="checkbox" name="logLevel" value="debug"> Отладка
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <h4>Фильтр по времени</h4>
+                                <label>От:</label>
+                                <input type="datetime-local" class="filter-input" id="timeFrom">
+                                <label>До:</label>
+                                <input type="datetime-local" class="filter-input" id="timeTo">
+                            </div>
+                            
+                            <div class="filter-group">
+                                <h4>Фильтр по содержанию</h4>
+                                <input type="text" class="filter-input" id="textFilter" placeholder="Содержит текст...">
+                            </div>
+                            
+                            <button class="btn btn-primary" id="applyFilters">Применить фильтры</button>
+                        </div>
+                        
+                        <div class="log-viewer" id="logViewer">
+                            <div class="log-empty">Загрузите лог-файл для просмотра</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-container" id="statsContainer" style="display: none;">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalLogs">0</div>
+                            <div class="stat-label">Всего записей</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="errorLogs">0</div>
+                            <div class="stat-label">Ошибки</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="warningLogs">0</div>
+                            <div class="stat-label">Предупреждения</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="infoLogs">0</div>
+                            <div class="stat-label">Информация</div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="analyzeBtn" disabled>Анализировать</button>
+                        <button class="btn btn-outline" id="resetBtn">Сбросить</button>
+                    </div>
+                    
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-bar-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <div class="status-message" id="statusMessage"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="../visualization/index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const selectedFileContainer = document.getElementById('selectedFileContainer');
+            const fileName = document.getElementById('fileName');
+            const removeFile = document.getElementById('removeFile');
+            const logViewer = document.getElementById('logViewer');
+            const applyFilters = document.getElementById('applyFilters');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const statusMessage = document.getElementById('statusMessage');
+            const statsContainer = document.getElementById('statsContainer');
+            
+            const totalLogsEl = document.getElementById('totalLogs');
+            const errorLogsEl = document.getElementById('errorLogs');
+            const warningLogsEl = document.getElementById('warningLogs');
+            const infoLogsEl = document.getElementById('infoLogs');
+            
+            let logEntries = [];
+            let filteredEntries = [];
+            
+            // Обработчики событий для загрузки файлов
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary-color)';
+                uploadArea.style.backgroundColor = 'var(--primary-light)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelection(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    handleFileSelection(fileInput.files[0]);
+                }
+            });
+            
+            // Обработка выбранного файла
+            function handleFileSelection(file) {
+                fileName.textContent = file.name;
+                selectedFileContainer.style.display = 'block';
+                analyzeBtn.disabled = false;
+                
+                // Сброс предыдущих данных
+                logEntries = [];
+                filteredEntries = [];
+                logViewer.innerHTML = '<div class="log-empty">Загрузите лог-файл для просмотра</div>';
+                statsContainer.style.display = 'none';
+            }
+            
+            // Удаление файла
+            removeFile.addEventListener('click', function() {
+                fileInput.value = '';
+                selectedFileContainer.style.display = 'none';
+                analyzeBtn.disabled = true;
+                logViewer.innerHTML = '<div class="log-empty">Загрузите лог-файл для просмотра</div>';
+                statsContainer.style.display = 'none';
+            });
+            
+            // Анализ лог-файла
+            analyzeBtn.addEventListener('click', function() {
+                if (!fileInput.files.length) {
+                    showStatus('Пожалуйста, выберите файл для анализа', 'error');
+                    return;
+                }
+                
+                progressBar.style.display = 'block';
+                statusMessage.style.display = 'none';
+                progressFill.style.width = '0%';
+                analyzeBtn.disabled = true;
+                
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        // Имитация процесса анализа с прогрессом
+                        simulateProgress();
+                        
+                        // Разбор содержимого лог-файла
+                        const content = e.target.result;
+                        logEntries = parseLogFile(content);
+                        filteredEntries = [...logEntries];
+                        
+                        // Отображение логов
+                        displayLogs(filteredEntries);
+                        
+                        // Обновление статистики
+                        updateStats(logEntries);
+                        
+                        progressFill.style.width = '100%';
+                        showStatus('Лог-файл успешно проанализирован', 'success');
+                        statsContainer.style.display = 'grid';
+                    } catch (error) {
+                        console.error(error);
+                        showStatus('Ошибка при анализе лог-файла', 'error');
+                    } finally {
+                        analyzeBtn.disabled = false;
+                    }
+                };
+                
+                reader.onerror = function() {
+                    showStatus('Ошибка при чтении файла', 'error');
+                    analyzeBtn.disabled = false;
+                };
+                
+                reader.readAsText(file);
+            });
+            
+            // Имитация прогресса анализа
+            function simulateProgress() {
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressFill.style.width = progress + '%';
+                    
+                    if (progress >= 90) {
+                        clearInterval(interval);
+                    }
+                }, 100);
+            }
+            
+            // Разбор лог-файла (упрощенный)
+            function parseLogFile(content) {
+                const lines = content.split('\n');
+                const entries = [];
+                
+                // Простые регулярные выражения для определения типа записи
+                const errorRegex = /error|exception|fail|failed|severe|critical/i;
+                const warningRegex = /warn|attention|notice/i;
+                const infoRegex = /info|status|success/i;
+                const debugRegex = /debug|trace|verbose/i;
+                
+                // Регулярное выражение для извлечения временной метки (пример)
+                const timestampRegex = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})|(\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2})/;
+                
+                lines.forEach((line, index) => {
+                    if (!line.trim()) return;
+                    
+                    let type = 'info';
+                    if (errorRegex.test(line)) type = 'error';
+                    else if (warningRegex.test(line)) type = 'warning';
+                    else if (debugRegex.test(line)) type = 'debug';
+                    
+                    // Попытка извлечь временную метку
+                    let timestamp = '';
+                    const match = line.match(timestampRegex);
+                    if (match) timestamp = match[0];
+                    
+                    entries.push({
+                        id: index,
+                        type: type,
+                        timestamp: timestamp,
+                        message: line.trim()
+                    });
+                });
+                
+                return entries;
+            }
+            
+            // Отображение логов в интерфейсе
+            function displayLogs(entries) {
+                if (entries.length === 0) {
+                    logViewer.innerHTML = '<div class="log-empty">Нет записей, соответствующих фильтрам</div>';
+                    return;
+                }
+                
+                logViewer.innerHTML = '';
+                
+                entries.forEach(entry => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = `log-entry ${entry.type}`;
+                    logEntry.textContent = entry.message;
+                    logViewer.appendChild(logEntry);
+                });
+            }
+            
+            // Обновление статистики
+            function updateStats(entries) {
+                totalLogsEl.textContent = entries.length;
+                errorLogsEl.textContent = entries.filter(e => e.type === 'error').length;
+                warningLogsEl.textContent = entries.filter(e => e.type === 'warning').length;
+                infoLogsEl.textContent = entries.filter(e => e.type === 'info').length;
+            }
+            
+            // Применение фильтров
+            applyFilters.addEventListener('click', function() {
+                if (logEntries.length === 0) {
+                    showStatus('Сначала загрузите и проанализируйте лог-файл', 'error');
+                    return;
+                }
+                
+                // Получаем выбранные уровни логов
+                const selectedLevels = Array.from(document.querySelectorAll('input[name="logLevel"]:checked')).map(el => el.value);
+                
+                // Получаем временные фильтры
+                const timeFrom = document.getElementById('timeFrom').value;
+                const timeTo = document.getElementById('timeTo').value;
+                
+                // Получаем текстовый фильтр
+                const textFilter = document.getElementById('textFilter').value.toLowerCase();
+                
+                // Фильтрация записей
+                filteredEntries = logEntries.filter(entry => {
+                    // Фильтр по уровню
+                    if (!selectedLevels.includes(entry.type)) return false;
+                    
+                    // Фильтр по времени (упрощенный)
+                    if (timeFrom && entry.timestamp && entry.timestamp < timeFrom.replace('T', ' ')) return false;
+                    if (timeTo && entry.timestamp && entry.timestamp > timeTo.replace('T', ' ')) return false;
+                    
+                    // Фильтр по тексту
+                    if (textFilter && !entry.message.toLowerCase().includes(textFilter)) return false;
+                    
+                    return true;
+                });
+                
+                // Отображение отфильтрованных записей
+                displayLogs(filteredEntries);
+                
+                showStatus(`Найдено ${filteredEntries.length} записей`, 'success');
+            });
+            
+            // Сброс формы
+            resetBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                selectedFileContainer.style.display = 'none';
+                analyzeBtn.disabled = true;
+                logViewer.innerHTML = '<div class="log-empty">Загрузите лог-файл для просмотра</div>';
+                statsContainer.style.display = 'none';
+                progressBar.style.display = 'none';
+                statusMessage.style.display = 'none';
+                progressFill.style.width = '0%';
+                
+                // Сброс фильтров
+                document.querySelectorAll('input[name="logLevel"]').forEach(el => {
+                    if (el.value !== 'debug') el.checked = true;
+                    else el.checked = false;
+                });
+                
+                document.getElementById('timeFrom').value = '';
+                document.getElementById('timeTo').value = '';
+                document.getElementById('textFilter').value = '';
+                
+                logEntries = [];
+                filteredEntries = [];
+            });
+            
+            // Показать статус
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status-message ' + type;
+                statusMessage.style.display = 'block';
+            }
+        });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

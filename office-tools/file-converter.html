@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конвертер файлов - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <style>
+        .tool-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+        }
+        
+        .tool-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .tool-title {
+            font-size: 1.75rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .tool-subtitle {
+            color: var(--dark-gray);
+            margin-bottom: 1.5rem;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .file-upload-area i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload-area p {
+            margin-bottom: 0.5rem;
+        }
+        
+        .file-upload-area input {
+            display: none;
+        }
+        
+        .selected-file {
+            margin-top: 1.5rem;
+            padding: 0.75rem;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-name {
+            flex: 1;
+            margin-right: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .file-remove {
+            color: #ff4444;
+            cursor: pointer;
+        }
+        
+        .converter-options {
+            margin-top: 1.5rem;
+        }
+        
+        .option-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .option-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .option-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .action-buttons .btn {
+            flex: 1;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .status-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .status-message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            display: block;
+        }
+        
+        .status-message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            display: block;
+        }
+        
+        .download-link {
+            display: none;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        .supported-formats {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .formats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .format-item {
+            padding: 0.5rem;
+            background-color: var(--white);
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Конвертер файлов</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Конвертер файлов</h1>
+                <p class="section-subtitle">Преобразование файлов между различными форматами</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="tool-container">
+                    <div class="tool-header">
+                        <h2 class="tool-title">Конвертировать файл</h2>
+                        <p class="tool-subtitle">Загрузите файл и выберите целевой формат</p>
+                    </div>
+                    
+                    <div class="file-upload-area" id="uploadArea">
+                        <i class="fas fa-file-upload"></i>
+                        <p>Перетащите сюда файл или</p>
+                        <button class="btn btn-outline">Выбрать файл</button>
+                        <input type="file" id="fileInput">
+                    </div>
+                    
+                    <div id="selectedFileContainer" style="display: none;">
+                        <div class="selected-file">
+                            <div class="file-name" id="fileName"></div>
+                            <div class="file-remove" id="removeFile"><i class="fas fa-times"></i></div>
+                        </div>
+                    </div>
+                    
+                    <div class="converter-options">
+                        <div class="option-group">
+                            <label for="targetFormat">Целевой формат:</label>
+                            <select id="targetFormat" disabled>
+                                <option value="">Сначала выберите файл</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="convertBtn" disabled>Конвертировать</button>
+                        <button class="btn btn-outline" id="resetBtn">Сбросить</button>
+                    </div>
+                    
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-bar-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <div class="status-message" id="statusMessage"></div>
+                    
+                    <div class="download-link" id="downloadLink">
+                        <a href="#" class="btn btn-success" id="downloadBtn"><i class="fas fa-download"></i> Скачать результат</a>
+                    </div>
+                    
+                    <div class="supported-formats">
+                        <h3>Поддерживаемые форматы</h3>
+                        <div class="formats-grid">
+                            <div class="format-item">
+                                <strong>Документы:</strong> DOCX, PDF, TXT, RTF
+                            </div>
+                            <div class="format-item">
+                                <strong>Изображения:</strong> JPG, PNG, GIF, BMP
+                            </div>
+                            <div class="format-item">
+                                <strong>Архивы:</strong> ZIP, RAR, 7Z
+                            </div>
+                            <div class="format-item">
+                                <strong>Другие:</strong> CSV, JSON, XML
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="../visualization/index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const selectedFileContainer = document.getElementById('selectedFileContainer');
+            const fileName = document.getElementById('fileName');
+            const removeFile = document.getElementById('removeFile');
+            const targetFormat = document.getElementById('targetFormat');
+            const convertBtn = document.getElementById('convertBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const statusMessage = document.getElementById('statusMessage');
+            const downloadLink = document.getElementById('downloadLink');
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            let currentFile = null;
+            let convertedFile = null;
+            
+            // Обработчики событий для загрузки файлов
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary-color)';
+                uploadArea.style.backgroundColor = 'var(--primary-light)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelection(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    handleFileSelection(fileInput.files[0]);
+                }
+            });
+            
+            // Обработка выбранного файла
+            function handleFileSelection(file) {
+                currentFile = file;
+                fileName.textContent = file.name;
+                selectedFileContainer.style.display = 'block';
+                
+                // Обновляем доступные форматы для конвертации
+                updateTargetFormats(file);
+                
+                convertBtn.disabled = false;
+            }
+            
+            // Удаление файла
+            removeFile.addEventListener('click', function() {
+                currentFile = null;
+                fileInput.value = '';
+                selectedFileContainer.style.display = 'none';
+                targetFormat.innerHTML = '<option value="">Сначала выберите файл</option>';
+                targetFormat.disabled = true;
+                convertBtn.disabled = true;
+                downloadLink.style.display = 'none';
+                statusMessage.style.display = 'none';
+            });
+            
+            // Обновление доступных форматов для конвертации
+            function updateTargetFormats(file) {
+                const fileName = file.name.toLowerCase();
+                const fileExt = fileName.split('.').pop();
+                
+                targetFormat.innerHTML = '';
+                targetFormat.disabled = false;
+                
+                // Определяем доступные форматы на основе расширения файла
+                let formats = [];
+                
+                if (['doc', 'docx', 'rtf'].includes(fileExt)) {
+                    formats = [
+                        { value: 'pdf', text: 'PDF Document' },
+                        { value: 'txt', text: 'Plain Text (TXT)' },
+                        { value: 'rtf', text: 'Rich Text Format (RTF)' }
+                    ];
+                } else if (fileExt === 'pdf') {
+                    formats = [
+                        { value: 'docx', text: 'Word Document (DOCX)' },
+                        { value: 'txt', text: 'Plain Text (TXT)' }
+                    ];
+                } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(fileExt)) {
+                    formats = [
+                        { value: 'jpg', text: 'JPEG Image' },
+                        { value: 'png', text: 'PNG Image' },
+                        { value: 'gif', text: 'GIF Image' }
+                    ];
+                } else if (['zip', 'rar', '7z'].includes(fileExt)) {
+                    formats = [
+                        { value: 'zip', text: 'ZIP Archive' },
+                        { value: 'rar', text: 'RAR Archive' },
+                        { value: '7z', text: '7Z Archive' }
+                    ];
+                } else if (['csv', 'json', 'xml'].includes(fileExt)) {
+                    formats = [
+                        { value: 'csv', text: 'CSV File' },
+                        { value: 'json', text: 'JSON File' },
+                        { value: 'xml', text: 'XML File' }
+                    ];
+                } else {
+                    formats = [
+                        { value: 'txt', text: 'Plain Text (TXT)' }
+                    ];
+                }
+                
+                // Добавляем опции в select
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Выберите формат';
+                targetFormat.appendChild(defaultOption);
+                
+                formats.forEach(format => {
+                    const option = document.createElement('option');
+                    option.value = format.value;
+                    option.textContent = format.text;
+                    targetFormat.appendChild(option);
+                });
+            }
+            
+            // Конвертация файла
+            convertBtn.addEventListener('click', async function() {
+                if (!currentFile || !targetFormat.value) {
+                    showStatus('Пожалуйста, выберите файл и целевой формат', 'error');
+                    return;
+                }
+                
+                progressBar.style.display = 'block';
+                statusMessage.style.display = 'none';
+                progressFill.style.width = '0%';
+                convertBtn.disabled = true;
+                
+                try {
+                    const fileExt = currentFile.name.split('.').pop().toLowerCase();
+                    const targetExt = targetFormat.value;
+                    
+                    // Имитация процесса конвертации с прогрессом
+                    simulateProgress();
+                    
+                    // В реальном приложении здесь будет реальная конвертация
+                    // Для демонстрации мы просто создаем Blob с тем же содержимым
+                    const arrayBuffer = await currentFile.arrayBuffer();
+                    
+                    // В зависимости от выбранного формата можно было бы использовать разные библиотеки
+                    // Например, для PDF в Word - pdf-lib, для изображений - canvas, и т.д.
+                    // Здесь просто создаем новый Blob с другим расширением
+                    convertedFile = new Blob([arrayBuffer], { type: getMimeType(targetExt) });
+                    
+                    progressFill.style.width = '100%';
+                    showStatus('Файл успешно конвертирован!', 'success');
+                    downloadLink.style.display = 'block';
+                    
+                    // Устанавливаем имя файла для скачивания
+                    const newFileName = currentFile.name.replace(/\.[^/.]+$/, '') + '.' + targetExt;
+                    downloadBtn.setAttribute('download', newFileName);
+                } catch (error) {
+                    console.error(error);
+                    showStatus('Ошибка при конвертации файла', 'error');
+                } finally {
+                    convertBtn.disabled = false;
+                }
+            });
+            
+            // Имитация прогресса конвертации
+            function simulateProgress() {
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressFill.style.width = progress + '%';
+                    
+                    if (progress >= 90) {
+                        clearInterval(interval);
+                    }
+                }, 100);
+            }
+            
+            // Получение MIME-типа по расширению
+            function getMimeType(ext) {
+                const mimeTypes = {
+                    'pdf': 'application/pdf',
+                    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'txt': 'text/plain',
+                    'rtf': 'application/rtf',
+                    'jpg': 'image/jpeg',
+                    'png': 'image/png',
+                    'gif': 'image/gif',
+                    'zip': 'application/zip',
+                    'rar': 'application/x-rar-compressed',
+                    '7z': 'application/x-7z-compressed',
+                    'csv': 'text/csv',
+                    'json': 'application/json',
+                    'xml': 'application/xml'
+                };
+                
+                return mimeTypes[ext] || 'application/octet-stream';
+            }
+            
+            // Скачивание результата
+            downloadBtn.addEventListener('click', function(e) {
+                if (!convertedFile) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                const url = URL.createObjectURL(convertedFile);
+                this.href = url;
+                
+                // Освобождаем память после скачивания
+                setTimeout(() => {
+                    URL.revokeObjectURL(url);
+                }, 100);
+            });
+            
+            // Сброс формы
+            resetBtn.addEventListener('click', function() {
+                currentFile = null;
+                convertedFile = null;
+                fileInput.value = '';
+                selectedFileContainer.style.display = 'none';
+                targetFormat.innerHTML = '<option value="">Сначала выберите файл</option>';
+                targetFormat.disabled = true;
+                convertBtn.disabled = true;
+                progressBar.style.display = 'none';
+                statusMessage.style.display = 'none';
+                downloadLink.style.display = 'none';
+                progressFill.style.width = '0%';
+            });
+            
+            // Показать статус
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status-message ' + type;
+                statusMessage.style.display = 'block';
+            }
+        });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
