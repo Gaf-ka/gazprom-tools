@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форматирование JSON - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .formatter-section {
+            padding: 40px 0;
+        }
+        
+        .formatter-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .formatter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .formatter-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .formatter-box {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            height: 100%;
+        }
+        
+        .formatter-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-dark);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .formatter-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .formatter-toolbar button {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .formatter-toolbar button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .formatter-textarea {
+            width: 100%;
+            min-height: 400px;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .formatter-status {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .formatter-status.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .formatter-status.error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .formatter-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .formatter-actions button {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Форматирование JSON</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Форматирование JSON</h1>
+                <p class="section-subtitle">Валидация и красивое отображение JSON-данных</p>
+            </div>
+        </section>
+
+        <section class="formatter-section">
+            <div class="container">
+                <div class="formatter-container">
+                    <div class="formatter-grid">
+                        <div class="formatter-box">
+                            <h2 class="formatter-title">Исходный JSON</h2>
+                            
+                            <div class="formatter-toolbar">
+                                <button id="example-btn"><i class="fas fa-code"></i> Пример</button>
+                                <button id="clear-btn"><i class="fas fa-trash"></i> Очистить</button>
+                            </div>
+                            
+                            <textarea class="formatter-textarea" id="input-json" placeholder='Вставьте JSON-данные здесь...'></textarea>
+                            
+                            <div class="formatter-actions">
+                                <button id="format-btn" class="btn btn-primary">
+                                    <i class="fas fa-align-left"></i> Форматировать
+                                </button>
+                                <button id="minify-btn" class="btn btn-outline">
+                                    <i class="fas fa-compress"></i> Минифицировать
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="formatter-box">
+                            <h2 class="formatter-title">Результат</h2>
+                            
+                            <div class="formatter-toolbar">
+                                <button id="copy-btn"><i class="fas fa-copy"></i> Копировать</button>
+                                <button id="download-btn"><i class="fas fa-download"></i> Скачать</button>
+                            </div>
+                            
+                            <textarea class="formatter-textarea" id="output-json" readonly></textarea>
+                            
+                            <div class="formatter-status" id="status-message">
+                                Введите JSON и нажмите "Форматировать"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="../visualization/index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // DOM elements
+        const inputJson = document.getElementById('input-json');
+        const outputJson = document.getElementById('output-json');
+        const statusMessage = document.getElementById('status-message');
+        const exampleBtn = document.getElementById('example-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const formatBtn = document.getElementById('format-btn');
+        const minifyBtn = document.getElementById('minify-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        
+        // Example JSON
+        const exampleJson = `{
+    "company": {
+        "name": "Газпром",
+        "founded": 1989,
+        "headquarters": {
+            "city": "Москва",
+            "address": "ул. Наметкина, 16"
+        },
+        "employees": 479000,
+        "departments": [
+            "Разведка и добыча",
+            "Транспортировка",
+            "Переработка",
+            "Сбыт",
+            "Экспорт"
+        ],
+        "financials": {
+            "revenue": "8.2 трлн руб (2021)",
+            "netIncome": "2.2 трлн руб (2021)"
+        }
+    },
+    "projects": [
+        {
+            "name": "Северный поток",
+            "type": "газопровод",
+            "length": 1224,
+            "capacity": "55 млрд м³/год"
+        },
+        {
+            "name": "Турецкий поток",
+            "type": "газопровод",
+            "length": 930,
+            "capacity": "31.5 млрд м³/год"
+        }
+    ]
+}`;
+        
+        // Load example
+        exampleBtn.addEventListener('click', () => {
+            inputJson.value = exampleJson;
+            statusMessage.textContent = 'Пример JSON загружен. Нажмите "Форматировать"';
+            statusMessage.className = 'formatter-status success';
+        });
+        
+        // Clear input
+        clearBtn.addEventListener('click', () => {
+            inputJson.value = '';
+            outputJson.value = '';
+            statusMessage.textContent = 'Поля очищены. Введите новый JSON';
+            statusMessage.className = 'formatter-status';
+        });
+        
+        // Format JSON
+        formatBtn.addEventListener('click', () => {
+            try {
+                const jsonObj = JSON.parse(inputJson.value);
+                const formattedJson = JSON.stringify(jsonObj, null, 4);
+                outputJson.value = formattedJson;
+                statusMessage.textContent = 'JSON успешно отформатирован';
+                statusMessage.className = 'formatter-status success';
+            } catch (error) {
+                statusMessage.textContent = 'Ошибка: ' + error.message;
+                statusMessage.className = 'formatter-status error';
+                outputJson.value = '';
+            }
+        });
+        
+        // Minify JSON
+        minifyBtn.addEventListener('click', () => {
+            try {
+                const jsonObj = JSON.parse(inputJson.value);
+                const minifiedJson = JSON.stringify(jsonObj);
+                outputJson.value = minifiedJson;
+                statusMessage.textContent = 'JSON успешно минифицирован';
+                statusMessage.className = 'formatter-status success';
+            } catch (error) {
+                statusMessage.textContent = 'Ошибка: ' + error.message;
+                statusMessage.className = 'formatter-status error';
+                outputJson.value = '';
+            }
+        });
+        
+        // Copy to clipboard
+        copyBtn.addEventListener('click', () => {
+            if (!outputJson.value) {
+                statusMessage.textContent = 'Ошибка: нет данных для копирования';
+                statusMessage.className = 'formatter-status error';
+                return;
+            }
+            
+            navigator.clipboard.writeText(outputJson.value).then(() => {
+                statusMessage.textContent = 'JSON скопирован в буфер обмена';
+                statusMessage.className = 'formatter-status success';
+                
+                // Reset status after 3 seconds
+                setTimeout(() => {
+                    if (outputJson.value) {
+                        statusMessage.textContent = 'JSON готов к использованию';
+                        statusMessage.className = 'formatter-status success';
+                    }
+                }, 3000);
+            }).catch(err => {
+                statusMessage.textContent = 'Ошибка при копировании: ' + err;
+                statusMessage.className = 'formatter-status error';
+            });
+        });
+        
+        // Download JSON
+        downloadBtn.addEventListener('click', () => {
+            if (!outputJson.value) {
+                statusMessage.textContent = 'Ошибка: нет данных для скачивания';
+                statusMessage.className = 'formatter-status error';
+                return;
+            }
+            
+            const blob = new Blob([outputJson.value], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            statusMessage.textContent = 'JSON скачан как data.json';
+            statusMessage.className = 'formatter-status success';
+            
+            // Reset status after 3 seconds
+            setTimeout(() => {
+                if (outputJson.value) {
+                    statusMessage.textContent = 'JSON готов к использованию';
+                    statusMessage.className = 'formatter-status success';
+                }
+            }, 3000);
+        });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

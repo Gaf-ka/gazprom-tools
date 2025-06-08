@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор QR-кодов - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <style>
+        .generator-section {
+            padding: 40px 0;
+        }
+        
+        .generator-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .generator-box {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .generator-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-dark);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input, 
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2rem 0;
+        }
+        
+        #qr-code {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 1rem;
+            border: 1px solid #eee;
+            padding: 10px;
+            background: white;
+        }
+        
+        .qr-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .qr-actions button {
+            flex: 1;
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .color-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .color-option input[type="color"] {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Генератор QR-кодов</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="../visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Генератор QR-кодов</h1>
+                <p class="section-subtitle">Создавайте QR-коды для URL, текста, контактов и другой информации</p>
+            </div>
+        </section>
+
+        <section class="generator-section">
+            <div class="container">
+                <div class="generator-container">
+                    <div class="generator-box">
+                        <h2 class="generator-title">Настройки QR-кода</h2>
+                        
+                        <div class="form-group">
+                            <label for="qr-type">Тип содержимого</label>
+                            <select id="qr-type">
+                                <option value="url">URL-адрес</option>
+                                <option value="text">Текст</option>
+                                <option value="email">Email</option>
+                                <option value="phone">Телефон</option>
+                                <option value="sms">SMS</option>
+                                <option value="wifi">Wi-Fi</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" id="url-group">
+                            <label for="qr-url">URL-адрес</label>
+                            <input type="url" id="qr-url" placeholder="https://example.com">
+                        </div>
+                        
+                        <div class="form-group" id="text-group" style="display: none;">
+                            <label for="qr-text">Текст</label>
+                            <textarea id="qr-text" placeholder="Введите любой текст"></textarea>
+                        </div>
+                        
+                        <div class="form-group" id="email-group" style="display: none;">
+                            <label for="qr-email">Email</label>
+                            <input type="email" id="qr-email" placeholder="user@example.com">
+                        </div>
+                        
+                        <div class="form-group" id="phone-group" style="display: none;">
+                            <label for="qr-phone">Телефон</label>
+                            <input type="tel" id="qr-phone" placeholder="+71234567890">
+                        </div>
+                        
+                        <div class="form-group" id="sms-group" style="display: none;">
+                            <label for="qr-sms-number">Номер телефона</label>
+                            <input type="tel" id="qr-sms-number" placeholder="+71234567890">
+                            <label for="qr-sms-text" style="margin-top: 1rem;">Текст сообщения</label>
+                            <input type="text" id="qr-sms-text" placeholder="Текст SMS">
+                        </div>
+                        
+                        <div class="form-group" id="wifi-group" style="display: none;">
+                            <label for="qr-wifi-ssid">Имя сети (SSID)</label>
+                            <input type="text" id="qr-wifi-ssid" placeholder="MyWiFi">
+                            <label for="qr-wifi-password" style="margin-top: 1rem;">Пароль</label>
+                            <input type="text" id="qr-wifi-password" placeholder="Пароль">
+                            <label for="qr-wifi-type" style="margin-top: 1rem;">Тип шифрования</label>
+                            <select id="qr-wifi-type">
+                                <option value="WPA">WPA/WPA2</option>
+                                <option value="WEP">WEP</option>
+                                <option value="">Нет</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Цвета</label>
+                            <div class="color-picker">
+                                <div class="color-option">
+                                    <input type="color" id="qr-color" value="#000000">
+                                    <span>Основной</span>
+                                </div>
+                                <div class="color-option">
+                                    <input type="color" id="qr-bgcolor" value="#ffffff">
+                                    <span>Фон</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="qr-size">Размер (в пикселях)</label>
+                            <input type="range" id="qr-size" min="100" max="500" value="200">
+                            <div style="text-align: center; margin-top: 0.5rem;">
+                                <span id="qr-size-value">200</span> px
+                            </div>
+                        </div>
+                        
+                        <button id="generate-btn" class="btn btn-primary">Сгенерировать QR-код</button>
+                    </div>
+                    
+                    <div class="generator-box">
+                        <h2 class="generator-title">Результат</h2>
+                        
+                        <div class="qr-container">
+                            <canvas id="qr-code"></canvas>
+                            <div class="qr-actions">
+                                <button id="download-btn" class="btn btn-primary">
+                                    <i class="fas fa-download"></i> Скачать
+                                </button>
+                                <button id="copy-btn" class="btn btn-outline">
+                                    <i class="fas fa-copy"></i> Копировать
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="../visualization/index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // DOM elements
+        const qrType = document.getElementById('qr-type');
+        const urlGroup = document.getElementById('url-group');
+        const textGroup = document.getElementById('text-group');
+        const emailGroup = document.getElementById('email-group');
+        const phoneGroup = document.getElementById('phone-group');
+        const smsGroup = document.getElementById('sms-group');
+        const wifiGroup = document.getElementById('wifi-group');
+        const qrUrl = document.getElementById('qr-url');
+        const qrText = document.getElementById('qr-text');
+        const qrEmail = document.getElementById('qr-email');
+        const qrPhone = document.getElementById('qr-phone');
+        const qrSmsNumber = document.getElementById('qr-sms-number');
+        const qrSmsText = document.getElementById('qr-sms-text');
+        const qrWifiSsid = document.getElementById('qr-wifi-ssid');
+        const qrWifiPassword = document.getElementById('qr-wifi-password');
+        const qrWifiType = document.getElementById('qr-wifi-type');
+        const qrColor = document.getElementById('qr-color');
+        const qrBgColor = document.getElementById('qr-bgcolor');
+        const qrSize = document.getElementById('qr-size');
+        const qrSizeValue = document.getElementById('qr-size-value');
+        const generateBtn = document.getElementById('generate-btn');
+        const qrCodeCanvas = document.getElementById('qr-code');
+        const downloadBtn = document.getElementById('download-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        
+        // Update size value display
+        qrSize.addEventListener('input', () => {
+            qrSizeValue.textContent = qrSize.value;
+        });
+        
+        // Show/hide input groups based on QR type
+        qrType.addEventListener('change', () => {
+            urlGroup.style.display = 'none';
+            textGroup.style.display = 'none';
+            emailGroup.style.display = 'none';
+            phoneGroup.style.display = 'none';
+            smsGroup.style.display = 'none';
+            wifiGroup.style.display = 'none';
+            
+            switch(qrType.value) {
+                case 'url':
+                    urlGroup.style.display = 'block';
+                    break;
+                case 'text':
+                    textGroup.style.display = 'block';
+                    break;
+                case 'email':
+                    emailGroup.style.display = 'block';
+                    break;
+                case 'phone':
+                    phoneGroup.style.display = 'block';
+                    break;
+                case 'sms':
+                    smsGroup.style.display = 'block';
+                    break;
+                case 'wifi':
+                    wifiGroup.style.display = 'block';
+                    break;
+            }
+        });
+        
+        // Generate QR code
+        generateBtn.addEventListener('click', () => {
+            let qrData = '';
+            
+            switch(qrType.value) {
+                case 'url':
+                    qrData = qrUrl.value.trim();
+                    if (!qrData) {
+                        alert('Введите URL-адрес');
+                        return;
+                    }
+                    if (!qrData.startsWith('http://') && !qrData.startsWith('https://')) {
+                        qrData = 'http://' + qrData;
+                    }
+                    break;
+                case 'text':
+                    qrData = qrText.value.trim();
+                    if (!qrData) {
+                        alert('Введите текст');
+                        return;
+                    }
+                    break;
+                case 'email':
+                    qrData = `mailto:${qrEmail.value.trim()}`;
+                    if (!qrEmail.value.trim()) {
+                        alert('Введите email');
+                        return;
+                    }
+                    break;
+                case 'phone':
+                    qrData = `tel:${qrPhone.value.trim()}`;
+                    if (!qrPhone.value.trim()) {
+                        alert('Введите номер телефона');
+                        return;
+                    }
+                    break;
+                case 'sms':
+                    qrData = `smsto:${qrSmsNumber.value.trim()}:${qrSmsText.value.trim()}`;
+                    if (!qrSmsNumber.value.trim()) {
+                        alert('Введите номер телефона');
+                        return;
+                    }
+                    break;
+                case 'wifi':
+                    const ssid = qrWifiSsid.value.trim();
+                    if (!ssid) {
+                        alert('Введите имя сети (SSID)');
+                        return;
+                    }
+                    const password = qrWifiPassword.value.trim();
+                    const type = qrWifiType.value;
+                    qrData = `WIFI:T:${type};S:${ssid};P:${password};;`;
+                    break;
+            }
+            
+            // Generate QR code
+            QRCode.toCanvas(qrCodeCanvas, qrData, {
+                width: parseInt(qrSize.value),
+                color: {
+                    dark: qrColor.value,
+                    light: qrBgColor.value
+                },
+                margin: 1
+            }, (error) => {
+                if (error) {
+                    console.error(error);
+                    alert('Ошибка при генерации QR-кода');
+                }
+            });
+        });
+        
+        // Download QR code
+        downloadBtn.addEventListener('click', () => {
+            if (!qrCodeCanvas.toDataURL().includes('base64')) {
+                alert('Сначала сгенерируйте QR-код');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.download = 'qr-code.png';
+            link.href = qrCodeCanvas.toDataURL('image/png');
+            link.click();
+        });
+        
+        // Copy QR code to clipboard
+        copyBtn.addEventListener('click', () => {
+            if (!qrCodeCanvas.toDataURL().includes('base64')) {
+                alert('Сначала сгенерируйте QR-код');
+                return;
+            }
+            
+            qrCodeCanvas.toBlob((blob) => {
+                navigator.clipboard.write([
+                    new ClipboardItem({
+                        'image/png': blob
+                    })
+                ]).then(() => {
+                    const originalText = copyBtn.textContent;
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Скопировано';
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Копировать';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Не удалось скопировать QR-код: ', err);
+                    alert('Не удалось скопировать QR-код. Попробуйте скачать его.');
+                });
+            });
+        });
+        
+        // Generate initial QR code on load
+        qrUrl.value = window.location.href;
+        generateBtn.click();
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
