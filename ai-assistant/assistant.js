@@ -9,8 +9,11 @@ const knowledgeBase = {
     "что такое газпром": "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти."
 };
 
-// Hugging Face API ключ (будет заменен через GitHub Actions или задан вручную)
-const HF_API_KEY = window.HF_API_KEY || "{{HF_API_KEY}}";
+// Настройки API
+const AI_CONFIG = {
+    HF_API_KEY: window.HF_API_KEY || "{{HF_API_KEY}}",
+    USE_LOCAL_MODEL: false // Автоматически переключится на true если API недоступно
+};
 
 // Элементы интерфейса
 const chatMessages = document.getElementById('chat-messages');
@@ -20,6 +23,41 @@ const userInput = document.getElementById('user-input');
 function initChat() {
     if (chatMessages.children.length <= 1) {
         addMessage("Здравствуйте! Я ваш виртуальный помощник. Могу ответить на вопросы о работе компании, внутренних инструментах и документах. Чем могу помочь?", 'assistant');
+        
+        // Проверка доступности API при загрузке
+        testHuggingFaceAPI();
+    }
+}
+
+// Тестирование доступности Hugging Face API
+async function testHuggingFaceAPI() {
+    if (!AI_CONFIG.HF_API_KEY || AI_CONFIG.HF_API_KEY === "{{HF_API_KEY}}") {
+        console.log("Hugging Face API ключ не задан, пробуем локальную модель");
+        AI_CONFIG.USE_LOCAL_MODEL = true;
+        return;
+    }
+
+    try {
+        const testResponse = await fetch(
+            "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill",
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${AI_CONFIG.HF_API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ inputs: "тест" })
+            }
+        );
+        
+        if (!testResponse.ok) {
+            throw new Error("API недоступно");
+        }
+        
+        console.log("Hugging Face API доступен");
+    } catch (error) {
+        console.log("Hugging Face API недоступен, переключаемся на локальную модель");
+        AI_CONFIG.USE_LOCAL_MODEL = true;
     }
 }
 
@@ -63,20 +101,25 @@ function checkQuickQuestions(question) {
     return null;
 }
 
-// Отправка запроса к Hugging Face API
-async function getAIResponse(question) {
-    try {
-        // Если ключ не задан, используем локальную базу знаний
-        if (!HF_API_KEY || HF_API_KEY === "{{HF_API_KEY}}") {
-            return "Извините, сервис временно недоступен. Попробуйте задать другой вопрос или обратитесь в поддержку.";
-        }
+// Локальная модель через Transformers.js
+async function loadLocalModel() {
+    if (!window.localModel) {
+        console.log("Загрузка локальной модели...");
+        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0');
+        window.localModel = await pipeline('text-generation', 'Xenova/LaMini-Flan-T5-248M');
+    }
+    return window.localModel;
+}
 
+// Получение ответа от Hugging Face API
+async function getHuggingFaceResponse(question) {
+    try {
         const response = await fetch(
             "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill",
             {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${HF_API_KEY}`,
+                    "Authorization": `Bearer ${AI_CONFIG.HF_API_KEY}`,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({ inputs: question })
@@ -91,8 +134,33 @@ async function getAIResponse(question) {
         return data.generated_text || "Не могу ответить на этот вопрос.";
     } catch (error) {
         console.error('Ошибка Hugging Face API:', error);
-        return "Извините, произошла ошибка. Попробуйте позже или задайте другой вопрос.";
+        AI_CONFIG.USE_LOCAL_MODEL = true;
+        return null;
     }
+}
+
+// Получение ответа от локальной модели
+async function getLocalModelResponse(question) {
+    try {
+        const model = await loadLocalModel();
+        const response = await model(question, { max_length: 100 });
+        return response[0].generated_text || "Не могу ответить на этот вопрос.";
+    } catch (error) {
+        console.error('Ошибка локальной модели:', error);
+        return "Извините, произошла ошибка при обработке запроса.";
+    }
+}
+
+// Основная функция получения ответа
+async function getAIResponse(question) {
+    // Сначала пробуем Hugging Face API если доступно
+    if (!AI_CONFIG.USE_LOCAL_MODEL && AI_CONFIG.HF_API_KEY && AI_CONFIG.HF_API_KEY !== "{{HF_API_KEY}}") {
+        const apiResponse = await getHuggingFaceResponse(question);
+        if (apiResponse) return apiResponse;
+    }
+    
+    // Если API недоступно, используем локальную модель
+    return await getLocalModelResponse(question);
 }
 
 // Обработка отправки сообщения
