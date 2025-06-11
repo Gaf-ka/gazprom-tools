@@ -9,8 +9,8 @@ const knowledgeBase = {
     "что такое газпром": "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти."
 };
 
-// API ключ (будет заменен GitHub Actions)
-const API_KEY = window.OPENAI_API_KEY || "{{OPENAI_API_KEY}}";
+// Hugging Face API ключ (будет заменен через GitHub Actions или задан вручную)
+const HF_API_KEY = window.HF_API_KEY || "{{HF_API_KEY}}";
 
 // Элементы интерфейса
 const chatMessages = document.getElementById('chat-messages');
@@ -63,25 +63,35 @@ function checkQuickQuestions(question) {
     return null;
 }
 
-// Отправка запроса к OpenAI
+// Отправка запроса к Hugging Face API
 async function getAIResponse(question) {
     try {
-        const API_URL = "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill";
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Authorization": "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",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ inputs: question })
-        });
+        // Если ключ не задан, используем локальную базу знаний
+        if (!HF_API_KEY || HF_API_KEY === "{{HF_API_KEY}}") {
+            return "Извините, сервис временно недоступен. Попробуйте задать другой вопрос или обратитесь в поддержку.";
+        }
 
-        if (!response.ok) throw new Error("Ошибка API");
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill",
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${HF_API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ inputs: question })
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Ошибка API: ${response.status}`);
+        }
+
         const data = await response.json();
-        return data.generated_text || "Не удалось получить ответ.";
+        return data.generated_text || "Не могу ответить на этот вопрос.";
     } catch (error) {
-        console.error("Ошибка:", error);
-        return "Извините, сервис временно недоступен. Попробуйте позже.";
+        console.error('Ошибка Hugging Face API:', error);
+        return "Извините, произошла ошибка. Попробуйте позже или задайте другой вопрос.";
     }
 }
 
@@ -102,16 +112,12 @@ async function sendMessage() {
             return;
         }
         
-        // Если API ключ заменен (не шаблонный)
-        if (API_KEY && API_KEY !== "{{OPENAI_API_KEY}}") {
-            const aiResponse = await getAIResponse(message);
-            addMessage(aiResponse, 'assistant');
-        } else {
-            addMessage("Извините, сервис временно недоступен. Попробуйте задать другой вопрос.", 'assistant');
-        }
+        // Если вопрос не найден в базе, используем AI
+        const aiResponse = await getAIResponse(message);
+        addMessage(aiResponse, 'assistant');
     } catch (error) {
         console.error('Ошибка:', error);
-        addMessage("Произошла ошибка при обработке запроса. Пожалуйста, попробуйте позже.", 'assistant');
+        addMessage("Произошла ошибка. Попробуйте позже.", 'assistant');
     } finally {
         hideTypingIndicator();
     }
