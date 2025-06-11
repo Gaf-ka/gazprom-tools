@@ -8,7 +8,41 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Обновленные стили для чата */
+        /* Стили для кнопок быстрых вопросов */
+        .quick-questions {
+            margin-top: 15px;
+            padding: 10px;
+        }
+        
+        .quick-questions p {
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .quick-question {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quick-question:hover {
+            background-color: #e0e0e0;
+            border-color: #ccc;
+        }
+        
+        .quick-question:active {
+            background-color: #d0d0d0;
+        }
+        
+        /* Дополнительные стили для чата */
         .assistant-container {
             max-width: 800px;
             margin: 20px auto;
@@ -16,7 +50,6 @@
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             overflow: hidden;
-            font-family: 'Roboto', sans-serif;
         }
         
         .assistant-header {
@@ -44,93 +77,48 @@
             padding: 20px;
             height: 400px;
             overflow-y: auto;
-            background: #f9f9f9;
         }
         
         .message {
             margin-bottom: 15px;
-            padding: 12px 16px;
+            padding: 10px 15px;
             border-radius: 18px;
             max-width: 80%;
-            line-height: 1.4;
-            position: relative;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         
         .assistant-message {
-            background: #e3f2fd;
+            background: #f1f1f1;
             margin-right: auto;
-            border-top-left-radius: 4px;
         }
         
         .user-message {
             background: #0088cc;
             color: white;
             margin-left: auto;
-            border-top-right-radius: 4px;
-        }
-        
-        .quick-questions {
-            margin-top: 15px;
-            padding: 10px;
-            text-align: center;
-        }
-        
-        .quick-questions p {
-            margin-bottom: 10px;
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .quick-question {
-            display: inline-block;
-            margin: 5px;
-            padding: 8px 15px;
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            color: #333;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .quick-question:hover {
-            background-color: #e0e0e0;
-            border-color: #ccc;
         }
         
         .assistant-input {
             display: flex;
             padding: 15px;
             border-top: 1px solid #eee;
-            background: #f8f8f8;
         }
         
         .assistant-input input {
             flex: 1;
-            padding: 12px 15px;
+            padding: 10px 15px;
             border: 1px solid #ddd;
             border-radius: 20px;
             outline: none;
-            font-size: 15px;
         }
         
         .assistant-input button {
             margin-left: 10px;
-            padding: 0 20px;
+            padding: 10px 20px;
             background: #0088cc;
             color: white;
             border: none;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 15px;
-            transition: background 0.3s;
         }
         
         .assistant-input button:hover {
@@ -146,15 +134,23 @@
         .typing-dot {
             width: 8px;
             height: 8px;
-            background: #999;
+            background-color: #999;
             border-radius: 50%;
             margin: 0 3px;
             animation: typingAnimation 1.4s infinite ease-in-out;
         }
         
-        .typing-dot:nth-child(1) { animation-delay: 0s; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
         
         @keyframes typingAnimation {
             0%, 60%, 100% { transform: translateY(0); }
@@ -163,7 +159,6 @@
     </style>
 </head>
 <body>
-    <!-- Шапка сайта -->
     <header class="header">
         <div class="container">
             <div class="header-container">
@@ -192,7 +187,6 @@
         </div>
     </header>
 
-    <!-- Основное содержимое -->
     <main class="main">
         <section class="section-header">
             <div class="container">
@@ -230,7 +224,6 @@
         </div>
     </main>
 
-    <!-- Подвал сайта -->
     <footer class="footer">
         <div class="container">
             <div class="footer-container">
@@ -278,22 +271,30 @@
         </div>
     </footer>
 
-    <!-- JavaScript -->
     <script>
-        // База знаний помощника (расширенная)
+        // Установите здесь ваш ключ Hugging Face API
+        window.HF_API_KEY = "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";
+    </script>
+
+    <script>
+        // База знаний помощника (для быстрых ответов)
         const knowledgeBase = {
-            "как пользоваться калькулятором": "Калькулятор находится в разделе 'Офисные инструменты'. Вы можете выполнять базовые арифметические операции, а также финансовые расчеты. Для доступа необходимо авторизоваться в системе.",
-            "техника безопасности": "Подробную информацию о технике безопасности вы можете найти в тренажере по технике безопасности в разделе 'Тренажёры'. Также доступны инструкции в PDF-формате.",
-            "визуализация данных": "В разделе 'Визуализация данных' вы можете создавать различные графики и диаграммы. Доступны: линейные, столбчатые, круговые, кольцевые диаграммы, а также тепловые карты.",
-            "как создать отчет": "Для создания отчета выполните следующие шаги:\n1. Перейдите в раздел 'Отчеты'\n2. Выберите тип отчета\n3. Укажите параметры и период\n4. Используйте инструменты визуализации\n5. Экспортируйте в PDF, Excel или изображение",
-            "контакты службы поддержки": "Служба поддержки доступна:\n- По внутреннему телефону: 1234\n- По email: support@gazprom.ru\n- Через онлайн-чат в правом нижнем углу экрана\nРабочее время: Пн-Пт с 9:00 до 18:00",
-            "как работать с excel": "В разделе 'Тренажёры' доступен интерактивный тренажёр Excel, где вы можете изучить:\n- Основные функции и формулы\n- Работу с таблицами\n- Создание диаграмм\n- Автоматизацию расчетов",
-            "что такое газпром": "Газпром — глобальная энергетическая компания, занимающаяся:\n- Разведкой и добычей газа\n- Транспортировкой и хранением\n- Переработкой и реализацией\n- Развитием новых технологий\nКомпания обеспечивает энергетическую безопасность страны.",
-            "привет": "Здравствуйте! Я виртуальный помощник Газпром. Чем могу помочь?",
-            "помощь": "Я могу помочь с:\n1. Работой с офисными инструментами\n2. Созданием отчетов\n3. Визуализацией данных\n4. Ответами на вопросы о компании\nЗадайте конкретный вопрос для получения подробной информации.",
-            "как войти в систему": "Для входа в систему используйте:\n1. Ваш корпоративный логин и пароль\n2. Электронную цифровую подпись\n3. Мобильное приложение для двухфакторной аутентификации\nПри проблемах обратитесь в ИТ-поддержку.",
-            "график работы": "Основной график работы:\nПонедельник-Пятница с 9:00 до 18:00\nОбед с 13:00 до 14:00\nДежурные подразделения работают круглосуточно.",
-            "корпоративные правила": "Корпоративные правила включают:\n1. Дресс-код\n2. Правила информационной безопасности\n3. Этика делового общения\n4. Порядок работы с документами\nПолный текст доступен во внутренней сети."
+            "как пользоваться калькулятором": "Калькулятор находится в разделе 'Офисные инструменты'. Вы можете выполнять базовые арифметические операции, а также финансовые расчеты.",
+            "техника безопасности": "Подробную информацию о технике безопасности вы можете найти в тренажере по технике безопасности в разделе 'Тренажёры'.",
+            "визуализация данных": "В разделе 'Визуализация данных' вы можете создавать графики и диаграммы. Доступны линейные, столбчатые, круговые и кольцевые диаграммы.",
+            "как создать отчет": "Для создания отчета вы можете использовать инструменты визуализации данных, а также экспортировать результаты в формате PDF или изображения.",
+            "контакты службы поддержки": "Служба поддержки доступна по внутреннему телефону 1234 или по email support@gazprom.ru.",
+            "как работать с excel": "В разделе 'Тренажёры' доступен тренажёр Excel, где вы можете изучить основные функции и формулы.",
+            "что такое газпром": "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти.",
+            "привет": "Здравствуйте! Чем могу помочь?",
+            "помощь": "Я могу ответить на вопросы о работе компании, внутренних инструментах и документах. Попробуйте задать конкретный вопрос."
+        };
+
+        // Настройки API
+        const AI_CONFIG = {
+            HF_API_KEY: window.HF_API_KEY || "{{HF_API_KEY}}",
+            USE_API: true,
+            MODEL_NAME: "facebook/blenderbot-400M-distill"
         };
 
         // Элементы интерфейса
@@ -347,37 +348,67 @@
             return null;
         }
 
+        // Получение ответа от Hugging Face API
+        async function getHuggingFaceResponse(question) {
+            try {
+                const response = await fetch(
+                    `https://api-inference.huggingface.co/models/${AI_CONFIG.MODEL_NAME}`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${AI_CONFIG.HF_API_KEY}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ inputs: question })
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка API: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.generated_text || "Не могу ответить на этот вопрос.";
+            } catch (error) {
+                console.error('Ошибка Hugging Face API:', error);
+                AI_CONFIG.USE_API = false;
+                return null;
+            }
+        }
+
         // Генерация ответа для неизвестных вопросов
         function generateFallbackResponse(question) {
             const lowerQuestion = question.toLowerCase();
             
-            if (lowerQuestion.includes("как") || lowerQuestion.includes("какой") || lowerQuestion.includes("где")) {
-                return "По этому вопросу обратитесь в службу поддержки по телефону 1234 или email support@gazprom.ru.";
+            if (lowerQuestion.includes("как") || lowerQuestion.includes("какой")) {
+                return "По этому вопросу обратитесь в службу поддержки по телефону 1234.";
             }
             
-            if (lowerQuestion.includes("когда") || lowerQuestion.includes("сколько") || lowerQuestion.includes("график")) {
-                return "Точную информацию по срокам и расписанию можно уточнить в соответствующем разделе портала или у вашего руководителя.";
+            if (lowerQuestion.includes("когда") || lowerQuestion.includes("сколько")) {
+                return "Точную информацию по срокам можно уточнить в соответствующем разделе портала.";
             }
             
-            if (lowerQuestion.includes("почему") || lowerQuestion.includes("причина")) {
-                return "Для выяснения причин обратитесь в соответствующий отдел. Я могу помочь с контактами.";
-            }
-            
-            return "Извините, я не могу ответить на этот вопрос. Пожалуйста, уточните ваш запрос или обратитесь в поддержку по телефону 1234.";
+            return "Извините, я не могу ответить на этот вопрос. Пожалуйста, уточните ваш запрос или обратитесь в поддержку.";
         }
 
         // Основная функция получения ответа
-        function getAIResponse(question) {
+        async function getAIResponse(question) {
             // Сначала проверяем быстрые вопросы
             const quickAnswer = checkQuickQuestions(question);
             if (quickAnswer) return quickAnswer;
             
-            // Если вопрос не найден, используем резервный вариант
+            // Пробуем Hugging Face API если доступно
+            if (AI_CONFIG.USE_API && AI_CONFIG.HF_API_KEY && AI_CONFIG.HF_API_KEY !== "{{HF_API_KEY}}") {
+                const apiResponse = await getHuggingFaceResponse(question);
+                if (apiResponse) return apiResponse;
+            }
+            
+            // Если API недоступно, используем резервный вариант
             return generateFallbackResponse(question);
         }
 
         // Обработка отправки сообщения
-        function sendMessage() {
+        async function sendMessage() {
             const message = userInput.value.trim();
             if (!message) return;
             
@@ -385,18 +416,15 @@
             addMessage(message, 'user');
             showTypingIndicator();
             
-            // Имитация задержки для реалистичности
-            setTimeout(() => {
-                try {
-                    const response = getAIResponse(message);
-                    addMessage(response, 'assistant');
-                } catch (error) {
-                    console.error('Ошибка:', error);
-                    addMessage("Произошла ошибка. Попробуйте позже.", 'assistant');
-                } finally {
-                    hideTypingIndicator();
-                }
-            }, 800); // Задержка 0.8 секунды
+            try {
+                const response = await getAIResponse(message);
+                addMessage(response, 'assistant');
+            } catch (error) {
+                console.error('Ошибка:', error);
+                addMessage("Произошла ошибка. Попробуйте позже.", 'assistant');
+            } finally {
+                hideTypingIndicator();
+            }
         }
 
         // Быстрый вопрос
@@ -420,9 +448,7 @@
         });
     </script>
 
-    <!-- Подключение основного скрипта -->
     <script src="../script.js"></script>
-    <script src="assistant.js"></script>
-
+     <script src="assistant.js"></script>
 </body>
 </html>
