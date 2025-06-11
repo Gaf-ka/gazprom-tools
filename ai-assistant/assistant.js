@@ -6,13 +6,15 @@ const knowledgeBase = {
     "как создать отчет": "Для создания отчета вы можете использовать инструменты визуализации данных, а также экспортировать результаты в формате PDF или изображения.",
     "контакты службы поддержки": "Служба поддержки доступна по внутреннему телефону 1234 или по email support@gazprom.ru.",
     "как работать с excel": "В разделе 'Тренажёры' доступен тренажёр Excel, где вы можете изучить основные функции и формулы.",
-    "что такое газпром": "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти."
+    "что такое газпром": "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти.",
+    "привет": "Здравствуйте! Чем могу помочь?",
+    "помощь": "Я могу ответить на вопросы о работе компании, внутренних инструментах и документах. Попробуйте задать конкретный вопрос."
 };
 
 // Настройки API
 const AI_CONFIG = {
     HF_API_KEY: window.HF_API_KEY || "{{HF_API_KEY}}",
-    USE_LOCAL_MODEL: false // Автоматически переключится на true если API недоступно
+    USE_API: true
 };
 
 // Элементы интерфейса
@@ -23,41 +25,6 @@ const userInput = document.getElementById('user-input');
 function initChat() {
     if (chatMessages.children.length <= 1) {
         addMessage("Здравствуйте! Я ваш виртуальный помощник. Могу ответить на вопросы о работе компании, внутренних инструментах и документах. Чем могу помочь?", 'assistant');
-        
-        // Проверка доступности API при загрузке
-        testHuggingFaceAPI();
-    }
-}
-
-// Тестирование доступности Hugging Face API
-async function testHuggingFaceAPI() {
-    if (!AI_CONFIG.HF_API_KEY || AI_CONFIG.HF_API_KEY === "{{HF_API_KEY}}") {
-        console.log("Hugging Face API ключ не задан, пробуем локальную модель");
-        AI_CONFIG.USE_LOCAL_MODEL = true;
-        return;
-    }
-
-    try {
-        const testResponse = await fetch(
-            "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill",
-            {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${AI_CONFIG.HF_API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ inputs: "тест" })
-            }
-        );
-        
-        if (!testResponse.ok) {
-            throw new Error("API недоступно");
-        }
-        
-        console.log("Hugging Face API доступен");
-    } catch (error) {
-        console.log("Hugging Face API недоступен, переключаемся на локальную модель");
-        AI_CONFIG.USE_LOCAL_MODEL = true;
     }
 }
 
@@ -101,16 +68,6 @@ function checkQuickQuestions(question) {
     return null;
 }
 
-// Локальная модель через Transformers.js
-async function loadLocalModel() {
-    if (!window.localModel) {
-        console.log("Загрузка локальной модели...");
-        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0');
-        window.localModel = await pipeline('text-generation', 'Xenova/LaMini-Flan-T5-248M');
-    }
-    return window.localModel;
-}
-
 // Получение ответа от Hugging Face API
 async function getHuggingFaceResponse(question) {
     try {
@@ -134,33 +91,40 @@ async function getHuggingFaceResponse(question) {
         return data.generated_text || "Не могу ответить на этот вопрос.";
     } catch (error) {
         console.error('Ошибка Hugging Face API:', error);
-        AI_CONFIG.USE_LOCAL_MODEL = true;
+        AI_CONFIG.USE_API = false;
         return null;
     }
 }
 
-// Получение ответа от локальной модели
-async function getLocalModelResponse(question) {
-    try {
-        const model = await loadLocalModel();
-        const response = await model(question, { max_length: 100 });
-        return response[0].generated_text || "Не могу ответить на этот вопрос.";
-    } catch (error) {
-        console.error('Ошибка локальной модели:', error);
-        return "Извините, произошла ошибка при обработке запроса.";
+// Генерация ответа для неизвестных вопросов
+function generateFallbackResponse(question) {
+    const lowerQuestion = question.toLowerCase();
+    
+    if (lowerQuestion.includes("как") || lowerQuestion.includes("какой")) {
+        return "По этому вопросу обратитесь в службу поддержки по телефону 1234.";
     }
+    
+    if (lowerQuestion.includes("когда") || lowerQuestion.includes("сколько")) {
+        return "Точную информацию по срокам можно уточнить в соответствующем разделе портала.";
+    }
+    
+    return "Извините, я не могу ответить на этот вопрос. Пожалуйста, уточните ваш запрос или обратитесь в поддержку.";
 }
 
 // Основная функция получения ответа
 async function getAIResponse(question) {
-    // Сначала пробуем Hugging Face API если доступно
-    if (!AI_CONFIG.USE_LOCAL_MODEL && AI_CONFIG.HF_API_KEY && AI_CONFIG.HF_API_KEY !== "{{HF_API_KEY}}") {
+    // Сначала проверяем быстрые вопросы
+    const quickAnswer = checkQuickQuestions(question);
+    if (quickAnswer) return quickAnswer;
+    
+    // Пробуем Hugging Face API если доступно
+    if (AI_CONFIG.USE_API && AI_CONFIG.HF_API_KEY && AI_CONFIG.HF_API_KEY !== "{{HF_API_KEY}}") {
         const apiResponse = await getHuggingFaceResponse(question);
         if (apiResponse) return apiResponse;
     }
     
-    // Если API недоступно, используем локальную модель
-    return await getLocalModelResponse(question);
+    // Если API недоступно, используем резервный вариант
+    return generateFallbackResponse(question);
 }
 
 // Обработка отправки сообщения
@@ -173,16 +137,8 @@ async function sendMessage() {
     showTypingIndicator();
     
     try {
-        // Сначала проверяем быстрые вопросы
-        const quickAnswer = checkQuickQuestions(message);
-        if (quickAnswer) {
-            addMessage(quickAnswer, 'assistant');
-            return;
-        }
-        
-        // Если вопрос не найден в базе, используем AI
-        const aiResponse = await getAIResponse(message);
-        addMessage(aiResponse, 'assistant');
+        const response = await getAIResponse(message);
+        addMessage(response, 'assistant');
     } catch (error) {
         console.error('Ошибка:', error);
         addMessage("Произошла ошибка. Попробуйте позже.", 'assistant');
