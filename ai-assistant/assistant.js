@@ -66,38 +66,22 @@ function checkQuickQuestions(question) {
 // Отправка запроса к OpenAI
 async function getAIResponse(question) {
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
+        const API_URL = "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill";
+        const response = await fetch(API_URL, {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
+                "Authorization": "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",
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                model: "gpt-3.5-turbo",
-                messages: [
-                    {
-                        role: "system",
-                        content: "Ты помощник в компании Газпром. Отвечай кратко и по делу на русском языке. Если вопрос не связан с работой компании, вежливо откажись отвечать. Отвечай только по работе компании и её инструментам."
-                    },
-                    {
-                        role: "user",
-                        content: question
-                    }
-                ],
-                temperature: 0.7,
-                max_tokens: 500
-            })
+            body: JSON.stringify({ inputs: question })
         });
 
-        if (!response.ok) {
-            throw new Error(`Ошибка API: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error("Ошибка API");
         const data = await response.json();
-        return data.choices[0].message.content.trim();
+        return data.generated_text || "Не удалось получить ответ.";
     } catch (error) {
-        console.error('Ошибка OpenAI:', error);
-        return "Извините, произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте позже.";
+        console.error("Ошибка:", error);
+        return "Извините, сервис временно недоступен. Попробуйте позже.";
     }
 }
 
