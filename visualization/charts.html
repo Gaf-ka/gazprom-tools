@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .chart-container {
             display: grid;
@@ -129,6 +130,18 @@
         .form-group {
             flex: 1;
         }
+        
+        .download-buttons {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .file-info {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -181,6 +194,8 @@
                                 <option value="line">Линейный</option>
                                 <option value="bar">Столбчатый</option>
                                 <option value="radar">Радар</option>
+                                <option value="pie">Круговая диаграмма</option>
+                                <option value="doughnut">Кольцевая диаграмма</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -190,9 +205,10 @@
                     </div>
                     
                     <div class="upload-area" id="uploadArea">
-                        <p>Перетащите сюда CSV или Excel файл или</p>
-                        <button class="btn btn-outline">Выбрать файл</button>
+                        <p><i class="fas fa-cloud-upload-alt"></i> Перетащите сюда CSV или Excel файл или</p>
+                        <button class="btn btn-outline" id="selectFileBtn">Выбрать файл</button>
                         <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+                        <div class="file-info" id="fileInfo">Файл не выбран</div>
                     </div>
                     
                     <div class="chart-controls">
@@ -204,6 +220,11 @@
                     
                     <div class="chart-wrapper">
                         <canvas id="myChart"></canvas>
+                    </div>
+                    
+                    <div class="download-buttons">
+                        <button onclick="downloadChartAsImage()"><i class="fas fa-download"></i> Скачать как изображение</button>
+                        <button onclick="downloadChartData()"><i class="fas fa-file-csv"></i> Скачать данные (CSV)</button>
                     </div>
                     
                     <div class="settings-panel">
@@ -311,6 +332,7 @@
             }
         ];
         let labels = ['Янв', 'Фев', 'Мар'];
+        let currentFileName = '';
         
         document.addEventListener('DOMContentLoaded', function() {
             initializeChart();
@@ -363,8 +385,9 @@
             // Обработка загрузки файлов
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');
+            const selectFileBtn = document.getElementById('selectFileBtn');
             
-            uploadArea.addEventListener('click', () => fileInput.click());
+            selectFileBtn.addEventListener('click', () => fileInput.click());
             
             uploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -403,6 +426,9 @@
         }
         
         function handleFileUpload(file) {
+            currentFileName = file.name;
+            document.getElementById('fileInfo').textContent = `Загружен файл: ${file.name}`;
+            
             const reader = new FileReader();
             
             reader.onload = function(e) {
@@ -426,88 +452,81 @@
             Papa.parse(data, {
                 header: true,
                 complete: function(results) {
-                    if (results.data.length > 0) {
-                        const firstRow = results.data[0];
-                        const headers = Object.keys(firstRow);
-                        
-                        // Очищаем текущие данные
-                        labels = [];
-                        datasets = [];
-                        
-                        // Первый столбец - метки
-                        results.data.forEach(row => {
-                            if (row[headers[0]]) {
-                                labels.push(row[headers[0]]);
-                            }
-                        });
-                        
-                        // Остальные столбцы - наборы данных
-                        for (let i = 1; i < headers.length; i++) {
-                            const datasetData = [];
-                            
-                            results.data.forEach(row => {
-                                if (row[headers[i]]) {
-                                    datasetData.push(parseFloat(row[headers[i]]) || 0);
-                                }
-                            });
-                            
-                            datasets.push({
-                                label: headers[i],
-                                data: datasetData,
-                                borderColor: getRandomColor(),
-                                backgroundColor: getRandomColor(0.5),
-                                borderWidth: 2
-                            });
-                        }
-                        
-                        updateTableFromData();
-                        updateChart();
+                    if (results.data.length > 0 && results.meta.fields) {
+                        processParsedData(results.meta.fields, results.data);
+                    } else {
+                        alert('Не удалось прочитать данные из CSV файла. Проверьте формат файла.');
                     }
+                },
+                error: function(error) {
+                    alert('Ошибка при чтении CSV файла: ' + error.message);
                 }
             });
         }
         
         function parseExcel(data) {
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-            
-            if (jsonData.length > 1) {
-                const headers = jsonData[0];
+            try {
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
                 
-                // Очищаем текущие данные
-                labels = [];
-                datasets = [];
-                
-                // Первый столбец - метки
-                for (let i = 1; i < jsonData.length; i++) {
-                    if (jsonData[i][0]) {
-                        labels.push(jsonData[i][0]);
-                    }
-                }
-                
-                // Остальные столбцы - наборы данных
-                for (let col = 1; col < headers.length; col++) {
-                    const datasetData = [];
+                if (jsonData.length > 1) {
+                    const headers = jsonData[0];
+                    const rows = jsonData.slice(1);
                     
-                    for (let row = 1; row < jsonData.length; row++) {
-                        if (jsonData[row][col] !== undefined) {
-                            datasetData.push(parseFloat(jsonData[row][col]) || 0);
-                        }
-                    }
-                    
-                    datasets.push({
-                        label: headers[col],
-                        data: datasetData,
-                        borderColor: getRandomColor(),
-                        backgroundColor: getRandomColor(0.5),
-                        borderWidth: 2
+                    // Преобразуем в формат, аналогичный CSV
+                    const fields = headers;
+                    const data = rows.map(row => {
+                        const obj = {};
+                        headers.forEach((header, i) => {
+                            obj[header] = row[i] !== undefined ? row[i] : '';
+                        });
+                        return obj;
                     });
+                    
+                    processParsedData(fields, data);
                 }
-                
-                updateTableFromData();
-                updateChart();
+            } catch (error) {
+                alert('Ошибка при чтении Excel файла: ' + error.message);
             }
+        }
+        
+        function processParsedData(fields, data) {
+            // Очищаем текущие данные
+            labels = [];
+            datasets = [];
+            
+            // Первый столбец - метки
+            data.forEach(row => {
+                if (row[fields[0]] !== undefined && row[fields[0]] !== null && row[fields[0]] !== '') {
+                    labels.push(String(row[fields[0]]));
+                }
+            });
+            
+            // Остальные столбцы - наборы данных
+            for (let i = 1; i < fields.length; i++) {
+                const datasetData = [];
+                
+                data.forEach(row => {
+                    if (row[fields[i]] !== undefined && row[fields[i]] !== null && row[fields[i]] !== '') {
+                        const value = parseFloat(row[fields[i]]);
+                        datasetData.push(isNaN(value) ? 0 : value);
+                    } else {
+                        datasetData.push(0);
+                    }
+                });
+                
+                datasets.push({
+                    label: fields[i],
+                    data: datasetData,
+                    borderColor: getRandomColor(),
+                    backgroundColor: getRandomColor(0.5),
+                    borderWidth: 2
+                });
+            }
+            
+            updateTableFromData();
+            updateChart();
         }
         
         function updateTableFromData() {
@@ -613,8 +632,8 @@
         
         function editDataset(index) {
             const newName = prompt('Введите новое название для набора данных:', datasets[index].label);
-            if (newName !== null) {
-                datasets[index].label = newName;
+            if (newName !== null && newName.trim() !== '') {
+                datasets[index].label = newName.trim();
                 updateTableFromData();
                 updateChart();
             }
@@ -629,8 +648,10 @@
             myChart.options.plugins.title.text = document.getElementById('chartTitle').value;
             myChart.options.plugins.legend.display = document.getElementById('showLegend').checked;
             
-            myChart.options.scales.y.grid.display = document.getElementById('showGrid').checked;
-            myChart.options.scales.x.grid.display = document.getElementById('showGrid').checked;
+            if (myChart.options.scales) {
+                myChart.options.scales.y.grid.display = document.getElementById('showGrid').checked;
+                myChart.options.scales.x.grid.display = document.getElementById('showGrid').checked;
+            }
             
             updateChart();
         }
@@ -641,10 +662,41 @@
             myChart.update();
         }
         
+        function downloadChartAsImage() {
+            const link = document.createElement('a');
+            link.download = currentFileName ? `график_${currentFileName.split('.')[0]}.png` : 'график.png';
+            link.href = document.getElementById('myChart').toDataURL('image/png');
+            link.click();
+        }
+        
+        function downloadChartData() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            // Заголовки
+            csvContent += "Категория," + datasets.map(d => d.label).join(",") + "\n";
+            
+            // Данные
+            labels.forEach((label, i) => {
+                const row = [label];
+                datasets.forEach(d => {
+                    row.push(d.data[i] || '');
+                });
+                csvContent += row.join(",") + "\n";
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', currentFileName ? `данные_${currentFileName.split('.')[0]}.csv` : 'данные.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
         function getRandomColor(opacity = 1) {
-            const r = Math.floor(Math.random() * 255);
-            const g = Math.floor(Math.random() * 255);
-            const b = Math.floor(Math.random() * 255);
+            const r = Math.floor(Math.random() * 205) + 50; // Не слишком темные цвета
+            const g = Math.floor(Math.random() * 205) + 50;
+            const b = Math.floor(Math.random() * 205) + 50;
             return `rgba(${r}, ${g}, ${b}, ${opacity})`;
         }
     </script>
