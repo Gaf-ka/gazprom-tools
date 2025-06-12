@@ -7,6 +7,64 @@
     <link rel="stylesheet" href="../style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .tool-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tool-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .tool-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: var(--dark-color);
+        }
+        
+        .tool-description {
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+        
+        .btn-primary {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            align-self: flex-start;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -43,7 +101,7 @@
         <section class="section-header">
             <div class="container">
                 <h1 class="section-title">Аналитика данных</h1>
-                <p class="section-subtitle">Инструменты для визуализации и анализа данных</p>
+                <p class="section-subtitle">Мощные инструменты для визуализации и анализа данных</p>
             </div>
         </section>
 
@@ -54,27 +112,54 @@
                         <div class="tool-icon">
                             <i class="fas fa-chart-line"></i>
                         </div>
-                        <h3 class="tool-title">Графики</h3>
-                        <p class="tool-description">Создавайте линейные, столбчатые и другие типы графиков с настройкой внешнего вида</p>
+                        <h3 class="tool-title">Графики и диаграммы</h3>
+                        <p class="tool-description">Создавайте различные типы графиков с возможностью загрузки данных и экспорта результатов</p>
                         <a href="charts.html" class="btn btn-primary">Открыть</a>
                     </div>
                     
                     <div class="tool-card">
                         <div class="tool-icon">
-                            <i class="fas fa-chart-pie"></i>
+                            <i class="fas fa-map"></i>
                         </div>
-                        <h3 class="tool-title">Диаграммы</h3>
-                        <p class="tool-description">Круговые, кольцевые диаграммы с полной кастомизацией</p>
-                        <a href="diagrams.html" class="btn btn-primary">Открыть</a>
+                        <h3 class="tool-title">Геоаналитика</h3>
+                        <p class="tool-description">Визуализация данных на карте с возможностью настройки слоев и экспорта</p>
+                        <a href="geo.html" class="btn btn-primary">Открыть</a>
                     </div>
                     
                     <div class="tool-card">
                         <div class="tool-icon">
-                            <i class="fas fa-file-import"></i>
+                            <i class="fas fa-table"></i>
                         </div>
-                        <h3 class="tool-title">Импорт данных</h3>
-                        <p class="tool-description">Загружайте данные из CSV и Excel файлов для анализа</p>
-                        <a href="import.html" class="btn btn-primary">Открыть</a>
+                        <h3 class="tool-title">Анализ таблиц</h3>
+                        <p class="tool-description">Мощный инструмент для анализа табличных данных с фильтрами и сводками</p>
+                        <a href="tables.html" class="btn btn-primary">Открыть</a>
+                    </div>
+                    
+                    <div class="tool-card">
+                        <div class="tool-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h3 class="tool-title">Гистограммы</h3>
+                        <p class="tool-description">Анализ распределения данных с настраиваемыми интервалами и параметрами</p>
+                        <a href="histograms.html" class="btn btn-primary">Открыть</a>
+                    </div>
+                    
+                    <div class="tool-card">
+                        <div class="tool-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <h3 class="tool-title">Корреляционный анализ</h3>
+                        <p class="tool-description">Выявление взаимосвязей между переменными с тепловыми картами корреляции</p>
+                        <a href="correlation.html" class="btn btn-primary">Открыть</a>
+                    </div>
+                    
+                    <div class="tool-card">
+                        <div class="tool-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h3 class="tool-title">Временные ряды</h3>
+                        <p class="tool-description">Анализ временных данных с прогнозированием и декомпозицией</p>
+                        <a href="timeseries.html" class="btn btn-primary">Открыть</a>
                     </div>
                 </div>
             </div>

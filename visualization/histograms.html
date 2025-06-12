@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гистограммы - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .histogram-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .histogram-box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+        
+        .histogram-box h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .histogram-wrapper {
+            position: relative;
+            height: 500px;
+            width: 100%;
+        }
+        
+        .histogram-controls {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .histogram-controls button, .histogram-controls select, .histogram-controls input {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .histogram-controls button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .settings-panel {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        
+        .settings-group {
+            margin-bottom: 1rem;
+        }
+        
+        .settings-group label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .color-picker input {
+            width: 40px;
+            height: 30px;
+            padding: 0;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        .download-buttons {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .file-info {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .bin-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Гистограммы</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="../office-tools/index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Гистограммы распределения</h1>
+                <p class="section-subtitle">Анализ распределения данных с настраиваемыми параметрами</p>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="histogram-container">
+                <div class="histogram-box">
+                    <h3>Настройки гистограммы</h3>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <p><i class="fas fa-cloud-upload-alt"></i> Перетащите сюда CSV или Excel файл с данными или</p>
+                        <button class="btn btn-outline" id="selectFileBtn">Выбрать файл</button>
+                        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+                        <div class="file-info" id="fileInfo">Файл не выбран</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dataColumn">Столбец с данными:</label>
+                            <select id="dataColumn" disabled>
+                                <option value="">Выберите столбец</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="histogramType">Тип гистограммы:</label>
+                            <select id="histogramType">
+                                <option value="vertical">Вертикальная</option>
+                                <option value="horizontal">Горизонтальная</option>
+                                <option value="stacked">Стэкированная</option>
+                                <option value="overlay">Наложенная</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="binCount">Количество интервалов:</label>
+                            <div class="bin-controls">
+                                <input type="range" id="binCount" min="3" max="20" value="10">
+                                <span id="binCountValue">10</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="colorScheme">Цветовая схема:</label>
+                            <select id="colorScheme">
+                                <option value="blue">Синяя</option>
+                                <option value="green">Зеленая</option>
+                                <option value="red">Красная</option>
+                                <option value="rainbow">Радужная</option>
+                                <option value="grayscale">Оттенки серого</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="histogram-wrapper">
+                        <canvas id="histogramChart"></canvas>
+                    </div>
+                    
+                    <div class="histogram-controls">
+                        <button id="updateHistogramBtn"><i class="fas fa-sync-alt"></i> Обновить гистограмму</button>
+                        <button id="addComparisonBtn"><i class="fas fa-plus-circle"></i> Добавить сравнение</button>
+                        <button id="clearComparisonBtn"><i class="fas fa-trash-alt"></i> Очистить сравнение</button>
+                    </div>
+                    
+                    <div class="download-buttons">
+                        <button id="exportImageBtn"><i class="fas fa-download"></i> Скачать как изображение</button>
+                        <button id="exportDataBtn"><i class="fas fa-file-csv"></i> Скачать данные (CSV)</button>
+                        <button id="exportStatsBtn"><i class="fas fa-chart-bar"></i> Скачать статистику</button>
+                    </div>
+                    
+                    <div class="settings-panel">
+                        <h4>Настройки отображения</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="showLegend" checked> 
+                                    Показывать легенду
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="showGrid" checked> 
+                                    Показывать сетку
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="showStats" checked> 
+                                    Показывать статистику
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Статистика распределения</h3>
+                    <div id="statsSummary"></div>
+                    
+                    <h3>Загруженные данные</h3>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <table class="data-table" id="dataTable">
+                            <thead id="headerRow"></thead>
+                            <tbody id="tableData"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="../office-tools/index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let histogramChart;
+        let currentData = [];
+        let currentColumns = [];
+        let currentFileName = '';
+        let comparisonData = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeHistogram();
+            setupEventListeners();
+        });
+        
+        function initializeHistogram() {
+            const ctx = document.getElementById('histogramChart').getContext('2d');
+            
+            histogramChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Гистограмма распределения',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Частота: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Интервалы'
+                            },
+                            grid: {
+                                display: true
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Частота'
+                            },
+                            beginAtZero: true,
+                            grid: {
+                                display: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function setupEventListeners() {
+            // Обработка загрузки файлов
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const selectFileBtn = document.getElementById('selectFileBtn');
+            
+            selectFileBtn.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary-color)';
+                uploadArea.style.backgroundColor = 'var(--primary-light)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileUpload(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    handleFileUpload(fileInput.files[0]);
+                }
+            });
+            
+            // Обработка кнопок управления
+            document.getElementById('updateHistogramBtn').addEventListener('click', updateHistogram);
+            document.getElementById('addComparisonBtn').addEventListener('click', addComparison);
+            document.getElementById('clearComparisonBtn').addEventListener('click', clearComparison);
+            
+            document.getElementById('exportImageBtn').addEventListener('click', exportAsImage);
+            document.getElementById('exportDataBtn').addEventListener('click', exportDataAsCsv);
+            document.getElementById('exportStatsBtn').addEventListener('click', exportStats);
+            
+            // Обработка изменений настроек
+            document.getElementById('binCount').addEventListener('input', function() {
+                document.getElementById('binCountValue').textContent = this.value;
+            });
+            
+            document.getElementById('showLegend').addEventListener('change', function() {
+                histogramChart.options.plugins.legend.display = this.checked;
+                histogramChart.update();
+            });
+            
+            document.getElementById('showGrid').addEventListener('change', function() {
+                histogramChart.options.scales.x.grid.display = this.checked;
+                histogramChart.options.scales.y.grid.display = this.checked;
+                histogramChart.update();
+            });
+            
+            document.getElementById('showStats').addEventListener('change', function() {
+                document.getElementById('statsSummary').style.display = this.checked ? 'block' : 'none';
+            });
+        }
+        
+        function handleFileUpload(file) {
+            currentFileName = file.name;
+            document.getElementById('fileInfo').textContent = `Загружен файл: ${file.name}`;
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const data = e.target.result;
+                
+                if (file.name.endsWith('.csv')) {
+                    parseCSV(data);
+                } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                    parseExcel(data);
+                }
+            };
+            
+            if (file.name.endsWith('.csv')) {
+                reader.readAsText(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
+        }
+        
+        function parseCSV(data) {
+            Papa.parse(data, {
+                header: true,
+                complete: function(results) {
+                    if (results.data.length > 0 && results.meta.fields) {
+                        processParsedData(results.meta.fields, results.data);
+                    } else {
+                        alert('Не удалось прочитать данные из CSV файла. Проверьте формат файла.');
+                    }
+                },
+                error: function(error) {
+                    alert('Ошибка при чтении CSV файла: ' + error.message);
+                }
+            });
+        }
+        
+        function parseExcel(data) {
+            try {
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                
+                if (jsonData.length > 1) {
+                    const headers = jsonData[0];
+                    const rows = jsonData.slice(1);
+                    
+                    // Преобразуем в формат, аналогичный CSV
+                    const fields = headers;
+                    const data = rows.map(row => {
+                        const obj = {};
+                        headers.forEach((header, i) => {
+                            obj[header] = row[i] !== undefined ? row[i] : '';
+                        });
+                        return obj;
+                    });
+                    
+                    processParsedData(fields, data);
+                }
+            } catch (error) {
+                alert('Ошибка при чтении Excel файла: ' + error.message);
+            }
+        }
+        
+        function processParsedData(fields, data) {
+            currentData = data;
+            currentColumns = fields;
+            
+            // Обновляем выпадающий список столбцов
+            updateColumnSelect(fields);
+            
+            // Обновляем таблицу с данными
+            updateDataTable(fields, data);
+            
+            // Включаем кнопки управления
+            document.getElementById('dataColumn').disabled = false;
+        }
+        
+        function updateColumnSelect(fields) {
+            const select = document.getElementById('dataColumn');
+            select.innerHTML = '<option value="">Выберите столбец</option>';
+            
+            fields.forEach(field => {
+                select.innerHTML += `<option value="${field}">${field}</option>`;
+            });
+        }
+        
+        function updateDataTable(fields, data) {
+            const headerRow = document.getElementById('headerRow');
+            const tableData = document.getElementById('tableData');
+            
+            // Очищаем таблицу
+            headerRow.innerHTML = '';
+            tableData.innerHTML = '';
+            
+            // Добавляем заголовки
+            fields.forEach(field => {
+                headerRow.innerHTML += `<th>${field}</th>`;
+            });
+            
+            // Добавляем данные (первые 50 строк)
+            const displayData = data.slice(0, 50);
+            displayData.forEach(row => {
+                const tr = document.createElement('tr');
+                fields.forEach(field => {
+                    const value = row[field] !== undefined ? row[field] : '';
+                    tr.innerHTML += `<td>${value}</td>`;
+                });
+                tableData.appendChild(tr);
+            });
+            
+            if (data.length > 50) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="${fields.length}" style="text-align: center; font-style: italic;">... и еще ${data.length - 50} строк</td>`;
+                tableData.appendChild(tr);
+            }
+        }
+        
+        function updateHistogram() {
+            const columnName = document.getElementById('dataColumn').value;
+            if (!columnName) {
+                alert('Пожалуйста, выберите столбец с данными');
+                return;
+            }
+            
+            // Получаем числовые значения из выбранного столбца
+            const values = currentData
+                .map(row => parseFloat(row[columnName]))
+                .filter(val => !isNaN(val));
+            
+            if (values.length === 0) {
+                alert('Не найдено числовых данных в выбранном столбце');
+                return;
+            }
+            
+            // Вычисляем гистограмму
+            const binCount = parseInt(document.getElementById('binCount').value);
+            const histogram = calculateHistogram(values, binCount);
+            
+            // Обновляем гистограмму
+            updateChart(histogram, columnName);
+            
+            // Обновляем статистику
+            updateStatistics(values, columnName);
+        }
+        
+        function calculateHistogram(values, binCount) {
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const range = max - min;
+            const binSize = range / binCount;
+            
+            // Создаем интервалы
+            const bins = Array(binCount).fill().map((_, i) => {
+                const start = min + i * binSize;
+                const end = start + binSize;
+                return {
+                    start: start,
+                    end: end,
+                    label: `${start.toFixed(2)} - ${end.toFixed(2)}`,
+                    count: 0
+                };
+            });
+            
+            // Заполняем интервалы
+            values.forEach(value => {
+                let binIndex = Math.floor((value - min) / binSize);
+                // Последнее значение попадает в последний интервал
+                binIndex = Math.min(binIndex, binCount - 1);
+                bins[binIndex].count++;
+            });
+            
+            return bins;
+        }
+        
+        function updateChart(bins, columnName) {
+            const type = document.getElementById('histogramType').value;
+            const colorScheme = document.getElementById('colorScheme').value;
+            
+            // Определяем тип графика
+            let chartType = 'bar';
+            if (type === 'horizontal') chartType = 'bar';
+            if (type === 'stacked') chartType = 'bar';
+            if (type === 'overlay') chartType = 'bar';
+            
+            // Определяем цвет
+            let backgroundColor;
+            switch(colorScheme) {
+                case 'blue':
+                    backgroundColor = 'rgba(54, 162, 235, 0.7)';
+                    break;
+                case 'green':
+                    backgroundColor = 'rgba(75, 192, 192, 0.7)';
+                    break;
+                case 'red':
+                    backgroundColor = 'rgba(255, 99, 132, 0.7)';
+                    break;
+                case 'rainbow':
+                    backgroundColor = bins.map((_, i) => {
+                        const hue = i * (360 / bins.length);
+                        return `hsla(${hue}, 100%, 50%, 0.7)`;
+                    });
+                    break;
+                case 'grayscale':
+                    backgroundColor = bins.map((_, i) => {
+                        const gray = 100 + i * (155 / bins.length);
+                        return `rgba(${gray}, ${gray}, ${gray}, 0.7)`;
+                    });
+                    break;
+                default:
+                    backgroundColor = 'rgba(54, 162, 235, 0.7)';
+            }
+            
+            // Обновляем данные графика
+            histogramChart.data.labels = bins.map(bin => bin.label);
+            
+            // Если есть данные для сравнения, добавляем их
+            const datasets = [{
+                label: columnName,
+                data: bins.map(bin => bin.count),
+                backgroundColor: backgroundColor,
+                borderColor: 'rgba(0, 0, 0, 0.8)',
+                borderWidth: 1
+            }];
+            
+            comparisonData.forEach((comp, i) => {
+                const compBins = calculateHistogram(comp.values, bins.length);
+                datasets.push({
+                    label: comp.name,
+                    data: compBins.map(bin => bin.count),
+                    backgroundColor: `rgba(${200 - i * 50}, ${100 + i * 50}, ${50 + i * 50}, 0.5)`,
+                    borderColor: `rgba(${200 - i * 50}, ${100 + i * 50}, ${50 + i * 50}, 1)`,
+                    borderWidth: 1
+                });
+            });
+            
+            histogramChart.data.datasets = datasets;
+            
+            // Обновляем настройки в зависимости от типа
+            if (type === 'stacked') {
+                histogramChart.options.scales.x.stacked = true;
+                histogramChart.options.scales.y.stacked = true;
+            } else {
+                histogramChart.options.scales.x.stacked = false;
+                histogramChart.options.scales.y.stacked = false;
+            }
+            
+            // Обновляем заголовок
+            histogramChart.options.plugins.title.text = `Гистограмма распределения: ${columnName}`;
+            
+            // Обновляем график
+            histogramChart.update();
+        }
+        
+        function updateStatistics(values, columnName) {
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const sum = values.reduce((a, b) => a + b, 0);
+            const mean = sum / values.length;
+            const stdDev = Math.sqrt(values.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / values.length);
+            
+            // Вычисляем квартили
+            const sorted = [...values].sort((a, b) => a - b);
+            const q1 = sorted[Math.floor(sorted.length * 0.25)];
+            const median = sorted[Math.floor(sorted.length * 0.5)];
+            const q3 = sorted[Math.floor(sorted.length * 0.75)];
+            
+            let statsHtml = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <strong>Количество:</strong> ${values.length}
+                    </div>
+                    <div class="form-group">
+                        <strong>Минимум:</strong> ${min.toFixed(2)}
+                    </div>
+                    <div class="form-group">
+                        <strong>Максимум:</strong> ${max.toFixed(2)}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <strong>Среднее:</strong> ${mean.toFixed(2)}
+                    </div>
+                    <div class="form-group">
+                        <strong>Станд. отклонение:</strong> ${stdDev.toFixed(2)}
+                    </div>
+                    <div class="form-group">
+                        <strong>Сумма:</strong> ${sum.toFixed(2)}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <strong>Q1 (25%):</strong> ${q1.toFixed(2)}
+                    </div>
+                    <div class="form-group">
+                        <strong>Медиана:</strong> ${median.toFixed(2)}
+                    </div>
+                    <div class="form-group">
+                        <strong>Q3 (75%):</strong> ${q3.toFixed(2)}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('statsSummary').innerHTML = statsHtml;
+        }
+        
+        function addComparison() {
+            const columnName = document.getElementById('dataColumn').value;
+            if (!columnName) {
+                alert('Пожалуйста, выберите столбец с данными');
+                return;
+            }
+            
+            const comparisonName = prompt('Введите название для сравнения:', `Сравнение ${comparisonData.length + 1}`);
+            if (!comparisonName) return;
+            
+            // Получаем числовые значения из выбранного столбца
+            const values = currentData
+                .map(row => parseFloat(row[columnName]))
+                .filter(val => !isNaN(val));
+            
+            if (values.length === 0) {
+                alert('Не найдено числовых данных в выбранном столбце');
+                return;
+            }
+            
+            // Добавляем данные для сравнения
+            comparisonData.push({
+                name: comparisonName,
+                values: values
+            });
+            
+            // Обновляем гистограмму
+            updateHistogram();
+        }
+        
+        function clearComparison() {
+            comparisonData = [];
+            updateHistogram();
+        }
+        
+        function exportAsImage() {
+            const link = document.createElement('a');
+            link.download = currentFileName ? `гистограмма_${currentFileName.split('.')[0]}.png` : 'гистограмма.png';
+            link.href = document.getElementById('histogramChart').toDataURL('image/png');
+            link.click();
+        }
+        
+        function exportDataAsCsv() {
+            const columnName = document.getElementById('dataColumn').value;
+            if (!columnName) {
+                alert('Пожалуйста, выберите столбец с данными');
+                return;
+            }
+            
+            // Получаем числовые значения из выбранного столбца
+            const values = currentData
+                .map(row => parseFloat(row[columnName]))
+                .filter(val => !isNaN(val));
+            
+            if (values.length === 0) {
+                alert('Не найдено числовых данных в выбранном столбце');
+                return;
+            }
+            
+            // Вычисляем гистограмму
+            const binCount = parseInt(document.getElementById('binCount').value);
+            const histogram = calculateHistogram(values, binCount);
+            
+            // Создаем CSV
+            let csvContent = "data:text/csv;charset=utf-8,Интервал,Частота\n";
+            histogram.forEach(bin => {
+                csvContent += `${bin.label},${bin.count}\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', currentFileName ? `гистограмма_${currentFileName.split('.')[0]}.csv` : 'histogram.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function exportStats() {
+            const columnName = document.getElementById('dataColumn').value;
+            if (!columnName) {
+                alert('Пожалуйста, выберите столбец с данными');
+                return;
+            }
+            
+            // Получаем числовые значения из выбранного столбца
+            const values = currentData
+                .map(row => parseFloat(row[columnName]))
+                .filter(val => !isNaN(val));
+            
+            if (values.length === 0) {
+                alert('Не найдено числовых данных в выбранном столбце');
+                return;
+            }
+            
+            // Вычисляем статистику
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const sum = values.reduce((a, b) => a + b, 0);
+            const mean = sum / values.length;
+            const stdDev = Math.sqrt(values.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / values.length);
+            
+            // Создаем CSV
+            let csvContent = "data:text/csv;charset=utf-8,Параметр,Значение\n";
+            csvContent += `Количество,${values.length}\n`;
+            csvContent += `Минимум,${min.toFixed(2)}\n`;
+            csvContent += `Максимум,${max.toFixed(2)}\n`;
+            csvContent += `Среднее,${mean.toFixed(2)}\n`;
+            csvContent += `Станд. отклонение,${stdDev.toFixed(2)}\n`;
+            csvContent += `Сумма,${sum.toFixed(2)}\n`;
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', currentFileName ? `статистика_${currentFileName.split('.')[0]}.csv` : 'statistics.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

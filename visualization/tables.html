@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализ таблиц - Газпром</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <style>
+        .table-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .table-box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+        
+        .table-box h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .table-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+        }
+        
+        .table-controls {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .table-controls button, .table-controls select, .table-controls input {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .table-controls button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .settings-panel {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        
+        .settings-group {
+            margin-bottom: 1rem;
+        }
+        
+        .settings-group label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        .download-buttons {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .file-info {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .summary-panel {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f0f8ff;
+            border-radius: 4px;
+        }
+        
+        .summary-item {
+            margin-bottom: 0.5rem;
+        }
+        
+        .summary-item strong {
+            display: inline-block;
+            min-width: 150px;
+        }
+        
+        #dataTable {
+            width: 100% !important;
+        }
+        
+        .dataTables_filter input {
+            border: 1px solid #ddd !important;
+            padding: 0.25rem !important;
+        }
+        
+        .dataTables_length select {
+            border: 1px solid #ddd !important;
+            padding: 0.25rem !important;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-title">Газпром</span>
+                        <span class="logo-subtitle">Анализ таблиц</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
+                        <li class="nav-item"><a href="../office-tools/index.html" class="nav-link">Инструменты</a></li>
+                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
+                        <li class="nav-item"><a href="index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section-header">
+            <div class="container">
+                <h1 class="section-title">Анализ табличных данных</h1>
+                <p class="section-subtitle">Мощный инструмент для работы с табличными данными</p>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="table-container">
+                <div class="table-box">
+                    <h3>Настройки анализа</h3>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <p><i class="fas fa-cloud-upload-alt"></i> Перетащите сюда CSV или Excel файл с данными или</p>
+                        <button class="btn btn-outline" id="selectFileBtn">Выбрать файл</button>
+                        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+                        <div class="file-info" id="fileInfo">Файл не выбран</div>
+                    </div>
+                    
+                    <div class="table-controls">
+                        <button id="addColumnBtn"><i class="fas fa-plus"></i> Добавить столбец</button>
+                        <button id="removeColumnBtn" disabled><i class="fas fa-minus"></i> Удалить столбец</button>
+                        <button id="filterBtn"><i class="fas fa-filter"></i> Фильтровать</button>
+                        <button id="sortBtn"><i class="fas fa-sort"></i> Сортировать</button>
+                        <button id="calculateBtn"><i class="fas fa-calculator"></i> Вычислить</button>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table id="dataTable" class="display nowrap" style="width:100%"></table>
+                    </div>
+                    
+                    <div class="summary-panel">
+                        <h4>Сводка по данным</h4>
+                        <div id="dataSummary"></div>
+                    </div>
+                    
+                    <div class="download-buttons">
+                        <button id="exportExcelBtn"><i class="fas fa-file-excel"></i> Скачать Excel</button>
+                        <button id="exportCsvBtn"><i class="fas fa-file-csv"></i> Скачать CSV</button>
+                        <button id="exportPdfBtn"><i class="fas fa-file-pdf"></i> Скачать PDF</button>
+                    </div>
+                    
+                    <div class="settings-panel">
+                        <h4>Настройки отображения</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pageLength">Строк на странице:</label>
+                                <select id="pageLength">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="-1">Все</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="showSearch" checked> 
+                                    Показывать поиск
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="showInfo" checked> 
+                                    Показывать информацию
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h4 class="footer-title">Газпром</h4>
+                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html" class="footer-link">Главная</a></li>
+                        <li><a href="../office-tools/index.html" class="footer-link">Инструменты</a></li>
+                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
+                        <li><a href="index.html" class="footer-link">Аналитика</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <span>+7 (495) 719-30-01</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">✉️</span>
+                            <span>portal@gazprom.ru</span>
+                        </li>
+                        <li class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span>Москва, ул. Наметкина, 16</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                    <a href="#" class="footer-link">Условия использования</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let dataTable;
+        let currentData = [];
+        let currentColumns = [];
+        let currentFileName = '';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDataTable();
+            setupEventListeners();
+        });
+        
+        function initializeDataTable() {
+            dataTable = $('#dataTable').DataTable({
+                dom: 'Bfrtip',
+                buttons: [],
+                scrollX: true,
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/ru.json'
+                }
+            });
+        }
+        
+        function setupEventListeners() {
+            // Обработка загрузки файлов
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const selectFileBtn = document.getElementById('selectFileBtn');
+            
+            selectFileBtn.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary-color)';
+                uploadArea.style.backgroundColor = 'var(--primary-light)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileUpload(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    handleFileUpload(fileInput.files[0]);
+                }
+            });
+            
+            // Обработка кнопок управления
+            document.getElementById('addColumnBtn').addEventListener('click', addCalculatedColumn);
+            document.getElementById('removeColumnBtn').addEventListener('click', removeSelectedColumn);
+            document.getElementById('filterBtn').addEventListener('click', applyFilter);
+            document.getElementById('sortBtn').addEventListener('click', applySort);
+            document.getElementById('calculateBtn').addEventListener('click', showCalculations);
+            
+            document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+            document.getElementById('exportCsvBtn').addEventListener('click', exportToCsv);
+            document.getElementById('exportPdfBtn').addEventListener('click', exportToPdf);
+            
+            // Обработка изменений настроек
+            document.getElementById('pageLength').addEventListener('change', function() {
+                dataTable.page.len(this.value).draw();
+            });
+            
+            document.getElementById('showSearch').addEventListener('change', function() {
+                $('#dataTable_filter').toggle(this.checked);
+            });
+            
+            document.getElementById('showInfo').addEventListener('change', function() {
+                $('#dataTable_info').toggle(this.checked);
+            });
+        }
+        
+        function handleFileUpload(file) {
+            currentFileName = file.name;
+            document.getElementById('fileInfo').textContent = `Загружен файл: ${file.name}`;
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const data = e.target.result;
+                
+                if (file.name.endsWith('.csv')) {
+                    parseCSV(data);
+                } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                    parseExcel(data);
+                }
+            };
+            
+            if (file.name.endsWith('.csv')) {
+                reader.readAsText(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
+        }
+        
+        function parseCSV(data) {
+            Papa.parse(data, {
+                header: true,
+                complete: function(results) {
+                    if (results.data.length > 0 && results.meta.fields) {
+                        processParsedData(results.meta.fields, results.data);
+                    } else {
+                        alert('Не удалось прочитать данные из CSV файла. Проверьте формат файла.');
+                    }
+                },
+                error: function(error) {
+                    alert('Ошибка при чтении CSV файла: ' + error.message);
+                }
+            });
+        }
+        
+        function parseExcel(data) {
+            try {
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                
+                if (jsonData.length > 1) {
+                    const headers = jsonData[0];
+                    const rows = jsonData.slice(1);
+                    
+                    // Преобразуем в формат, аналогичный CSV
+                    const fields = headers;
+                    const data = rows.map(row => {
+                        const obj = {};
+                        headers.forEach((header, i) => {
+                            obj[header] = row[i] !== undefined ? row[i] : '';
+                        });
+                        return obj;
+                    });
+                    
+                    processParsedData(fields, data);
+                }
+            } catch (error) {
+                alert('Ошибка при чтении Excel файла: ' + error.message);
+            }
+        }
+        
+        function processParsedData(fields, data) {
+            currentData = data;
+            currentColumns = fields;
+            
+            // Очищаем таблицу
+            dataTable.clear().destroy();
+            
+            // Создаем массив объектов с колонками для DataTables
+            const columns = fields.map(field => {
+                return { 
+                    title: field,
+                    data: field
+                };
+            });
+            
+            // Инициализируем таблицу с новыми данными
+            dataTable = $('#dataTable').DataTable({
+                data: data,
+                columns: columns,
+                dom: 'Bfrtip',
+                buttons: [],
+                scrollX: true,
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/ru.json'
+                },
+                pageLength: document.getElementById('pageLength').value
+            });
+            
+            // Обновляем сводку
+            updateDataSummary(fields, data);
+            
+            // Включаем кнопки управления
+            document.getElementById('removeColumnBtn').disabled = false;
+        }
+        
+        function updateDataSummary(fields, data) {
+            let summaryHtml = '';
+            
+            // Основная информация
+            summaryHtml += `
+                <div class="summary-item"><strong>Колонок:</strong> ${fields.length}</div>
+                <div class="summary-item"><strong>Строк:</strong> ${data.length}</div>
+            `;
+            
+            // Статистика по числовым колонкам
+            const numericColumns = [];
+            
+            fields.forEach(field => {
+                const sampleValue = data[0][field];
+                if (!isNaN(parseFloat(sampleValue)) && isFinite(sampleValue)) {
+                    numericColumns.push(field);
+                }
+            });
+            
+            if (numericColumns.length > 0) {
+                summaryHtml += `<div class="summary-item"><strong>Числовые колонки:</strong> ${numericColumns.join(', ')}</div>`;
+                
+                numericColumns.forEach(column => {
+                    const values = data.map(row => parseFloat(row[column])).filter(val => !isNaN(val));
+                    if (values.length > 0) {
+                        const min = Math.min(...values);
+                        const max = Math.max(...values);
+                        const avg = values.reduce((a, b) => a + b, 0) / values.length;
+                        const sum = values.reduce((a, b) => a + b, 0);
+                        
+                        summaryHtml += `
+                            <div class="summary-item">
+                                <strong>${column}:</strong>
+                                min: ${min.toFixed(2)}, max: ${max.toFixed(2)}, avg: ${avg.toFixed(2)}, sum: ${sum.toFixed(2)}
+                            </div>
+                        `;
+                    }
+                });
+            }
+            
+            document.getElementById('dataSummary').innerHTML = summaryHtml;
+        }
+        
+        function addCalculatedColumn() {
+            const columnName = prompt('Введите название новой колонки:');
+            if (!columnName) return;
+            
+            const formula = prompt('Введите формулу (например: Колонка1 + Колонка2):');
+            if (!formula) return;
+            
+            try {
+                // Добавляем новую колонку
+                currentColumns.push(columnName);
+                
+                // Вычисляем значения для каждой строки
+                currentData.forEach(row => {
+                    try {
+                        // Простая реализация вычислений (в реальном приложении нужен парсер формул)
+                        let computedValue = formula;
+                        currentColumns.forEach(col => {
+                            const value = row[col] || 0;
+                            computedValue = computedValue.replace(new RegExp(col, 'g'), value);
+                        });
+                        
+                        // Вычисляем значение (опасно - в реальном приложении нужно использовать безопасный eval)
+                        row[columnName] = eval(computedValue);
+                    } catch (e) {
+                        row[columnName] = 'Ошибка';
+                    }
+                });
+                
+                // Обновляем таблицу
+                processParsedData(currentColumns, currentData);
+            } catch (e) {
+                alert('Ошибка при создании колонки: ' + e.message);
+            }
+        }
+        
+        function removeSelectedColumn() {
+            const columns = dataTable.columns().header().toArray();
+            const columnNames = columns.map(col => col.textContent);
+            
+            const columnToRemove = prompt(`Введите название колонки для удаления (${columnNames.join(', ')}):`);
+            if (!columnToRemove || !columnNames.includes(columnToRemove)) {
+                alert('Колонка не найдена');
+                return;
+            }
+            
+            const columnIndex = columnNames.indexOf(columnToRemove);
+            currentColumns.splice(columnIndex, 1);
+            
+            // Удаляем данные из всех строк
+            currentData.forEach(row => {
+                delete row[columnToRemove];
+            });
+            
+            // Обновляем таблицу
+            processParsedData(currentColumns, currentData);
+        }
+        
+        function applyFilter() {
+            const filterExpression = prompt('Введите условие фильтрации (например: Колонка1 > 100):');
+            if (!filterExpression) return;
+            
+            try {
+                const filteredData = currentData.filter(row => {
+                    try {
+                        // Простая реализация фильтрации (в реальном приложении нужен парсер выражений)
+                        let expression = filterExpression;
+                        currentColumns.forEach(col => {
+                            const value = row[col] || 0;
+                            expression = expression.replace(new RegExp(col, 'g'), value);
+                        });
+                        
+                        // Вычисляем выражение (опасно - в реальном приложении нужно использовать безопасный eval)
+                        return eval(expression);
+                    } catch (e) {
+                        return false;
+                    }
+                });
+                
+                // Обновляем таблицу с отфильтрованными данными
+                dataTable.clear();
+                dataTable.rows.add(filteredData);
+                dataTable.draw();
+                
+                // Обновляем сводку
+                updateDataSummary(currentColumns, filteredData);
+            } catch (e) {
+                alert('Ошибка при фильтрации: ' + e.message);
+            }
+        }
+        
+        function applySort() {
+            const columnToSort = prompt(`Введите название колонки для сортировки (${currentColumns.join(', ')}):`);
+            if (!columnToSort || !currentColumns.includes(columnToSort)) {
+                alert('Колонка не найдена');
+                return;
+            }
+            
+            const sortDirection = prompt('Сортировать по возрастанию (1) или убыванию (-1)?', '1');
+            if (sortDirection !== '1' && sortDirection !== '-1') {
+                alert('Неверное направление сортировки');
+                return;
+            }
+            
+            try {
+                const sortedData = [...currentData].sort((a, b) => {
+                    const valA = a[columnToSort];
+                    const valB = b[columnToSort];
+                    
+                    if (!isNaN(valA)) {
+                        return (parseFloat(valA) - parseFloat(valB)) * sortDirection;
+                    } else {
+                        return valA.localeCompare(valB) * sortDirection;
+                    }
+                });
+                
+                // Обновляем таблицу с отсортированными данными
+                dataTable.clear();
+                dataTable.rows.add(sortedData);
+                dataTable.draw();
+            } catch (e) {
+                alert('Ошибка при сортировке: ' + e.message);
+            }
+        }
+        
+        function showCalculations() {
+            const numericColumns = [];
+            
+            currentColumns.forEach(field => {
+                const sampleValue = currentData[0][field];
+                if (!isNaN(parseFloat(sampleValue))) {
+                    numericColumns.push(field);
+                }
+            });
+            
+            if (numericColumns.length === 0) {
+                alert('Нет числовых колонок для анализа');
+                return;
+            }
+            
+            const columnToAnalyze = prompt(`Введите название числовой колонки (${numericColumns.join(', ')}):`);
+            if (!columnToAnalyze || !numericColumns.includes(columnToAnalyze)) {
+                alert('Колонка не найдена или не является числовой');
+                return;
+            }
+            
+            const values = currentData.map(row => parseFloat(row[columnToAnalyze])).filter(val => !isNaN(val));
+            if (values.length === 0) {
+                alert('Нет данных для анализа');
+                return;
+            }
+            
+            const sum = values.reduce((a, b) => a + b, 0);
+            const avg = sum / values.length;
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const stdDev = Math.sqrt(values.map(x => Math.pow(x - avg, 2)).reduce((a, b) => a + b) / values.length);
+            
+            alert(`
+                Анализ колонки "${columnToAnalyze}":
+                - Количество значений: ${values.length}
+                - Сумма: ${sum.toFixed(2)}
+                - Среднее: ${avg.toFixed(2)}
+                - Минимум: ${min.toFixed(2)}
+                - Максимум: ${max.toFixed(2)}
+                - Стандартное отклонение: ${stdDev.toFixed(2)}
+            `);
+        }
+        
+        function exportToExcel() {
+            // Создаем новую книгу Excel
+            const wb = XLSX.utils.book_new();
+            
+            // Преобразуем данные в рабочий лист
+            const ws = XLSX.utils.json_to_sheet(currentData);
+            
+            // Добавляем рабочий лист в книгу
+            XLSX.utils.book_append_sheet(wb, ws, "Данные");
+            
+            // Скачиваем файл
+            XLSX.writeFile(wb, currentFileName ? `${currentFileName.split('.')[0]}_export.xlsx` : 'data_export.xlsx');
+        }
+        
+        function exportToCsv() {
+            // Преобразуем данные в CSV
+            const csv = Papa.unparse(currentData);
+            
+            // Создаем ссылку для скачивания
+            const dataStr = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute('href', dataStr);
+            downloadAnchorNode.setAttribute('download', currentFileName ? `${currentFileName.split('.')[0]}_export.csv` : 'data_export.csv');
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+        
+        function exportToPdf() {
+            alert('Для экспорта в PDF необходимо подключить библиотеку jsPDF. Эта функция будет реализована в полной версии.');
+        }
+    </script>
+</body>
+</html>
