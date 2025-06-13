@@ -101,6 +101,12 @@
             text-align: center;
             padding: 10px;
         }
+        .error-message {
+            color: #d32f2f;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -108,10 +114,10 @@
         <div class="chat-header">Помощник Газпром</div>
         <div class="chat-messages" id="chat-messages">
             <div class="message bot-message">
-                Здравствуйте! Я ваш виртуальный помощник. Отвечу на вопросы о компании Газпром и её деятельности.
+                Здравствуйте! Я ваш виртуальный помощник. Инициализирую систему...
             </div>
             <div class="status-message" id="status-message">
-                Загружаю нейросеть, пожалуйста подождите...
+                Загружаю нейросеть, пожалуйста подождите (это займет 1-2 минуты)...
             </div>
         </div>
         <div class="chat-input">
@@ -123,11 +129,12 @@
     <script>
         // Конфигурация
         const config = {
-            modelName: 'Xenova/distilgpt2',
+            // Используем более легкую модель для лучшей совместимости
+            modelName: 'Xenova/facebook-bart-base',
             context: "Ты - помощник в компании Газпром. Отвечай профессионально и вежливо. " +
                     "Газпром - российская энергетическая компания, специализирующаяся на добыче, " +
                     "транспортировке и продаже природного газа. " +
-                    "Отвечай кратко и по делу, не более 2-3 предложений."
+                    "Отвечай кратко и по делу."
         };
 
         // Элементы интерфейса
@@ -139,16 +146,29 @@
         // Переменные для модели
         let pipeline;
         let isModelReady = false;
+        let initializationAttempted = false;
 
         // Инициализация модели
         async function initializeModel() {
+            if (initializationAttempted) return;
+            initializationAttempted = true;
+            
             try {
                 statusMessage.textContent = "Загружаю нейросеть (это займет 1-2 минуты)...";
                 
-                // Создаем pipeline для генерации текста
+                // Создаем pipeline для генерации текста с прогрессом
+                const statusCallback = (status) => {
+                    if (status.status === 'progress') {
+                        statusMessage.textContent = `Загружаю нейросеть: ${Math.round(status.progress * 100)}%`;
+                    }
+                };
+                
                 pipeline = await transformers.TextGenerationPipeline.from_pretrained(
                     config.modelName,
-                    { quantized: false } // Отключаем квантование для лучшего качества
+                    { 
+                        quantized: true, // Используем квантованную версию для экономии памяти
+                        progress_callback: statusCallback
+                    }
                 );
                 
                 isModelReady = true;
@@ -157,17 +177,47 @@
                 sendButton.disabled = false;
                 
                 // Добавляем тестовый ответ для проверки
-                addMessage("Я готов отвечать на ваши вопросы о компании Газпром.", 'bot');
+                addMessage("Система готова к работе. Чем могу помочь?", 'bot');
             } catch (error) {
                 console.error("Ошибка загрузки модели:", error);
-                statusMessage.textContent = "Ошибка загрузки нейросети. Обновите страницу и попробуйте снова.";
+                statusMessage.textContent = "";
+                addMessage("Не удалось загрузить полную версию нейросети. Активирую упрощенный режим.", 'bot');
+                activateFallbackMode();
             }
         }
 
-        // Генерация ответа с помощью нейросети
+        // Режим fallback (если модель не загрузилась)
+        function activateFallbackMode() {
+            isModelReady = true;
+            userInput.disabled = false;
+            sendButton.disabled = false;
+            
+            // Простая база знаний
+            const knowledgeBase = {
+                "газпром": "Газпром — российская энергетическая компания, крупнейший производитель природного газа.",
+                "контакты": "Служба поддержки: телефон 1234, email support@gazprom.ru",
+                "безопасность": "Инструкции по технике безопасности доступны в корпоративном портале",
+                "отчет": "Для создания отчета используйте раздел 'Отчеты' в личном кабинете",
+                "калькулятор": "Калькулятор доступен в разделе 'Инструменты'"
+            };
+            
+            pipeline = {
+                generate: async (prompt) => {
+                    const lowerPrompt = prompt.toLowerCase();
+                    for (const [key, value] of Object.entries(knowledgeBase)) {
+                        if (lowerPrompt.includes(key)) {
+                            return value;
+                        }
+                    }
+                    return "Извините, я не могу ответить на этот вопрос в упрощенном режиме. Обратитесь в службу поддержки.";
+                }
+            };
+        }
+
+        // Генерация ответа
         async function generateResponse(prompt) {
             if (!isModelReady || !pipeline) {
-                return "Нейросеть ещё не готова. Пожалуйста, подождите.";
+                return "Система ещё не готова. Пожалуйста, подождите.";
             }
             
             try {
@@ -178,12 +228,15 @@
                 const response = await pipeline(fullPrompt, {
                     max_new_tokens: 100,
                     temperature: 0.7,
-                    do_sample: true,
-                    no_repeat_ngram_size: 2
+                    do_sample: true
                 });
                 
                 // Очищаем ответ
-                let cleanResponse = response[0].generated_text
+                let cleanResponse = Array.isArray(response) 
+                    ? response[0].generated_text 
+                    : response.generated_text || response;
+                
+                cleanResponse = cleanResponse
                     .replace(fullPrompt, '')
                     .trim()
                     .split('\n')[0];
@@ -191,7 +244,7 @@
                 return cleanResponse || "Не могу сформулировать ответ. Попробуйте перефразировать вопрос.";
             } catch (error) {
                 console.error("Ошибка генерации ответа:", error);
-                return "Произошла ошибка при генерации ответа. Попробуйте ещё раз.";
+                return "Произошла ошибка при обработке запроса. Попробуйте ещё раз.";
             }
         }
 
@@ -257,8 +310,10 @@
                 if (e.key === 'Enter') sendMessage();
             });
             
-            // Загрузка модели
-            initializeModel();
+            // Загрузка модели с задержкой для стабильности
+            setTimeout(() => {
+                initializeModel();
+            }, 500);
         });
     </script>
 </body>
