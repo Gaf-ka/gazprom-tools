@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         .table-container {
             display: grid;
@@ -103,6 +105,7 @@
             margin-top: 1rem;
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
         
         .file-info {
@@ -139,6 +142,22 @@
         .dataTables_length select {
             border: 1px solid #ddd !important;
             padding: 0.25rem !important;
+        }
+        
+        .filter-panel {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #fffaf0;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .sort-panel {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f0fff0;
+            border-radius: 4px;
+            display: none;
         }
     </style>
 </head>
@@ -199,6 +218,56 @@
                         <button id="filterBtn"><i class="fas fa-filter"></i> Фильтровать</button>
                         <button id="sortBtn"><i class="fas fa-sort"></i> Сортировать</button>
                         <button id="calculateBtn"><i class="fas fa-calculator"></i> Вычислить</button>
+                    </div>
+                    
+                    <div class="filter-panel" id="filterPanel">
+                        <h4>Настройки фильтрации</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="filterColumn">Столбец:</label>
+                                <select id="filterColumn"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filterOperator">Оператор:</label>
+                                <select id="filterOperator">
+                                    <option value="=">Равно</option>
+                                    <option value="!=">Не равно</option>
+                                    <option value=">">Больше</option>
+                                    <option value="<">Меньше</option>
+                                    <option value=">=">Больше или равно</option>
+                                    <option value="<=">Меньше или равно</option>
+                                    <option value="contains">Содержит</option>
+                                    <option value="startsWith">Начинается с</option>
+                                    <option value="endsWith">Заканчивается на</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="filterValue">Значение:</label>
+                                <input type="text" id="filterValue" placeholder="Введите значение для фильтрации">
+                            </div>
+                        </div>
+                        <button id="applyFilterBtn"><i class="fas fa-check"></i> Применить фильтр</button>
+                        <button id="clearFilterBtn"><i class="fas fa-times"></i> Сбросить фильтр</button>
+                    </div>
+                    
+                    <div class="sort-panel" id="sortPanel">
+                        <h4>Настройки сортировки</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sortColumn">Столбец:</label>
+                                <select id="sortColumn"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sortDirection">Направление:</label>
+                                <select id="sortDirection">
+                                    <option value="asc">По возрастанию</option>
+                                    <option value="desc">По убыванию</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="applySortBtn"><i class="fas fa-check"></i> Применить сортировку</button>
                     </div>
                     
                     <div class="table-wrapper">
@@ -300,6 +369,7 @@
         let currentData = [];
         let currentColumns = [];
         let currentFileName = '';
+        let filteredData = [];
         
         document.addEventListener('DOMContentLoaded', function() {
             initializeDataTable();
@@ -356,9 +426,13 @@
             // Обработка кнопок управления
             document.getElementById('addColumnBtn').addEventListener('click', addCalculatedColumn);
             document.getElementById('removeColumnBtn').addEventListener('click', removeSelectedColumn);
-            document.getElementById('filterBtn').addEventListener('click', applyFilter);
-            document.getElementById('sortBtn').addEventListener('click', applySort);
+            document.getElementById('filterBtn').addEventListener('click', toggleFilterPanel);
+            document.getElementById('sortBtn').addEventListener('click', toggleSortPanel);
             document.getElementById('calculateBtn').addEventListener('click', showCalculations);
+            
+            document.getElementById('applyFilterBtn').addEventListener('click', applyFilter);
+            document.getElementById('clearFilterBtn').addEventListener('click', clearFilter);
+            document.getElementById('applySortBtn').addEventListener('click', applySort);
             
             document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
             document.getElementById('exportCsvBtn').addEventListener('click', exportToCsv);
@@ -447,6 +521,7 @@
         function processParsedData(fields, data) {
             currentData = data;
             currentColumns = fields;
+            filteredData = [...data];
             
             // Очищаем таблицу
             dataTable.clear().destroy();
@@ -461,7 +536,7 @@
             
             // Инициализируем таблицу с новыми данными
             dataTable = $('#dataTable').DataTable({
-                data: data,
+                data: filteredData,
                 columns: columns,
                 dom: 'Bfrtip',
                 buttons: [],
@@ -473,10 +548,26 @@
             });
             
             // Обновляем сводку
-            updateDataSummary(fields, data);
+            updateDataSummary(fields, filteredData);
+            
+            // Обновляем выпадающие списки для фильтров и сортировки
+            updateColumnSelects(fields);
             
             // Включаем кнопки управления
             document.getElementById('removeColumnBtn').disabled = false;
+        }
+        
+        function updateColumnSelects(fields) {
+            const filterColumn = document.getElementById('filterColumn');
+            const sortColumn = document.getElementById('sortColumn');
+            
+            filterColumn.innerHTML = '';
+            sortColumn.innerHTML = '';
+            
+            fields.forEach(field => {
+                filterColumn.innerHTML += `<option value="${field}">${field}</option>`;
+                sortColumn.innerHTML += `<option value="${field}">${field}</option>`;
+            });
         }
         
         function updateDataSummary(fields, data) {
@@ -492,8 +583,8 @@
             const numericColumns = [];
             
             fields.forEach(field => {
-                const sampleValue = data[0][field];
-                if (!isNaN(parseFloat(sampleValue)) && isFinite(sampleValue)) {
+                const sampleValue = data[0] ? data[0][field] : null;
+                if (sampleValue && !isNaN(parseFloat(sampleValue))) {
                     numericColumns.push(field);
                 }
             });
@@ -579,24 +670,44 @@
             processParsedData(currentColumns, currentData);
         }
         
+        function toggleFilterPanel() {
+            const panel = document.getElementById('filterPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            document.getElementById('sortPanel').style.display = 'none';
+        }
+        
+        function toggleSortPanel() {
+            const panel = document.getElementById('sortPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            document.getElementById('filterPanel').style.display = 'none';
+        }
+        
         function applyFilter() {
-            const filterExpression = prompt('Введите условие фильтрации (например: Колонка1 > 100):');
-            if (!filterExpression) return;
+            const column = document.getElementById('filterColumn').value;
+            const operator = document.getElementById('filterOperator').value;
+            const value = document.getElementById('filterValue').value;
+            
+            if (!column || !operator) {
+                alert('Пожалуйста, выберите столбец и оператор');
+                return;
+            }
             
             try {
-                const filteredData = currentData.filter(row => {
-                    try {
-                        // Простая реализация фильтрации (в реальном приложении нужен парсер выражений)
-                        let expression = filterExpression;
-                        currentColumns.forEach(col => {
-                            const value = row[col] || 0;
-                            expression = expression.replace(new RegExp(col, 'g'), value);
-                        });
-                        
-                        // Вычисляем выражение (опасно - в реальном приложении нужно использовать безопасный eval)
-                        return eval(expression);
-                    } catch (e) {
-                        return false;
+                filteredData = currentData.filter(row => {
+                    const cellValue = row[column] !== undefined ? row[column].toString() : '';
+                    const filterValue = value.toString();
+                    
+                    switch(operator) {
+                        case '=': return cellValue === filterValue;
+                        case '!=': return cellValue !== filterValue;
+                        case '>': return parseFloat(cellValue) > parseFloat(filterValue);
+                        case '<': return parseFloat(cellValue) < parseFloat(filterValue);
+                        case '>=': return parseFloat(cellValue) >= parseFloat(filterValue);
+                        case '<=': return parseFloat(cellValue) <= parseFloat(filterValue);
+                        case 'contains': return cellValue.includes(filterValue);
+                        case 'startsWith': return cellValue.startsWith(filterValue);
+                        case 'endsWith': return cellValue.endsWith(filterValue);
+                        default: return true;
                     }
                 });
                 
@@ -607,40 +718,57 @@
                 
                 // Обновляем сводку
                 updateDataSummary(currentColumns, filteredData);
+                
+                // Скрываем панель фильтрации
+                document.getElementById('filterPanel').style.display = 'none';
             } catch (e) {
                 alert('Ошибка при фильтрации: ' + e.message);
             }
         }
         
-        function applySort() {
-            const columnToSort = prompt(`Введите название колонки для сортировки (${currentColumns.join(', ')}):`);
-            if (!columnToSort || !currentColumns.includes(columnToSort)) {
-                alert('Колонка не найдена');
-                return;
-            }
+        function clearFilter() {
+            filteredData = [...currentData];
             
-            const sortDirection = prompt('Сортировать по возрастанию (1) или убыванию (-1)?', '1');
-            if (sortDirection !== '1' && sortDirection !== '-1') {
-                alert('Неверное направление сортировки');
+            // Обновляем таблицу с исходными данными
+            dataTable.clear();
+            dataTable.rows.add(filteredData);
+            dataTable.draw();
+            
+            // Обновляем сводку
+            updateDataSummary(currentColumns, filteredData);
+            
+            // Скрываем панель фильтрации
+            document.getElementById('filterPanel').style.display = 'none';
+        }
+        
+        function applySort() {
+            const column = document.getElementById('sortColumn').value;
+            const direction = document.getElementById('sortDirection').value;
+            
+            if (!column) {
+                alert('Пожалуйста, выберите столбец для сортировки');
                 return;
             }
             
             try {
-                const sortedData = [...currentData].sort((a, b) => {
-                    const valA = a[columnToSort];
-                    const valB = b[columnToSort];
+                filteredData.sort((a, b) => {
+                    const valA = a[column];
+                    const valB = b[column];
                     
-                    if (!isNaN(valA)) {
-                        return (parseFloat(valA) - parseFloat(valB)) * sortDirection;
+                    if (!isNaN(parseFloat(valA)) && !isNaN(parseFloat(valB))) {
+                        return (parseFloat(valA) - parseFloat(valB)) * (direction === 'asc' ? 1 : -1);
                     } else {
-                        return valA.localeCompare(valB) * sortDirection;
+                        return valA.toString().localeCompare(valB.toString()) * (direction === 'asc' ? 1 : -1);
                     }
                 });
                 
                 // Обновляем таблицу с отсортированными данными
                 dataTable.clear();
-                dataTable.rows.add(sortedData);
+                dataTable.rows.add(filteredData);
                 dataTable.draw();
+                
+                // Скрываем панель сортировки
+                document.getElementById('sortPanel').style.display = 'none';
             } catch (e) {
                 alert('Ошибка при сортировке: ' + e.message);
             }
@@ -650,8 +778,8 @@
             const numericColumns = [];
             
             currentColumns.forEach(field => {
-                const sampleValue = currentData[0][field];
-                if (!isNaN(parseFloat(sampleValue))) {
+                const sampleValue = currentData[0] ? currentData[0][field] : null;
+                if (sampleValue && !isNaN(parseFloat(sampleValue))) {
                     numericColumns.push(field);
                 }
             });
@@ -667,7 +795,7 @@
                 return;
             }
             
-            const values = currentData.map(row => parseFloat(row[columnToAnalyze])).filter(val => !isNaN(val));
+            const values = filteredData.map(row => parseFloat(row[columnToAnalyze])).filter(val => !isNaN(val));
             if (values.length === 0) {
                 alert('Нет данных для анализа');
                 return;
@@ -695,7 +823,7 @@
             const wb = XLSX.utils.book_new();
             
             // Преобразуем данные в рабочий лист
-            const ws = XLSX.utils.json_to_sheet(currentData);
+            const ws = XLSX.utils.json_to_sheet(filteredData);
             
             // Добавляем рабочий лист в книгу
             XLSX.utils.book_append_sheet(wb, ws, "Данные");
@@ -706,7 +834,7 @@
         
         function exportToCsv() {
             // Преобразуем данные в CSV
-            const csv = Papa.unparse(currentData);
+            const csv = Papa.unparse(filteredData);
             
             // Создаем ссылку для скачивания
             const dataStr = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
@@ -719,7 +847,34 @@
         }
         
         function exportToPdf() {
-            alert('Для экспорта в PDF необходимо подключить библиотеку jsPDF. Эта функция будет реализована в полной версии.');
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Заголовок
+            doc.setFontSize(16);
+            doc.text('Экспорт таблицы данных', 105, 15, { align: 'center' });
+            
+            // Данные для таблицы
+            const columns = currentColumns.map(col => ({ header: col, dataKey: col }));
+            const rows = filteredData.map(row => {
+                const newRow = {};
+                currentColumns.forEach(col => {
+                    newRow[col] = row[col] !== undefined ? row[col].toString() : '';
+                });
+                return newRow;
+            });
+            
+            // Добавляем таблицу
+            doc.autoTable({
+                head: [currentColumns],
+                body: rows.map(row => currentColumns.map(col => row[col])),
+                startY: 25,
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [51, 136, 255] }
+            });
+            
+            // Сохраняем PDF
+            doc.save(currentFileName ? `${currentFileName.split('.')[0]}_export.pdf` : 'data_export.pdf');
         }
     </script>
 </body>

@@ -26,6 +26,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             padding: 1.5rem;
+            position: relative;
         }
         
         .map-box h3 {
@@ -38,13 +39,13 @@
             height: 600px;
             width: 100%;
             margin-bottom: 1rem;
+            z-index: 1;
         }
         
         #map {
             height: 100%;
             width: 100%;
             border-radius: 4px;
-            z-index: 1;
         }
         
         .map-controls {
@@ -182,14 +183,11 @@
         }
         
         .column-options {
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            background-color: #f0f8ff;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f5f5f5;
             border-radius: 4px;
-        }
-        
-        .column-option {
-            margin-bottom: 0.5rem;
+            display: none;
         }
     </style>
 </head>
@@ -269,30 +267,20 @@
                                 <option value="cluster">Кластеры точек</option>
                                 <option value="heatmap">Тепловая карта</option>
                                 <option value="circle">Круговые маркеры</option>
-                                <option value="symbol">Символьная карта</option>
                             </select>
                         </div>
                     </div>
                     
-                    <div id="columnOptions" class="column-options" style="display: none;">
-                        <div class="column-option">
-                            <label for="minRadius">Минимальный радиус:</label>
-                            <input type="range" id="minRadius" min="1" max="20" value="5">
-                            <span id="minRadiusValue">5</span>
-                        </div>
-                        <div class="column-option">
-                            <label for="maxRadius">Максимальный радиус:</label>
-                            <input type="range" id="maxRadius" min="10" max="50" value="20">
-                            <span id="maxRadiusValue">20</span>
-                        </div>
-                        <div class="column-option">
-                            <label for="colorScale">Цветовая шкала:</label>
-                            <select id="colorScale">
-                                <option value="red">Красная</option>
-                                <option value="blue">Синяя</option>
-                                <option value="green">Зеленая</option>
-                                <option value="rainbow">Радужная</option>
-                            </select>
+                    <div id="columnOptions" class="column-options">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="markerColor">Цвет маркеров:</label>
+                                <input type="color" id="markerColor" value="#3388ff">
+                            </div>
+                            <div class="form-group">
+                                <label for="markerSize">Размер маркеров:</label>
+                                <input type="range" id="markerSize" min="5" max="30" value="10">
+                            </div>
                         </div>
                     </div>
                     
@@ -323,6 +311,7 @@
                                     <option value="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png">OpenTopoMap</option>
                                     <option value="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}">Спутник</option>
                                     <option value="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png">Темная</option>
+                                    <option value="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png">Светлая</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -392,9 +381,6 @@
     </footer>
 
     <script>
-        // Инициализация jsPDF
-        const { jsPDF } = window.jspdf;
-        
         let map;
         let currentLayer = null;
         let markersLayer = null;
@@ -404,7 +390,7 @@
         let layersControl = null;
         let baseLayers = {};
         let overlayLayers = {};
-        let currentLegend = null;
+        let legend = null;
         
         document.addEventListener('DOMContentLoaded', function() {
             initializeMap();
@@ -429,6 +415,11 @@
                     attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
                 }),
                 "Темная": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 20
+                }),
+                "Светлая": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
                     subdomains: 'abcd',
                     maxZoom: 20
@@ -512,26 +503,19 @@
                 map.setZoom(parseInt(this.value));
             });
             
-            document.getElementById('dataColumn').addEventListener('change', function() {
-                const columnOptions = document.getElementById('columnOptions');
-                if (this.value && this.value !== 'none' && this.value !== 'cluster') {
-                    columnOptions.style.display = 'block';
-                } else {
-                    columnOptions.style.display = 'none';
-                }
-            });
-            
-            document.getElementById('minRadius').addEventListener('input', function() {
-                document.getElementById('minRadiusValue').textContent = this.value;
-            });
-            
-            document.getElementById('maxRadius').addEventListener('input', function() {
-                document.getElementById('maxRadiusValue').textContent = this.value;
-            });
-            
             // Обновляем уровень масштаба при изменении на карте
             map.on('zoomend', function() {
                 document.getElementById('mapZoom').value = map.getZoom();
+            });
+            
+            // Показываем/скрываем дополнительные настройки
+            document.getElementById('dataColumn').addEventListener('change', function() {
+                const optionsPanel = document.getElementById('columnOptions');
+                if (this.value && this.value !== 'none') {
+                    optionsPanel.style.display = 'block';
+                } else {
+                    optionsPanel.style.display = 'none';
+                }
             });
         }
         
@@ -670,7 +654,6 @@
                 <option value="cluster">Кластеры точек</option>
                 <option value="heatmap">Тепловая карта</option>
                 <option value="circle">Круговые маркеры</option>
-                <option value="symbol">Символьная карта</option>
             `;
         }
         
@@ -687,15 +670,16 @@
             // Очищаем предыдущий слой
             markersLayer.clearLayers();
             heatmapLayer.clearLayers();
-            if (currentLegend) {
-                currentLegend.remove();
-                currentLegend = null;
+            
+            // Удаляем предыдущую легенду
+            if (legend) {
+                legend.remove();
+                legend = null;
             }
             
             // Собираем данные для визуализации
             const points = [];
             const heatmapData = [];
-            const values = [];
             
             currentData.forEach(row => {
                 const lat = parseFloat(row[latColumn]);
@@ -707,7 +691,6 @@
                     if (dataColumn && dataColumn !== 'none' && dataColumn !== 'cluster') {
                         const value = parseFloat(row[dataColumn]) || 0;
                         heatmapData.push([lat, lng, value]);
-                        values.push(value);
                     }
                 }
             });
@@ -724,8 +707,6 @@
                 createClusterLayer(points);
             } else if (dataColumn === 'circle') {
                 createCircleMarkersLayer(points, heatmapData, dataColumn);
-            } else if (dataColumn === 'symbol') {
-                createSymbolLayer(points, heatmapData, dataColumn);
             } else if (dataColumn === 'none') {
                 createSimpleMarkersLayer(points);
             } else if (dataColumn && dataColumn !== 'none') {
@@ -737,8 +718,18 @@
         }
         
         function createSimpleMarkersLayer(points) {
+            const markerColor = document.getElementById('markerColor').value;
+            const markerSize = parseInt(document.getElementById('markerSize').value);
+            
             points.forEach(point => {
-                const marker = L.marker([point[0], point[1]]).addTo(markersLayer);
+                const marker = L.circleMarker([point[0], point[1]], {
+                    radius: markerSize,
+                    fillColor: markerColor,
+                    color: '#333',
+                    weight: 1,
+                    fillOpacity: 0.8
+                }).addTo(markersLayer);
+                
                 marker.bindPopup(`Широта: ${point[0].toFixed(4)}<br>Долгота: ${point[1].toFixed(4)}`);
             });
             
@@ -747,10 +738,17 @@
         }
         
         function createClusterLayer(points) {
+            const markerColor = document.getElementById('markerColor').value;
             const markers = L.markerClusterGroup();
             
             points.forEach(point => {
-                const marker = L.marker([point[0], point[1]]);
+                const marker = L.circleMarker([point[0], point[1]], {
+                    radius: 8,
+                    fillColor: markerColor,
+                    color: '#333',
+                    weight: 1,
+                    fillOpacity: 0.8
+                });
                 marker.bindPopup(`Широта: ${point[0].toFixed(4)}<br>Долгота: ${point[1].toFixed(4)}`);
                 markers.addLayer(marker);
             });
@@ -761,27 +759,23 @@
         }
         
         function createHeatmapLayer(heatmapData, columnName) {
-            if (heatmapData.length === 0) return;
-            
-            const minValue = Math.min(...heatmapData.map(d => d[2]));
-            const maxValue = Math.max(...heatmapData.map(d => d[2]));
+            // Для простоты используем круги с градиентом цвета
+            const minValue = Math.min(...heatmapData.map(p => p[2]));
+            const maxValue = Math.max(...heatmapData.map(p => p[2]));
             
             heatmapData.forEach(point => {
-                const value = point[2];
-                const normalizedValue = (value - minValue) / (maxValue - minValue);
-                const radius = parseInt(document.getElementById('minRadius').value) + 
-                              normalizedValue * (parseInt(document.getElementById('maxRadius').value) - parseInt(document.getElementById('minRadius').value));
-                const color = getColorForValue(value, minValue, maxValue);
+                const normalizedValue = (point[2] - minValue) / (maxValue - minValue);
+                const radius = 5 + normalizedValue * 25; // Масштабируем значение для радиуса
+                const color = getColorForValue(point[2], minValue, maxValue);
                 
                 const circle = L.circle([point[0], point[1]], {
-                    radius: radius * 100, // Умножаем на 100 для метрической системы
+                    radius: radius * 1000, // В метрах
                     fillColor: color,
                     color: color,
-                    fillOpacity: 0.7,
-                    weight: 1
+                    fillOpacity: 0.5
                 }).addTo(heatmapLayer);
                 
-                circle.bindPopup(`${columnName}: ${value}`);
+                circle.bindPopup(`Значение: ${point[2]}`);
             });
             
             currentLayer = heatmapLayer;
@@ -789,20 +783,44 @@
             
             // Добавляем легенду
             addLegend([minValue, minValue + (maxValue - minValue) / 4, minValue + (maxValue - minValue) / 2, 
-                      minValue + (maxValue - minValue) * 3 / 4, maxValue], columnName, 'heat');
+                     minValue + (maxValue - minValue) * 3 / 4, maxValue], columnName, 'heat');
         }
         
         function createCircleMarkersLayer(points, values, columnName) {
-            if (values.length === 0) return;
+            const minValue = Math.min(...values.map(p => p[2]));
+            const maxValue = Math.max(...values.map(p => p[2]));
             
-            const minValue = Math.min(...values.map(d => d[2]));
-            const maxValue = Math.max(...values.map(d => d[2]));
+            values.forEach(point => {
+                const normalizedValue = (point[2] - minValue) / (maxValue - minValue);
+                const radius = 5 + normalizedValue * 15;
+                const color = getColorForValue(point[2], minValue, maxValue);
+                
+                const circle = L.circle([point[0], point[1]], {
+                    radius: radius * 1000, // В метрах
+                    fillColor: color,
+                    color: color,
+                    fillOpacity: 0.5
+                }).addTo(markersLayer);
+                
+                circle.bindPopup(`Значение: ${point[2]}`);
+            });
+            
+            currentLayer = markersLayer;
+            fitMapToData();
+            
+            // Добавляем легенду
+            addLegend([minValue, minValue + (maxValue - minValue) / 4, minValue + (maxValue - minValue) / 2, 
+                     minValue + (maxValue - minValue) * 3 / 4, maxValue], columnName, 'circle');
+        }
+        
+        function createValueMarkersLayer(points, values, columnName) {
+            const minValue = Math.min(...values.map(p => p[2]));
+            const maxValue = Math.max(...values.map(p => p[2]));
             
             values.forEach(point => {
                 const value = point[2];
                 const normalizedValue = (value - minValue) / (maxValue - minValue);
-                const radius = parseInt(document.getElementById('minRadius').value) + 
-                              normalizedValue * (parseInt(document.getElementById('maxRadius').value) - parseInt(document.getElementById('minRadius').value));
+                const radius = 5 + normalizedValue * 15;
                 const color = getColorForValue(value, minValue, maxValue);
                 
                 const circle = L.circleMarker([point[0], point[1]], {
@@ -810,7 +828,7 @@
                     fillColor: color,
                     color: '#333',
                     weight: 1,
-                    fillOpacity: 0.7
+                    fillOpacity: 0.8
                 }).addTo(markersLayer);
                 
                 circle.bindPopup(`${columnName}: ${value}`);
@@ -821,102 +839,20 @@
             
             // Добавляем легенду
             addLegend([minValue, minValue + (maxValue - minValue) / 4, minValue + (maxValue - minValue) / 2, 
-                      minValue + (maxValue - minValue) * 3 / 4, maxValue], columnName, 'circle');
-        }
-        
-        function createSymbolLayer(points, values, columnName) {
-            if (values.length === 0) return;
-            
-            const minValue = Math.min(...values.map(d => d[2]));
-            const maxValue = Math.max(...values.map(d => d[2]));
-            
-            values.forEach(point => {
-                const value = point[2];
-                const normalizedValue = (value - minValue) / (maxValue - minValue);
-                const size = parseInt(document.getElementById('minRadius').value) + 
-                            normalizedValue * (parseInt(document.getElementById('maxRadius').value) - parseInt(document.getElementById('minRadius').value));
-                const color = getColorForValue(value, minValue, maxValue);
-                
-                // Создаем кастомный символ
-                const symbol = L.divIcon({
-                    html: `<div style="background-color:${color}; width:${size}px; height:${size}px; border-radius:50%; border:1px solid #333;"></div>`,
-                    className: 'symbol-icon',
-                    iconSize: [size, size]
-                });
-                
-                const marker = L.marker([point[0], point[1]], {
-                    icon: symbol
-                }).addTo(markersLayer);
-                
-                marker.bindPopup(`${columnName}: ${value}`);
-            });
-            
-            currentLayer = markersLayer;
-            fitMapToData();
-            
-            // Добавляем легенду
-            addLegend([minValue, minValue + (maxValue - minValue) / 4, minValue + (maxValue - minValue) / 2, 
-                      minValue + (maxValue - minValue) * 3 / 4, maxValue], columnName, 'symbol');
-        }
-        
-        function createValueMarkersLayer(points, values, columnName) {
-            if (values.length === 0) return;
-            
-            const minValue = Math.min(...values.map(d => d[2]));
-            const maxValue = Math.max(...values.map(d => d[2]));
-            
-            values.forEach(point => {
-                const value = point[2];
-                const normalizedValue = (value - minValue) / (maxValue - minValue);
-                const size = 5 + normalizedValue * 15;
-                const color = getColorForValue(value, minValue, maxValue);
-                
-                const circle = L.circleMarker([point[0], point[1]], {
-                    radius: size,
-                    fillColor: color,
-                    color: '#333',
-                    weight: 1,
-                    fillOpacity: 0.7
-                }).addTo(markersLayer);
-                
-                circle.bindPopup(`${columnName}: ${value}`);
-            });
-            
-            currentLayer = markersLayer;
-            fitMapToData();
-            
-            // Добавляем легенду
-            addLegend([minValue, minValue + (maxValue - minValue) / 4, minValue + (maxValue - minValue) / 2, 
-                      minValue + (maxValue - minValue) * 3 / 4, maxValue], columnName, 'value');
+                     minValue + (maxValue - minValue) * 3 / 4, maxValue], columnName, 'value');
         }
         
         function getColorForValue(value, minValue, maxValue) {
-            const colorScheme = document.getElementById('colorScale').value;
+            // Градиент от синего к красному
             const normalizedValue = (value - minValue) / (maxValue - minValue);
-            
-            switch(colorScheme) {
-                case 'red':
-                    return `rgb(${255}, ${Math.round(255 * (1 - normalizedValue))}, ${Math.round(255 * (1 - normalizedValue))})`;
-                case 'blue':
-                    return `rgb(${Math.round(255 * (1 - normalizedValue))}, ${Math.round(255 * (1 - normalizedValue))}, 255)`;
-                case 'green':
-                    return `rgb(${Math.round(255 * (1 - normalizedValue))}, 255, ${Math.round(255 * (1 - normalizedValue))})`;
-                case 'rainbow':
-                    const hue = (1 - normalizedValue) * 240;
-                    return `hsl(${hue}, 100%, 50%)`;
-                default:
-                    return '#3388ff';
-            }
+            const hue = ((1 - normalizedValue) * 240).toString(10);
+            return `hsl(${hue}, 100%, 50%)`;
         }
         
         function addLegend(grades, title, type) {
-            if (currentLegend) {
-                currentLegend.remove();
-            }
+            legend = L.control({ position: 'bottomright' });
             
-            currentLegend = L.control({ position: 'bottomright' });
-            
-            currentLegend.onAdd = function(map) {
+            legend.onAdd = function(map) {
                 const div = L.DomUtil.create('div', 'legend');
                 div.innerHTML = `<h4>${title}</h4>`;
                 
@@ -924,18 +860,17 @@
                     const from = grades[i];
                     const to = grades[i + 1];
                     
-                    if (type === 'heat' || type === 'circle' || type === 'value') {
-                        const color = getColorForValue(from, grades[0], grades[grades.length - 1]);
+                    if (type === 'heat' || type === 'circle') {
+                        const color = getColorForValue(from, grades[0], grades[grades.length-1]);
                         div.innerHTML += `
                             <i style="background:${color}"></i>
-                            ${from.toFixed(1)}${to ? `&ndash;${to.toFixed(1)}` : '+'}<br>
+                            ${from.toFixed(2)}${to ? `&ndash;${to.toFixed(2)}` : '+'}<br>
                         `;
-                    } else if (type === 'symbol') {
-                        const size = parseInt(document.getElementById('minRadius').value) + 
-                                     (i / (grades.length - 1)) * (parseInt(document.getElementById('maxRadius').value) - parseInt(document.getElementById('minRadius').value));
+                    } else if (type === 'value') {
+                        const size = 5 + (i / (grades.length - 1)) * 15;
                         div.innerHTML += `
-                            <i style="width:${size}px;height:${size}px;border-radius:50%;background:#3388ff;display:inline-block;vertical-align:middle;"></i>
-                            ${from.toFixed(1)}${to ? `&ndash;${to.toFixed(1)}` : '+'}<br>
+                            <i style="width:${size * 2}px;height:${size * 2}px;border-radius:${size}px;background:#3388ff;display:inline-block;vertical-align:middle;"></i>
+                            ${from.toFixed(2)}${to ? `&ndash;${to.toFixed(2)}` : '+'}<br>
                         `;
                     }
                 }
@@ -943,7 +878,7 @@
                 return div;
             };
             
-            currentLegend.addTo(map);
+            legend.addTo(map);
         }
         
         function removeCurrentLayer() {
@@ -951,9 +886,9 @@
                 currentLayer.clearLayers();
                 document.getElementById('removeLayerBtn').disabled = true;
                 
-                if (currentLegend) {
-                    currentLegend.remove();
-                    currentLegend = null;
+                if (legend) {
+                    legend.remove();
+                    legend = null;
                 }
             }
         }
@@ -969,28 +904,24 @@
             heatmapLayer.clearLayers();
             document.getElementById('removeLayerBtn').disabled = true;
             
-            if (currentLegend) {
-                currentLegend.remove();
-                currentLegend = null;
+            if (legend) {
+                legend.remove();
+                legend = null;
             }
         }
         
         function exportMapAsImage() {
-            // Используем html2canvas для создания изображения карты
-            html2canvas(document.querySelector('#map'), {
+            const mapElement = document.getElementById('map');
+            
+            html2canvas(mapElement, {
                 useCORS: true,
                 allowTaint: true,
-                scale: 2,
-                logging: false,
-                backgroundColor: null
+                scale: 2
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = currentFileName ? `карта_${currentFileName.split('.')[0]}.png` : 'map.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-            }).catch(err => {
-                console.error('Ошибка при экспорте карты:', err);
-                alert('Не удалось экспортировать карту как изображение');
             });
         }
         
@@ -1046,13 +977,13 @@
         }
         
         function exportMapAsPDF() {
-            // Используем html2canvas и jsPDF для создания PDF
-            html2canvas(document.querySelector('#map'), {
+            const { jsPDF } = window.jspdf;
+            const mapElement = document.getElementById('map');
+            
+            html2canvas(mapElement, {
                 useCORS: true,
                 allowTaint: true,
-                scale: 2,
-                logging: false,
-                backgroundColor: null
+                scale: 2
             }).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF('landscape');
@@ -1062,9 +993,6 @@
                 
                 pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
                 pdf.save(currentFileName ? `карта_${currentFileName.split('.')[0]}.pdf` : 'map.pdf');
-            }).catch(err => {
-                console.error('Ошибка при экспорте PDF:', err);
-                alert('Не удалось экспортировать карту как PDF');
             });
         }
     </script>
