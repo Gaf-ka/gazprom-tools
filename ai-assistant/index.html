@@ -5,26 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Помощник Газпром</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        #chat { height: 500px; border: 1px solid #ccc; padding: 10px; overflow-y: scroll; margin-bottom: 10px; }
-        .message { margin: 5px; padding: 8px 12px; border-radius: 5px; max-width: 80%; }
-        .user { background: #e3f2fd; margin-left: auto; }
-        .bot { background: #f1f1f1; margin-right: auto; }
-        #input { width: 100%; padding: 10px; margin-bottom: 10px; }
-        button { padding: 10px 15px; background: #4CAF50; color: white; border: none; cursor: pointer; }
-        .loading { color: #666; text-align: center; padding: 10px; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #chat {
+            height: 400px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin: 5px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+        .user {
+            background: #e3f2fd;
+            margin-left: auto;
+        }
+        .bot {
+            background: #f1f1f1;
+            margin-right: auto;
+        }
+        #input {
+            width: 70%;
+            padding: 8px;
+        }
+        button {
+            padding: 8px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .status {
+            color: #666;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
     <h1>Помощник Газпром</h1>
     <div id="chat"></div>
     <input type="text" id="input" placeholder="Введите ваш вопрос...">
-    <button onclick="sendMessage()">Отправить</button>
-    <div id="status" class="loading">Готов к работе</div>
+    <button id="send-btn">Отправить</button>
+    <div id="status" class="status">Готов к работе</div>
 
     <script>
         const chat = document.getElementById('chat');
         const input = document.getElementById('input');
+        const sendBtn = document.getElementById('send-btn');
         const status = document.getElementById('status');
 
         function addMessage(text, isUser) {
@@ -41,27 +76,34 @@
 
             input.value = '';
             addMessage(message, true);
-            status.textContent = "Помощник думает...";
+            status.textContent = "Обработка запроса...";
+            sendBtn.disabled = true;
 
             try {
-                const response = await fetch('http://localhost:3000/ask', {
+                const response = await fetch('/ask', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ question: message })
                 });
 
-                if (!response.ok) throw new Error('Ошибка сервера');
-                
+                if (!response.ok) {
+                    throw new Error('Ошибка сервера');
+                }
+
                 const data = await response.json();
                 addMessage(data.answer, false);
-                status.textContent = "Готов к работе";
             } catch (error) {
-                addMessage("Извините, произошла ошибка. Пожалуйста, попробуйте позже.", false);
-                status.textContent = "Ошибка: " + error.message;
+                addMessage("Ошибка: " + error.message, false);
                 console.error(error);
+            } finally {
+                status.textContent = "Готов к работе";
+                sendBtn.disabled = false;
             }
         }
 
+        sendBtn.addEventListener('click', sendMessage);
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
