@@ -1,19 +1,64 @@
 // Конфигурация помощника
 const config = {
     assistantName: "Помощник Газпром",
-    companyInfo: "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти.",
-    defaultResponse: "Извините, я не могу ответить на этот вопрос. Пожалуйста, обратитесь в службу поддержки по телефону 1234."
+    companyInfo: `Газпром — глобальная энергетическая компания. Основные направления деятельности:
+    - Разведка и добыча газа
+    - Транспортировка газа
+    - Хранение и переработка
+    - Реализация газа и нефтепродуктов
+    
+    Контакты поддержки: телефон 1234, email support@gazprom.ru`,
+    
+    // Локальная модель (работает в браузере)
+    modelName: "Xenova/LaMini-Flan-T5-248M",
+    
+    // Системный промт для модели
+    systemPrompt: `Ты - виртуальный помощник компании Газпром. Отвечай профессионально и вежливо на русском языке.
+    Если вопрос не по теме компании, вежливо ответь, что помогаешь только с вопросами о Газпроме.
+    Отвечай кратко и по делу.`
 };
 
 // Элементы интерфейса
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
+const statusMessage = document.getElementById('status-message');
 
-// История диалога
-let conversationHistory = [
-    { role: "assistant", content: "Здравствуйте! Я ваш виртуальный помощник в компании Газпром. Чем могу помочь?" }
-];
+// Глобальные переменные для модели
+let pipeline = null;
+let modelLoaded = false;
+
+// Инициализация модели
+async function initModel() {
+    try {
+        statusMessage.textContent = "Загрузка нейросети... (это займет около 30 секунд)";
+        
+        // Импортируем необходимые компоненты
+        const { pipeline } = await import('@xenova/transformers');
+        
+        // Загружаем модель
+        statusMessage.textContent = "Загрузка модели...";
+        const generator = await pipeline('text2text-generation', config.modelName, {
+            quantized: true,
+            progress_callback: (progress) => {
+                const percent = Math.round(progress.loaded / progress.total * 100);
+                statusMessage.textContent = `Загрузка модели: ${percent}%`;
+            }
+        });
+        
+        pipeline = generator;
+        modelLoaded = true;
+        statusMessage.textContent = "Модель загружена! Можете задавать вопросы.";
+        userInput.disabled = false;
+        sendButton.disabled = false;
+        userInput.focus();
+        
+        console.log("Модель успешно загружена");
+    } catch (error) {
+        console.error("Ошибка загрузки модели:", error);
+        statusMessage.textContent = "Ошибка загрузки модели. Пожалуйста, обновите страницу.";
+    }
+}
 
 // Инициализация чата
 function initChat() {
@@ -52,68 +97,43 @@ function hideTypingIndicator() {
     if (typingElement) typingElement.remove();
 }
 
-// Получение ответа от AI
-async function getAIResponse(userMessage) {
-    // Добавляем контекст для AI
-    const systemPrompt = `Ты - ${config.assistantName}, виртуальный помощник в компании Газпром. 
-    ${config.companyInfo}
-    Отвечай вежливо и профессионально на русском языке. 
-    Если вопрос не связан с компанией, вежливо сообщи, что помогаешь только по вопросам, связанным с Газпромом.`;
-
-    // Формируем полный запрос
-    const messages = [
-        { role: "system", content: systemPrompt },
-        ...conversationHistory.map(msg => ({ role: msg.role, content: msg.content })),
-        { role: "user", content: userMessage }
-    ];
-
+// Генерация ответа с помощью локальной модели
+async function generateResponse(userMessage) {
+    if (!modelLoaded || !pipeline) {
+        return "Модель еще не загружена. Пожалуйста, подождите.";
+    }
+    
     try {
-        // Используем бесплатный прокси к OpenAI API
-        const response = await fetch('https://free.churchless.tech/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: "gpt-3.5-turbo",
-                messages: messages,
-                temperature: 0.7,
-                max_tokens: 500
-            })
+        // Формируем полный промт
+        const fullPrompt = `${config.systemPrompt}\n\nКонтекст компании:\n${config.companyInfo}\n\nВопрос: ${userMessage}\nОтвет:`;
+        
+        // Генерируем ответ
+        const response = await pipeline(fullPrompt, {
+            max_new_tokens: 200,
+            temperature: 0.7,
+            repetition_penalty: 1.2,
+            do_sample: true
         });
-
-        if (!response.ok) {
-            throw new Error(`Ошибка API: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.choices[0].message.content.trim();
+        
+        return response[0].generated_text.trim();
     } catch (error) {
-        console.error('Ошибка при запросе к AI:', error);
-        return null;
+        console.error("Ошибка генерации ответа:", error);
+        return "Извините, произошла ошибка при генерации ответа. Пожалуйста, попробуйте еще раз.";
     }
 }
 
 // Отправка сообщения
 async function sendMessage() {
     const message = userInput.value.trim();
-    if (!message) return;
+    if (!message || !modelLoaded) return;
 
     userInput.value = '';
     addMessage(message, 'user');
-    conversationHistory.push({ role: "user", content: message });
     showTypingIndicator();
 
     try {
-        const response = await getAIResponse(message);
-        
-        if (response) {
-            addMessage(response, 'assistant');
-            conversationHistory.push({ role: "assistant", content: response });
-        } else {
-            addMessage(config.defaultResponse, 'assistant');
-            conversationHistory.push({ role: "assistant", content: config.defaultResponse });
-        }
+        const response = await generateResponse(message);
+        addMessage(response, 'assistant');
     } catch (error) {
         console.error('Ошибка:', error);
         addMessage("Произошла ошибка. Пожалуйста, попробуйте позже.", 'assistant');
@@ -123,4 +143,7 @@ async function sendMessage() {
 }
 
 // Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', initChat);
+document.addEventListener('DOMContentLoaded', function() {
+    initChat();
+    initModel();
+});

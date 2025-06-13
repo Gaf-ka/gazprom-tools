@@ -102,6 +102,12 @@
             0%, 60%, 100% { transform: translateY(0); }
             30% { transform: translateY(-5px); }
         }
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            color: #666;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -113,13 +119,18 @@
             <div class="message assistant-message">
                 Здравствуйте! Я ваш виртуальный помощник в компании Газпром. Чем могу помочь?
             </div>
+            <div class="status-message" id="status-message">
+                Загрузка нейросети... (это займет около 30 секунд)
+            </div>
         </div>
         <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Введите ваш вопрос..." autocomplete="off">
-            <button id="send-button">Отправить</button>
+            <input type="text" id="user-input" placeholder="Введите ваш вопрос..." autocomplete="off" disabled>
+            <button id="send-button" disabled>Отправить</button>
         </div>
     </div>
 
+    <!-- Подключаем библиотеку Transformers.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.4.0"></script>
     <script src="assistant.js"></script>
 </body>
 </html>
