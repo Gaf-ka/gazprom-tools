@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Простой ИИ-помощник</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <title>ИИ-помощник (нейросеть в браузере)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            background: #f5f5f5;
         }
         .chat-container {
             max-width: 600px;
             margin: 0 auto;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
         .chat-header {
-            background: #4285f4;
+            background: #6200ee;
             color: white;
             padding: 15px;
-            font-size: 18px;
             text-align: center;
+            font-size: 18px;
         }
         .chat-messages {
             height: 400px;
@@ -40,7 +40,7 @@
             max-width: 80%;
         }
         .user-message {
-            background: #4285f4;
+            background: #6200ee;
             color: white;
             margin-left: auto;
         }
@@ -64,14 +64,14 @@
         #send-button {
             margin-left: 10px;
             padding: 10px 20px;
-            background: #4285f4;
+            background: #6200ee;
             color: white;
             border: none;
             border-radius: 20px;
             cursor: pointer;
         }
         #send-button:disabled {
-            background: #cccccc;
+            background: #aaa;
             cursor: not-allowed;
         }
         .typing-indicator {
@@ -81,7 +81,7 @@
         .typing-dot {
             width: 8px;
             height: 8px;
-            background-color: #888;
+            background: #666;
             border-radius: 50%;
             margin: 0 3px;
             animation: typing 1.4s infinite ease-in-out;
@@ -100,10 +100,10 @@
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">Простой ИИ-помощник</div>
+        <div class="chat-header">ИИ-помощник (нейросеть в браузере)</div>
         <div class="chat-messages" id="chat-messages">
-            <div class="message bot-message">Привет! Я простой ИИ-помощник. Чем могу помочь?</div>
-            <div class="status" id="status">Загружаю нейросеть...</div>
+            <div class="message bot-message">Привет! Я нейросеть, работающая прямо в твоём браузере. Задавай вопрос!</div>
+            <div class="status" id="status">Загружаю нейросеть (это займёт ~30 сек)...</div>
         </div>
         <div class="chat-input">
             <input type="text" id="user-input" placeholder="Напишите сообщение..." disabled>
@@ -112,56 +112,27 @@
     </div>
 
     <script>
-        // Элементы интерфейса
-        const chatMessages = document.getElementById('chat-messages');
-        const userInput = document.getElementById('user-input');
-        const sendButton = document.getElementById('send-button');
-        const statusElement = document.getElementById('status');
+        // ===== Конфигурация =====
+        const MODEL_NAME = "Xenova/t5-small"; // Компактная, но рабочая модель
+        let pipeline = null;
 
-        // Простая нейросеть для генерации ответов
-        class SimpleAIModel {
-            constructor() {
-                // Простые правила для ответов
-                this.rules = [
-                    { pattern: /привет|здравствуй|hello/i, responses: ["Привет!", "Здравствуйте!", "Привет! Как дела?"] },
-                    { pattern: /как дела|как ты/i, responses: ["У меня всё хорошо!", "Отлично, спасибо!", "Как у нейросети - работаю :)"] },
-                    { pattern: /спасибо|благодарю/i, responses: ["Пожалуйста!", "Всегда рад помочь!", "Обращайтесь!"] },
-                    { pattern: /пока|до свидания/i, responses: ["До свидания!", "Всего хорошего!", "Был рад помочь!"] },
-                    { pattern: /.*/, responses: ["Интересный вопрос...", "Я пока учусь отвечать на такие вопросы", 
-                                              "Не совсем понял, можете уточнить?", "Моя нейросеть ещё учится :)"] }
-                ];
-            }
+        // ===== Элементы интерфейса =====
+        const chatMessages = document.getElementById("chat-messages");
+        const userInput = document.getElementById("user-input");
+        const sendButton = document.getElementById("send-button");
+        const statusElement = document.getElementById("status");
 
-            // Генерация ответа
-            generateResponse(input) {
-                input = input.toLowerCase().trim();
-                
-                // Ищем подходящее правило
-                for (const rule of this.rules) {
-                    if (rule.pattern.test(input)) {
-                        // Возвращаем случайный ответ из подходящих
-                        const randomIndex = Math.floor(Math.random() * rule.responses.length);
-                        return rule.responses[randomIndex];
-                    }
-                }
-                
-                return "Не понял ваш вопрос...";
-            }
-        }
-
-        // Инициализация модели
-        let aiModel;
-        
+        // ===== Инициализация нейросети =====
         async function initializeModel() {
-            statusElement.textContent = "Создаю нейросеть...";
-            
             try {
-                // Имитируем загрузку сложной модели
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                statusElement.textContent = "Загружаю нейросеть (это займёт ~30 сек)...";
                 
-                // Создаем простую модель
-                aiModel = new SimpleAIModel();
-                
+                // Загружаем модель для генерации текста
+                pipeline = await transformers.TextGenerationPipeline.from_pretrained(
+                    MODEL_NAME,
+                    { quantized: true } // Уменьшенная версия для быстрой загрузки
+                );
+
                 statusElement.textContent = "Нейросеть готова!";
                 setTimeout(() => {
                     statusElement.remove();
@@ -169,75 +140,88 @@
                     sendButton.disabled = false;
                     userInput.focus();
                 }, 1000);
-                
+
             } catch (error) {
-                console.error("Ошибка инициализации:", error);
+                console.error("Ошибка загрузки модели:", error);
                 statusElement.textContent = "Ошибка загрузки. Обновите страницу.";
             }
         }
 
-        // Добавление сообщения в чат
+        // ===== Генерация ответа нейросетью =====
+        async function generateResponse(userMessage) {
+            if (!pipeline) return "Нейросеть не загрузилась. Попробуйте позже.";
+
+            // Формируем промпт для модели
+            const prompt = `Ответь на вопрос: "${userMessage}"`;
+            
+            // Генерируем ответ
+            const response = await pipeline(prompt, {
+                max_new_tokens: 100,  // Максимальная длина ответа
+                temperature: 0.7,     // "Креативность" ответов
+                do_sample: true       // Включить случайность
+            });
+
+            return response[0].generated_text || "Не могу сгенерировать ответ.";
+        }
+
+        // ===== Отправка сообщения =====
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            userInput.value = "";
+            addMessage(message, "user");
+            showTyping();
+            userInput.disabled = true;
+            sendButton.disabled = true;
+
+            try {
+                const response = await generateResponse(message);
+                addMessage(response, "bot");
+            } catch (error) {
+                console.error("Ошибка генерации:", error);
+                addMessage("Ошибка нейросети. Попробуйте ещё раз.", "bot");
+            } finally {
+                hideTyping();
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        // ===== Вспомогательные функции =====
         function addMessage(text, sender) {
-            const messageElement = document.createElement('div');
+            const messageElement = document.createElement("div");
             messageElement.className = `message ${sender}-message`;
             messageElement.textContent = text;
             chatMessages.appendChild(messageElement);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Показать индикатор набора
         function showTyping() {
-            const typingElement = document.createElement('div');
-            typingElement.className = 'typing-indicator';
-            typingElement.id = 'typing-indicator';
+            const typingElement = document.createElement("div");
+            typingElement.className = "typing-indicator";
+            typingElement.id = "typing-indicator";
             for (let i = 0; i < 3; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'typing-dot';
+                const dot = document.createElement("div");
+                dot.className = "typing-dot";
                 typingElement.appendChild(dot);
             }
             chatMessages.appendChild(typingElement);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Скрыть индикатор набора
         function hideTyping() {
-            const typingElement = document.getElementById('typing-indicator');
+            const typingElement = document.getElementById("typing-indicator");
             if (typingElement) typingElement.remove();
         }
 
-        // Обработка отправки сообщения
-        async function sendMessage() {
-            const message = userInput.value.trim();
-            if (!message) return;
-            
-            userInput.value = '';
-            addMessage(message, 'user');
-            showTyping();
-            userInput.disabled = true;
-            sendButton.disabled = true;
-            
-            // Имитируем "думание" нейросети
-            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
-            
-            // Получаем ответ от нейросети
-            const response = aiModel.generateResponse(message);
-            addMessage(response, 'bot');
-            
-            hideTyping();
-            userInput.disabled = false;
-            sendButton.disabled = false;
-            userInput.focus();
-        }
-
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', () => {
-            // Назначение обработчиков
-            sendButton.addEventListener('click', sendMessage);
-            userInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') sendMessage();
+        // ===== Запуск при загрузке =====
+        document.addEventListener("DOMContentLoaded", () => {
+            sendButton.addEventListener("click", sendMessage);
+            userInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") sendMessage();
             });
-            
-            // Загрузка модели
             initializeModel();
         });
     </script>
