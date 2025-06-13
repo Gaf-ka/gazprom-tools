@@ -6,71 +6,64 @@
     <title>ИИ помощник - Газпром</title>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
         }
-        .assistant-container {
+        .chat-container {
             max-width: 800px;
-            margin: 20px auto;
-            background: #fff;
+            margin: 0 auto;
+            background: white;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
-        .assistant-header {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            background: #f8f8f8;
-            border-bottom: 1px solid #eee;
-        }
-        .assistant-avatar {
-            width: 40px;
-            height: 40px;
+        .chat-header {
             background: #0088cc;
             color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
+            padding: 15px 20px;
+            font-size: 18px;
             font-weight: bold;
         }
-        .assistant-messages {
-            padding: 20px;
+        .chat-messages {
             height: 400px;
             overflow-y: auto;
+            padding: 20px;
+            background: #f9f9f9;
         }
         .message {
             margin-bottom: 15px;
+            max-width: 80%;
             padding: 10px 15px;
             border-radius: 18px;
-            max-width: 80%;
-        }
-        .assistant-message {
-            background: #f1f1f1;
-            margin-right: auto;
+            line-height: 1.4;
         }
         .user-message {
             background: #0088cc;
             color: white;
             margin-left: auto;
         }
-        .assistant-input {
+        .assistant-message {
+            background: #e5e5ea;
+            margin-right: auto;
+        }
+        .chat-input {
             display: flex;
             padding: 15px;
             border-top: 1px solid #eee;
+            background: white;
         }
-        .assistant-input input {
+        #user-input {
             flex: 1;
             padding: 10px 15px;
             border: 1px solid #ddd;
             border-radius: 20px;
             outline: none;
+            font-size: 16px;
         }
-        .assistant-input button {
+        #send-button {
             margin-left: 10px;
             padding: 10px 20px;
             background: #0088cc;
@@ -78,8 +71,9 @@
             border: none;
             border-radius: 20px;
             cursor: pointer;
+            font-size: 16px;
         }
-        .assistant-input button:hover {
+        #send-button:hover {
             background: #0077bb;
         }
         .typing-indicator {
@@ -108,52 +102,21 @@
             0%, 60%, 100% { transform: translateY(0); }
             30% { transform: translateY(-5px); }
         }
-        .quick-questions {
-            margin-top: 15px;
-            padding: 10px;
-        }
-        .quick-questions p {
-            margin-bottom: 10px;
-            color: #666;
-            font-size: 14px;
-        }
-        .quick-question {
-            display: inline-block;
-            margin: 5px;
-            padding: 8px 15px;
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            color: #333;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .quick-question:hover {
-            background-color: #e0e0e0;
-            border-color: #ccc;
-        }
     </style>
 </head>
 <body>
-    <div class="assistant-container">
-        <div class="assistant-header">
-            <div class="assistant-avatar">AI</div>
-            <div>
-                <h3>Помощник Газпром</h3>
-                <p>Чем могу помочь?</p>
-            </div>
+    <div class="chat-container">
+        <div class="chat-header">
+            Помощник Газпром
         </div>
-        
-        <div class="assistant-messages" id="chat-messages">
+        <div class="chat-messages" id="chat-messages">
             <div class="message assistant-message">
-                Здравствуйте! Я ваш виртуальный помощник. Могу ответить на вопросы о работе компании. Чем могу помочь?
+                Здравствуйте! Я ваш виртуальный помощник в компании Газпром. Чем могу помочь?
             </div>
         </div>
-        
-        <div class="assistant-input">
-            <input type="text" id="user-input" placeholder="Введите ваш вопрос..." onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()">Отправить</button>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Введите ваш вопрос..." autocomplete="off">
+            <button id="send-button">Отправить</button>
         </div>
     </div>
 

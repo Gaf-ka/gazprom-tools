@@ -1,20 +1,26 @@
-// Конфигурация API
-const AI_CONFIG = {
-    HF_API_KEY: "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",
-    MODEL: "facebook/blenderbot-400M-distill",
-    API_URL: "https://api-inference.huggingface.co/models/"
+// Конфигурация помощника
+const config = {
+    assistantName: "Помощник Газпром",
+    companyInfo: "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти.",
+    defaultResponse: "Извините, я не могу ответить на этот вопрос. Пожалуйста, обратитесь в службу поддержки по телефону 1234."
 };
 
 // Элементы интерфейса
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
+const sendButton = document.getElementById('send-button');
 
 // История диалога
-let conversationHistory = [];
+let conversationHistory = [
+    { role: "assistant", content: "Здравствуйте! Я ваш виртуальный помощник в компании Газпром. Чем могу помочь?" }
+];
 
 // Инициализация чата
 function initChat() {
-    addMessage("Здравствуйте! Я ваш виртуальный помощник. Могу ответить на вопросы о работе компании. Чем могу помочь?", 'assistant');
+    sendButton.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
 }
 
 // Добавление сообщения в чат
@@ -46,97 +52,75 @@ function hideTypingIndicator() {
     if (typingElement) typingElement.remove();
 }
 
-// Запрос к Hugging Face API
-async function queryHuggingFace(prompt) {
+// Получение ответа от AI
+async function getAIResponse(userMessage) {
+    // Добавляем контекст для AI
+    const systemPrompt = `Ты - ${config.assistantName}, виртуальный помощник в компании Газпром. 
+    ${config.companyInfo}
+    Отвечай вежливо и профессионально на русском языке. 
+    Если вопрос не связан с компанией, вежливо сообщи, что помогаешь только по вопросам, связанным с Газпромом.`;
+
+    // Формируем полный запрос
+    const messages = [
+        { role: "system", content: systemPrompt },
+        ...conversationHistory.map(msg => ({ role: msg.role, content: msg.content })),
+        { role: "user", content: userMessage }
+    ];
+
     try {
-        // Добавляем контекст для нейросети
-        const context = "Ты - помощник в компании Газпром. Отвечай на вопросы вежливо и профессионально. " + 
-                        "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, " + 
-                        "транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти.";
-        
-        // Формируем полный запрос с историей диалога
-        const fullPrompt = `${context}\n\nТекущий диалог:\n${conversationHistory.join('\n')}\nПользователь: ${prompt}\nАссистент:`;
-        
-        const response = await fetch(
-            AI_CONFIG.API_URL + AI_CONFIG.MODEL,
-            {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${AI_CONFIG.HF_API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ 
-                    inputs: fullPrompt,
-                    parameters: {
-                        max_length: 200,
-                        temperature: 0.7,
-                        repetition_penalty: 1.2
-                    }
-                })
-            }
-        );
+        // Используем бесплатный прокси к OpenAI API
+        const response = await fetch('https://free.churchless.tech/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: "gpt-3.5-turbo",
+                messages: messages,
+                temperature: 0.7,
+                max_tokens: 500
+            })
+        });
 
         if (!response.ok) {
             throw new Error(`Ошибка API: ${response.status}`);
         }
 
         const data = await response.json();
-        return data.generated_text;
+        return data.choices[0].message.content.trim();
     } catch (error) {
-        console.error('Ошибка Hugging Face API:', error);
+        console.error('Ошибка при запросе к AI:', error);
         return null;
     }
 }
 
-// Обработка отправки сообщения
+// Отправка сообщения
 async function sendMessage() {
     const message = userInput.value.trim();
     if (!message) return;
-    
+
     userInput.value = '';
     addMessage(message, 'user');
+    conversationHistory.push({ role: "user", content: message });
     showTypingIndicator();
-    
-    // Добавляем вопрос в историю
-    conversationHistory.push(`Пользователь: ${message}`);
-    
+
     try {
-        const response = await queryHuggingFace(message);
+        const response = await getAIResponse(message);
         
         if (response) {
-            // Очищаем лишние части ответа (если есть)
-            let cleanResponse = response.replace(/Ассистент:/g, '').trim();
-            
-            // Добавляем ответ в историю
-            conversationHistory.push(`Ассистент: ${cleanResponse}`);
-            
-            // Ограничиваем историю диалога (чтобы не перегружать API)
-            if (conversationHistory.length > 6) {
-                conversationHistory = conversationHistory.slice(-6);
-            }
-            
-            addMessage(cleanResponse, 'assistant');
+            addMessage(response, 'assistant');
+            conversationHistory.push({ role: "assistant", content: response });
         } else {
-            addMessage("Извините, не удалось получить ответ. Попробуйте позже.", 'assistant');
+            addMessage(config.defaultResponse, 'assistant');
+            conversationHistory.push({ role: "assistant", content: config.defaultResponse });
         }
     } catch (error) {
         console.error('Ошибка:', error);
-        addMessage("Произошла ошибка. Попробуйте позже.", 'assistant');
+        addMessage("Произошла ошибка. Пожалуйста, попробуйте позже.", 'assistant');
     } finally {
         hideTypingIndicator();
     }
 }
 
-// Обработка нажатия Enter
-function handleKeyPress(event) {
-    if (event.key === 'Enter') sendMessage();
-}
-
 // Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-    initChat();
-    
-    // Назначение обработчиков
-    document.querySelector('.assistant-input button').addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', handleKeyPress);
-});
+document.addEventListener('DOMContentLoaded', initChat);
