@@ -3,100 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Помощник Газпром</title>
+    <title>ИИ помощник - Газпром</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .chat-container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        #chat {
+        .chat-header {
+            background: #0088cc;
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .chat-messages {
             height: 400px;
-            border: 1px solid #ddd;
-            padding: 10px;
             overflow-y: auto;
-            margin-bottom: 10px;
+            padding: 15px;
+            background: #f9f9f9;
         }
         .message {
-            margin: 10px;
+            margin-bottom: 15px;
             padding: 10px 15px;
-            border-radius: 5px;
+            border-radius: 18px;
             max-width: 80%;
+            line-height: 1.4;
         }
-        .user {
-            background: #e3f2fd;
+        .user-message {
+            background: #0088cc;
+            color: white;
             margin-left: auto;
         }
-        .bot {
-            background: #f1f1f1;
+        .bot-message {
+            background: #e5e5ea;
+            color: black;
             margin-right: auto;
         }
-        #input-container {
+        .chat-input {
             display: flex;
-            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            background: white;
         }
-        #input {
+        #user-input {
             flex: 1;
-            padding: 10px;
+            padding: 10px 15px;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 20px;
+            outline: none;
         }
-        button {
+        #send-button {
+            margin-left: 10px;
             padding: 10px 20px;
             background: #0088cc;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 20px;
             cursor: pointer;
+        }
+        .typing-indicator {
+            display: flex;
+            padding: 10px 15px;
+        }
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #999;
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
         }
     </style>
 </head>
 <body>
-    <h1>Помощник Газпром</h1>
-    <div id="chat">
-        <div class="message bot">Здравствуйте! Я ваш виртуальный помощник. Задайте ваш вопрос.</div>
-    </div>
-    <div id="input-container">
-        <input type="text" id="input" placeholder="Введите ваш вопрос...">
-        <button id="send-btn">Отправить</button>
+    <div class="chat-container">
+        <div class="chat-header">Помощник Газпром</div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot-message">
+                Здравствуйте! Я ваш виртуальный помощник. Отвечу на вопросы о компании Газпром и её деятельности.
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Введите ваш вопрос..." autocomplete="off">
+            <button id="send-button">Отправить</button>
+        </div>
     </div>
 
     <script>
-        const chat = document.getElementById('chat');
-        const input = document.getElementById('input');
-        const sendBtn = document.getElementById('send-btn');
+        // База знаний
+        const knowledgeBase = [
+            {
+                question: "что такое газпром",
+                answer: "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти."
+            },
+            {
+                question: "как создать отчет",
+                answer: "Для создания отчета используйте инструменты визуализации данных в разделе 'Отчеты'. Вы можете экспортировать результаты в PDF или Excel."
+            },
+            {
+                question: "техника безопасности",
+                answer: "Все материалы по технике безопасности доступны в корпоративном портале в разделе 'Безопасность'. Обязательно пройдите ежегодный инструктаж."
+            },
+            {
+                question: "контакты поддержки",
+                answer: "Служба поддержки доступна по внутреннему телефону 1234 или email support@gazprom.ru. Часы работы: с 9:00 до 18:00."
+            },
+            {
+                question: "калькулятор",
+                answer: "Калькулятор находится в разделе 'Инструменты'. Доступны базовые вычисления и финансовые расчеты."
+            }
+        ];
 
-        function addMessage(text, isUser) {
-            const div = document.createElement('div');
-            div.className = `message ${isUser ? 'user' : 'bot'}`;
-            div.textContent = text;
-            chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight;
-        }
+        // Элементы интерфейса
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
 
-        async function sendMessage() {
-            const message = input.value.trim();
-            if (!message) return;
-
-            input.value = '';
-            addMessage(message, true);
-
+        // Инициализация модели
+        let model;
+        let encoder;
+        
+        async function loadModels() {
+            showTyping();
+            addMessage("Загружаю модели ИИ...", 'bot');
+            
             try {
-                const response = await fetch(`/ask?question=${encodeURIComponent(message)}`);
-                if (!response.ok) throw new Error('Ошибка сервера');
+                // Загружаем Universal Sentence Encoder для сравнения вопросов
+                encoder = await use.load();
                 
-                const data = await response.json();
-                addMessage(data.answer, false);
+                // Загружаем модель для генерации ответов (упрощенный вариант)
+                model = {
+                    respond: async (question) => {
+                        // Сначала ищем в базе знаний
+                        const bestMatch = await findBestMatch(question);
+                        if (bestMatch.score > 0.7) {
+                            return bestMatch.answer;
+                        }
+                        
+                        // Если не нашли, генерируем общий ответ
+                        return generateGeneralResponse(question);
+                    }
+                };
+                
+                hideTyping();
+                addMessage("Модели загружены. Задавайте ваш вопрос.", 'bot');
             } catch (error) {
-                addMessage("Произошла ошибка при обработке запроса", false);
-                console.error(error);
+                console.error("Ошибка загрузки моделей:", error);
+                addMessage("Не удалось загрузить модели ИИ. Буду использовать упрощенный режим.", 'bot');
+                hideTyping();
             }
         }
 
-        sendBtn.addEventListener('click', sendMessage);
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+        // Поиск лучшего соответствия в базе знаний
+        async function findBestMatch(question) {
+            if (!encoder) {
+                return { answer: "Система ещё не готова. Попробуйте позже.", score: 0 };
+            }
+            
+            // Кодируем вопрос пользователя
+            const questionEmbedding = await encoder.embed([question]);
+            
+            let bestMatch = { answer: "", score: 0 };
+            
+            // Сравниваем с каждым вопросом в базе знаний
+            for (const item of knowledgeBase) {
+                const kbEmbedding = await encoder.embed([item.question]);
+                const similarity = tf.matMul(questionEmbedding, kbEmbedding, false, true).dataSync()[0];
+                
+                if (similarity > bestMatch.score) {
+                    bestMatch = { answer: item.answer, score: similarity };
+                }
+            }
+            
+            return bestMatch;
+        }
+
+        // Генерация общего ответа
+        function generateGeneralResponse(question) {
+            const lowerQuestion = question.toLowerCase();
+            
+            if (lowerQuestion.includes("привет") || lowerQuestion.includes("здравств")) {
+                return "Здравствуйте! Чем могу помочь?";
+            }
+            
+            if (lowerQuestion.includes("спасибо")) {
+                return "Пожалуйста! Обращайтесь, если будут ещё вопросы.";
+            }
+            
+            if (lowerQuestion.includes("как") || lowerQuestion.includes("какой")) {
+                return "По этому вопросу обратитесь в службу поддержки по телефону 1234.";
+            }
+            
+            if (lowerQuestion.includes("когда") || lowerQuestion.includes("сколько")) {
+                return "Точную информацию по срокам можно уточнить в соответствующем разделе портала.";
+            }
+            
+            return "Извините, я не совсем понял вопрос. Можете переформулировать?";
+        }
+
+        // Добавление сообщения в чат
+        function addMessage(text, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${sender}-message`;
+            messageElement.textContent = text;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Показать индикатор набора
+        function showTyping() {
+            const typingElement = document.createElement('div');
+            typingElement.className = 'typing-indicator';
+            typingElement.id = 'typing-indicator';
+            typingElement.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            chatMessages.appendChild(typingElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Скрыть индикатор набора
+        function hideTyping() {
+            const typingElement = document.getElementById('typing-indicator');
+            if (typingElement) typingElement.remove();
+        }
+
+        // Отправка сообщения
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            userInput.value = '';
+            addMessage(message, 'user');
+            showTyping();
+            
+            try {
+                let response;
+                
+                if (model) {
+                    response = await model.respond(message);
+                } else {
+                    // Если модель не загрузилась, используем простой поиск
+                    const lowerMessage = message.toLowerCase();
+                    const found = knowledgeBase.find(item => lowerMessage.includes(item.question));
+                    response = found ? found.answer : generateGeneralResponse(message);
+                }
+                
+                addMessage(response, 'bot');
+            } catch (error) {
+                console.error("Ошибка:", error);
+                addMessage("Произошла ошибка при обработке запроса.", 'bot');
+            } finally {
+                hideTyping();
+            }
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            // Назначение обработчиков
+            sendButton.addEventListener('click', sendMessage);
+            userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+            
+            // Загрузка моделей
+            loadModels();
         });
     </script>
 </body>
