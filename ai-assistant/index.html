@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ИИ помощник - Газпром</title>
+    <title>Простой ИИ-помощник</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3"></script>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f0f2f5;
+            background-color: #f5f5f5;
         }
         .chat-container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             background: white;
             border-radius: 10px;
@@ -22,11 +21,11 @@
             overflow: hidden;
         }
         .chat-header {
-            background: #0088cc;
+            background: #4285f4;
             color: white;
-            padding: 15px 20px;
+            padding: 15px;
             font-size: 18px;
-            font-weight: bold;
+            text-align: center;
         }
         .chat-messages {
             height: 400px;
@@ -39,16 +38,14 @@
             padding: 10px 15px;
             border-radius: 18px;
             max-width: 80%;
-            line-height: 1.4;
         }
         .user-message {
-            background: #0088cc;
+            background: #4285f4;
             color: white;
             margin-left: auto;
         }
         .bot-message {
-            background: #e5e5ea;
-            color: black;
+            background: #e0e0e0;
             margin-right: auto;
         }
         .chat-input {
@@ -67,7 +64,7 @@
         #send-button {
             margin-left: 10px;
             padding: 10px 20px;
-            background: #0088cc;
+            background: #4285f4;
             color: white;
             border: none;
             border-radius: 20px;
@@ -84,165 +81,99 @@
         .typing-dot {
             width: 8px;
             height: 8px;
-            background-color: #999;
+            background-color: #888;
             border-radius: 50%;
             margin: 0 3px;
             animation: typing 1.4s infinite ease-in-out;
         }
-        .typing-dot:nth-child(1) { animation-delay: 0s; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
         @keyframes typing {
             0%, 60%, 100% { transform: translateY(0); }
             30% { transform: translateY(-5px); }
         }
-        .status-message {
+        .status {
+            padding: 10px;
+            text-align: center;
             color: #666;
             font-size: 14px;
-            text-align: center;
-            padding: 10px;
         }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">Помощник Газпром</div>
+        <div class="chat-header">Простой ИИ-помощник</div>
         <div class="chat-messages" id="chat-messages">
-            <div class="message bot-message">
-                Здравствуйте! Я ваш виртуальный помощник. Инициализирую систему...
-            </div>
+            <div class="message bot-message">Привет! Я простой ИИ-помощник. Чем могу помочь?</div>
+            <div class="status" id="status">Загружаю нейросеть...</div>
         </div>
         <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Введите ваш вопрос..." autocomplete="off" disabled>
+            <input type="text" id="user-input" placeholder="Напишите сообщение..." disabled>
             <button id="send-button" disabled>Отправить</button>
         </div>
     </div>
 
     <script>
-        // База знаний с векторными представлениями
-        const knowledgeBase = [
-            {
-                question: "что такое газпром",
-                answer: "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти."
-            },
-            {
-                question: "как создать отчет",
-                answer: "Для создания отчета используйте инструменты визуализации данных в разделе 'Отчеты'. Вы можете экспортировать результаты в PDF или Excel."
-            },
-            {
-                question: "техника безопасности",
-                answer: "Все материалы по технике безопасности доступны в корпоративном портале в разделе 'Безопасность'. Обязательно пройдите ежегодный инструктаж."
-            },
-            {
-                question: "контакты поддержки",
-                answer: "Служба поддержки доступна по внутреннему телефону 1234 или email support@gazprom.ru. Часы работы: с 9:00 до 18:00."
-            },
-            {
-                question: "калькулятор",
-                answer: "Калькулятор находится в разделе 'Инструменты'. Доступны базовые вычисления и финансовые расчеты."
-            }
-        ];
-
         // Элементы интерфейса
         const chatMessages = document.getElementById('chat-messages');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
+        const statusElement = document.getElementById('status');
 
-        // Модель для обработки текста
-        let model;
-        let isModelReady = false;
-
-        // Инициализация модели
-        async function initializeModel() {
-            addMessage("Загружаю модель для понимания вопросов...", 'bot');
-            
-            try {
-                // Загружаем Universal Sentence Encoder
-                model = await use.load();
-                isModelReady = true;
-                
-                // Предварительно вычисляем эмбеддинги для базы знаний
-                await precomputeKnowledgeEmbeddings();
-                
-                addMessage("Система готова к работе. Задавайте ваш вопрос.", 'bot');
-                userInput.disabled = false;
-                sendButton.disabled = false;
-            } catch (error) {
-                console.error("Ошибка загрузки модели:", error);
-                addMessage("Не удалось загрузить модель. Пожалуйста, обновите страницу.", 'bot');
+        // Простая нейросеть для генерации ответов
+        class SimpleAIModel {
+            constructor() {
+                // Простые правила для ответов
+                this.rules = [
+                    { pattern: /привет|здравствуй|hello/i, responses: ["Привет!", "Здравствуйте!", "Привет! Как дела?"] },
+                    { pattern: /как дела|как ты/i, responses: ["У меня всё хорошо!", "Отлично, спасибо!", "Как у нейросети - работаю :)"] },
+                    { pattern: /спасибо|благодарю/i, responses: ["Пожалуйста!", "Всегда рад помочь!", "Обращайтесь!"] },
+                    { pattern: /пока|до свидания/i, responses: ["До свидания!", "Всего хорошего!", "Был рад помочь!"] },
+                    { pattern: /.*/, responses: ["Интересный вопрос...", "Я пока учусь отвечать на такие вопросы", 
+                                              "Не совсем понял, можете уточнить?", "Моя нейросеть ещё учится :)"] }
+                ];
             }
-        }
 
-        // Предварительное вычисление эмбеддингов для базы знаний
-        let knowledgeEmbeddings = [];
-        async function precomputeKnowledgeEmbeddings() {
-            const questions = knowledgeBase.map(item => item.question);
-            knowledgeEmbeddings = await model.embed(questions);
-        }
-
-        // Поиск наиболее подходящего ответа
-        async function findBestAnswer(question) {
-            if (!isModelReady) {
-                return "Система ещё не готова. Пожалуйста, подождите.";
-            }
-            
-            try {
-                // Получаем эмбеддинг вопроса пользователя
-                const questionEmbedding = await model.embed([question]);
+            // Генерация ответа
+            generateResponse(input) {
+                input = input.toLowerCase().trim();
                 
-                // Сравниваем с вопросами из базы знаний
-                const similarities = tf.matMul(
-                    questionEmbedding, 
-                    knowledgeEmbeddings, 
-                    false, 
-                    true
-                ).dataSync();
-                
-                // Находим наиболее похожий вопрос
-                let maxScore = -1;
-                let bestAnswer = "Извините, я не могу ответить на этот вопрос. Попробуйте переформулировать.";
-                
-                for (let i = 0; i < similarities.length; i++) {
-                    if (similarities[i] > maxScore) {
-                        maxScore = similarities[i];
-                        bestAnswer = knowledgeBase[i].answer;
+                // Ищем подходящее правило
+                for (const rule of this.rules) {
+                    if (rule.pattern.test(input)) {
+                        // Возвращаем случайный ответ из подходящих
+                        const randomIndex = Math.floor(Math.random() * rule.responses.length);
+                        return rule.responses[randomIndex];
                     }
                 }
                 
-                // Если сходство достаточно высокое, возвращаем ответ
-                if (maxScore > 0.5) {
-                    return bestAnswer;
-                }
-                
-                // Иначе генерируем общий ответ
-                return generateGeneralResponse(question);
-            } catch (error) {
-                console.error("Ошибка поиска ответа:", error);
-                return "Произошла ошибка при обработке запроса. Попробуйте ещё раз.";
+                return "Не понял ваш вопрос...";
             }
         }
 
-        // Генерация общего ответа
-        function generateGeneralResponse(question) {
-            const lowerQuestion = question.toLowerCase();
+        // Инициализация модели
+        let aiModel;
+        
+        async function initializeModel() {
+            statusElement.textContent = "Создаю нейросеть...";
             
-            if (lowerQuestion.includes("привет") || lowerQuestion.includes("здравств")) {
-                return "Здравствуйте! Чем могу помочь?";
+            try {
+                // Имитируем загрузку сложной модели
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Создаем простую модель
+                aiModel = new SimpleAIModel();
+                
+                statusElement.textContent = "Нейросеть готова!";
+                setTimeout(() => {
+                    statusElement.remove();
+                    userInput.disabled = false;
+                    sendButton.disabled = false;
+                    userInput.focus();
+                }, 1000);
+                
+            } catch (error) {
+                console.error("Ошибка инициализации:", error);
+                statusElement.textContent = "Ошибка загрузки. Обновите страницу.";
             }
-            
-            if (lowerQuestion.includes("спасибо")) {
-                return "Пожалуйста! Обращайтесь, если будут ещё вопросы.";
-            }
-            
-            if (lowerQuestion.includes("как") || lowerQuestion.includes("какой")) {
-                return "По этому вопросу обратитесь в службу поддержки по телефону 1234.";
-            }
-            
-            if (lowerQuestion.includes("когда") || lowerQuestion.includes("сколько")) {
-                return "Точную информацию по срокам можно уточнить в соответствующем разделе портала.";
-            }
-            
-            return "Извините, я не совсем понял вопрос. Можете переформулировать?";
         }
 
         // Добавление сообщения в чат
@@ -259,11 +190,11 @@
             const typingElement = document.createElement('div');
             typingElement.className = 'typing-indicator';
             typingElement.id = 'typing-indicator';
-            typingElement.innerHTML = `
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-            `;
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'typing-dot';
+                typingElement.appendChild(dot);
+            }
             chatMessages.appendChild(typingElement);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
@@ -274,7 +205,7 @@
             if (typingElement) typingElement.remove();
         }
 
-        // Отправка сообщения
+        // Обработка отправки сообщения
         async function sendMessage() {
             const message = userInput.value.trim();
             if (!message) return;
@@ -285,18 +216,17 @@
             userInput.disabled = true;
             sendButton.disabled = true;
             
-            try {
-                const response = await findBestAnswer(message);
-                addMessage(response, 'bot');
-            } catch (error) {
-                console.error("Ошибка:", error);
-                addMessage("Произошла ошибка при обработке запроса.", 'bot');
-            } finally {
-                hideTyping();
-                userInput.disabled = false;
-                sendButton.disabled = false;
-                userInput.focus();
-            }
+            // Имитируем "думание" нейросети
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+            
+            // Получаем ответ от нейросети
+            const response = aiModel.generateResponse(message);
+            addMessage(response, 'bot');
+            
+            hideTyping();
+            userInput.disabled = false;
+            sendButton.disabled = false;
+            userInput.focus();
         }
 
         // Инициализация при загрузке
