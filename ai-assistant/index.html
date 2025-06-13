@@ -17,23 +17,20 @@
             padding: 10px;
             overflow-y: auto;
             margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
         }
         .message {
-            margin: 5px;
+            margin: 10px;
             padding: 10px 15px;
-            border-radius: 18px;
+            border-radius: 5px;
             max-width: 80%;
         }
         .user {
-            background: #0088cc;
-            color: white;
-            align-self: flex-end;
+            background: #e3f2fd;
+            margin-left: auto;
         }
         .bot {
             background: #f1f1f1;
-            align-self: flex-start;
+            margin-right: auto;
         }
         #input-container {
             display: flex;
@@ -43,45 +40,22 @@
             flex: 1;
             padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 20px;
+            border-radius: 5px;
         }
-        #send-btn {
+        button {
             padding: 10px 20px;
             background: #0088cc;
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 5px;
             cursor: pointer;
-        }
-        #send-btn:hover {
-            background: #0077bb;
-        }
-        .typing {
-            display: inline-block;
-            margin-left: 5px;
-        }
-        .typing-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #999;
-            border-radius: 50%;
-            margin: 0 2px;
-            animation: typing 1.4s infinite ease-in-out;
-        }
-        .typing-dot:nth-child(1) { animation-delay: 0s; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-5px); }
         }
     </style>
 </head>
 <body>
     <h1>Помощник Газпром</h1>
     <div id="chat">
-        <div class="message bot">Здравствуйте! Я ваш помощник. Чем могу помочь?</div>
+        <div class="message bot">Здравствуйте! Я ваш виртуальный помощник. Задайте ваш вопрос.</div>
     </div>
     <div id="input-container">
         <input type="text" id="input" placeholder="Введите ваш вопрос...">
@@ -101,54 +75,22 @@
             chat.scrollTop = chat.scrollHeight;
         }
 
-        function showTyping() {
-            const typing = document.createElement('span');
-            typing.className = 'typing';
-            typing.id = 'typing-indicator';
-            typing.innerHTML = `
-                <span class="typing-dot"></span>
-                <span class="typing-dot"></span>
-                <span class="typing-dot"></span>
-            `;
-            chat.appendChild(typing);
-            chat.scrollTop = chat.scrollHeight;
-        }
-
-        function hideTyping() {
-            const typing = document.getElementById('typing-indicator');
-            if (typing) typing.remove();
-        }
-
         async function sendMessage() {
             const message = input.value.trim();
             if (!message) return;
 
             input.value = '';
             addMessage(message, true);
-            showTyping();
-            sendBtn.disabled = true;
 
             try {
-                const response = await fetch('/ask', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ question: message })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Ошибка сервера');
-                }
-
+                const response = await fetch(`/ask?question=${encodeURIComponent(message)}`);
+                if (!response.ok) throw new Error('Ошибка сервера');
+                
                 const data = await response.json();
                 addMessage(data.answer, false);
             } catch (error) {
-                addMessage("Произошла ошибка. Попробуйте позже.", false);
+                addMessage("Произошла ошибка при обработке запроса", false);
                 console.error(error);
-            } finally {
-                hideTyping();
-                sendBtn.disabled = false;
             }
         }
 
