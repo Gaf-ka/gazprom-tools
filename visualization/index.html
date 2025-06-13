@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Аналитика данных - Газпром</title>
+    <title>Аналитика данных - Газпром газораспределение Уфа</title>
     <link rel="stylesheet" href="../style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,9 +16,9 @@
         }
         
         .tool-card {
-            background-color: white;
+            background-color: var(--white);
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
             padding: 1.5rem;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
@@ -35,18 +35,26 @@
             font-size: 2.5rem;
             color: var(--primary-color);
             margin-bottom: 1rem;
+            text-align: center;
         }
         
         .tool-title {
             font-size: 1.25rem;
             margin-bottom: 0.75rem;
-            color: var(--dark-color);
+            color: var(--primary-dark);
+            text-align: center;
         }
         
         .tool-description {
-            color: var(--text-color);
+            color: var(--dark-gray);
             margin-bottom: 1.5rem;
             flex-grow: 1;
+            text-align: center;
+        }
+        
+        .tool-btn-container {
+            display: flex;
+            justify-content: center;
         }
         
         .btn-primary {
@@ -58,11 +66,18 @@
             text-decoration: none;
             font-weight: 500;
             transition: background-color 0.3s ease;
-            align-self: flex-start;
+            text-align: center;
         }
         
         .btn-primary:hover {
-            background-color: var(--secondary-color);
+            background-color: var(--primary-dark);
+        }
+        
+        /* Логотип */
+        .logo-img {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
         }
     </style>
 </head>
@@ -71,11 +86,9 @@
         <div class="container">
             <div class="header-container">
                 <div class="logo">
-                    <a href="https://pic.rutubelist.ru/user/57/68/5768dcac4aeef5099dfbb01395851338.jpg" target="_blank">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
-                    </a>
+                    <img src="https://pic.rutubelist.ru/user/57/68/5768dcac4aeef5099dfbb01395851338.jpg" alt="Газпром газораспределение Уфа" class="logo-img">
                     <div class="logo-text">
-                        <span class="logo-title">Газпром</span>
+                        <span class="logo-title">Газпром газораспределение Уфа</span>
                         <span class="logo-subtitle">Аналитика данных</span>
                     </div>
                 </div>
@@ -84,7 +97,6 @@
                     <ul class="nav-list">
                         <li class="nav-item"><a href="../index.html" class="nav-link">Главная</a></li>
                         <li class="nav-item"><a href="../office-tools/index.html" class="nav-link">Инструменты</a></li>
-                        <li class="nav-item"><a href="../trainers/index.html" class="nav-link">Тренажёры</a></li>
                         <li class="nav-item"><a href="index.html" class="nav-link active">Аналитика</a></li>
                         <li class="nav-item"><a href="../ai-assistant/index.html" class="nav-link">Помощник</a></li>
                     </ul>
@@ -116,7 +128,9 @@
                         </div>
                         <h3 class="tool-title">Графики и диаграммы</h3>
                         <p class="tool-description">Создавайте различные типы графиков с возможностью загрузки данных и экспорта результатов</p>
-                        <a href="charts.html" class="btn btn-primary">Открыть</a>
+                        <div class="tool-btn-container">
+                            <a href="charts.html" class="btn btn-primary">Открыть</a>
+                        </div>
                     </div>
                     
                     <div class="tool-card">
@@ -125,7 +139,9 @@
                         </div>
                         <h3 class="tool-title">Геоаналитика</h3>
                         <p class="tool-description">Визуализация данных на карте с возможностью настройки слоев и экспорта</p>
-                        <a href="geo.html" class="btn btn-primary">Открыть</a>
+                        <div class="tool-btn-container">
+                            <a href="geo.html" class="btn btn-primary">Открыть</a>
+                        </div>
                     </div>
                     
                     <div class="tool-card">
@@ -134,7 +150,9 @@
                         </div>
                         <h3 class="tool-title">Анализ таблиц</h3>
                         <p class="tool-description">Мощный инструмент для анализа табличных данных с фильтрами и сводками</p>
-                        <a href="tables.html" class="btn btn-primary">Открыть</a>
+                        <div class="tool-btn-container">
+                            <a href="tables.html" class="btn btn-primary">Открыть</a>
+                        </div>
                     </div>
                     
                     <div class="tool-card">
@@ -143,7 +161,9 @@
                         </div>
                         <h3 class="tool-title">Корреляционный анализ</h3>
                         <p class="tool-description">Выявление взаимосвязей между переменными с тепловыми картами корреляции</p>
-                        <a href="correlation.html" class="btn btn-primary">Открыть</a>
+                        <div class="tool-btn-container">
+                            <a href="correlation.html" class="btn btn-primary">Открыть</a>
+                        </div>
                     </div>
                     
                     <div class="tool-card">
@@ -152,7 +172,9 @@
                         </div>
                         <h3 class="tool-title">Временные ряды</h3>
                         <p class="tool-description">Анализ временных данных с прогнозированием и декомпозицией</p>
-                        <a href="timeseries.html" class="btn btn-primary">Открыть</a>
+                        <div class="tool-btn-container">
+                            <a href="timeseries.html" class="btn btn-primary">Открыть</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -163,8 +185,8 @@
         <div class="container">
             <div class="footer-container">
                 <div class="footer-column">
-                    <h4 class="footer-title">Газпром</h4>
-                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
+                    <h4 class="footer-title">ПАО «Газпром газораспределение Уфа»</h4>
+                    <p class="footer-text">Крупнейшая газовая компания Республики Башкортостан, обеспечивающая надежное газоснабжение региона.</p>
                 </div>
                 
                 <div class="footer-column">
@@ -172,8 +194,8 @@
                     <ul class="footer-links">
                         <li><a href="../index.html" class="footer-link">Главная</a></li>
                         <li><a href="../office-tools/index.html" class="footer-link">Инструменты</a></li>
-                        <li><a href="../trainers/index.html" class="footer-link">Тренажёры</a></li>
                         <li><a href="index.html" class="footer-link">Аналитика</a></li>
+                        <li><a href="../ai-assistant/index.html" class="footer-link">Помощник</a></li>
                     </ul>
                 </div>
                 
@@ -182,25 +204,25 @@
                     <ul class="footer-contacts">
                         <li class="contact-item">
                             <span class="contact-icon">📞</span>
-                            <span>+7 (495) 719-30-01</span>
+                            <span>8-800-234-05-00</span>
                         </li>
                         <li class="contact-item">
                             <span class="contact-icon">✉️</span>
-                            <span>portal@gazprom.ru</span>
+                            <span>info@bashgaz.ru</span>
                         </li>
                         <li class="contact-item">
                             <span class="contact-icon">📍</span>
-                            <span>Москва, ул. Наметкина, 16</span>
+                            <span>Республика Башкортостан, г. Уфа, ул. Новосибирская, д. 2, корп. 4</span>
                         </li>
                     </ul>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <p>© 2025 ПАО «Газпром газораспределение Уфа». Все права защищены.</p>
                 <div class="footer-links">
-                    <a href="#" class="footer-link">Политика конфиденциальности</a>
-                    <a href="#" class="footer-link">Условия использования</a>
+                    <a href="https://www.bashgaz.ru/upload/Политика%20конфиденциальности.pdf" class="footer-link">Политика конфиденциальности</a>
+                    <a href="https://www.bashgaz.ru/upload/user_agreement.pdf" class="footer-link">Пользовательское соглашение</a>
                 </div>
             </div>
         </div>
