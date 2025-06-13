@@ -3,134 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ИИ помощник - Газпром</title>
+    <title>Помощник Газпром</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f2f5;
-            color: #333;
-        }
-        .chat-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        .chat-header {
-            background: #0088cc;
-            color: white;
-            padding: 15px 20px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .chat-messages {
-            height: 400px;
-            overflow-y: auto;
-            padding: 20px;
-            background: #f9f9f9;
-        }
-        .message {
-            margin-bottom: 15px;
-            max-width: 80%;
-            padding: 10px 15px;
-            border-radius: 18px;
-            line-height: 1.4;
-        }
-        .user-message {
-            background: #0088cc;
-            color: white;
-            margin-left: auto;
-        }
-        .assistant-message {
-            background: #e5e5ea;
-            margin-right: auto;
-        }
-        .chat-input {
-            display: flex;
-            padding: 15px;
-            border-top: 1px solid #eee;
-            background: white;
-        }
-        #user-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            outline: none;
-            font-size: 16px;
-        }
-        #send-button {
-            margin-left: 10px;
-            padding: 10px 20px;
-            background: #0088cc;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        #send-button:hover {
-            background: #0077bb;
-        }
-        .typing-indicator {
-            display: flex;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-        }
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #999;
-            border-radius: 50%;
-            margin: 0 3px;
-            animation: typingAnimation 1.4s infinite ease-in-out;
-        }
-        .typing-dot:nth-child(1) {
-            animation-delay: 0s;
-        }
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-        @keyframes typingAnimation {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-5px); }
-        }
-        .status-message {
-            text-align: center;
-            padding: 10px;
-            color: #666;
-            font-size: 14px;
-        }
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        #chat { height: 500px; border: 1px solid #ccc; padding: 10px; overflow-y: scroll; margin-bottom: 10px; }
+        .message { margin: 5px; padding: 8px 12px; border-radius: 5px; max-width: 80%; }
+        .user { background: #e3f2fd; margin-left: auto; }
+        .bot { background: #f1f1f1; margin-right: auto; }
+        #input { width: 100%; padding: 10px; margin-bottom: 10px; }
+        button { padding: 10px 15px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        .loading { color: #666; text-align: center; padding: 10px; }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            Помощник Газпром
-        </div>
-        <div class="chat-messages" id="chat-messages">
-            <div class="message assistant-message">
-                Здравствуйте! Я ваш виртуальный помощник в компании Газпром. Чем могу помочь?
-            </div>
-            <div class="status-message" id="status-message">
-                Загрузка нейросети... (это займет около 30 секунд)
-            </div>
-        </div>
-        <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Введите ваш вопрос..." autocomplete="off" disabled>
-            <button id="send-button" disabled>Отправить</button>
-        </div>
-    </div>
+    <h1>Помощник Газпром</h1>
+    <div id="chat"></div>
+    <input type="text" id="input" placeholder="Введите ваш вопрос...">
+    <button onclick="sendMessage()">Отправить</button>
+    <div id="status" class="loading">Готов к работе</div>
 
-    <!-- Подключаем библиотеку Transformers.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.4.0"></script>
-    <script src="assistant.js"></script>
+    <script>
+        const chat = document.getElementById('chat');
+        const input = document.getElementById('input');
+        const status = document.getElementById('status');
+
+        function addMessage(text, isUser) {
+            const div = document.createElement('div');
+            div.className = `message ${isUser ? 'user' : 'bot'}`;
+            div.textContent = text;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            addMessage(message, true);
+            status.textContent = "Помощник думает...";
+
+            try {
+                const response = await fetch('http://localhost:3000/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: message })
+                });
+
+                if (!response.ok) throw new Error('Ошибка сервера');
+                
+                const data = await response.json();
+                addMessage(data.answer, false);
+                status.textContent = "Готов к работе";
+            } catch (error) {
+                addMessage("Извините, произошла ошибка. Пожалуйста, попробуйте позже.", false);
+                status.textContent = "Ошибка: " + error.message;
+                console.error(error);
+            }
+        }
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
 </body>
 </html>
