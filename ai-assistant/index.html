@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ИИ помощник - Газпром</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -73,6 +72,10 @@
             border-radius: 20px;
             cursor: pointer;
         }
+        #send-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
         .typing-indicator {
             display: flex;
             padding: 10px 15px;
@@ -92,6 +95,12 @@
             0%, 60%, 100% { transform: translateY(0); }
             30% { transform: translateY(-5px); }
         }
+        .status-message {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -101,123 +110,89 @@
             <div class="message bot-message">
                 Здравствуйте! Я ваш виртуальный помощник. Отвечу на вопросы о компании Газпром и её деятельности.
             </div>
+            <div class="status-message" id="status-message">
+                Загружаю нейросеть, пожалуйста подождите...
+            </div>
         </div>
         <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Введите ваш вопрос..." autocomplete="off">
-            <button id="send-button">Отправить</button>
+            <input type="text" id="user-input" placeholder="Введите ваш вопрос..." autocomplete="off" disabled>
+            <button id="send-button" disabled>Отправить</button>
         </div>
     </div>
 
     <script>
-        // База знаний
-        const knowledgeBase = [
-            {
-                question: "что такое газпром",
-                answer: "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти."
-            },
-            {
-                question: "как создать отчет",
-                answer: "Для создания отчета используйте инструменты визуализации данных в разделе 'Отчеты'. Вы можете экспортировать результаты в PDF или Excel."
-            },
-            {
-                question: "техника безопасности",
-                answer: "Все материалы по технике безопасности доступны в корпоративном портале в разделе 'Безопасность'. Обязательно пройдите ежегодный инструктаж."
-            },
-            {
-                question: "контакты поддержки",
-                answer: "Служба поддержки доступна по внутреннему телефону 1234 или email support@gazprom.ru. Часы работы: с 9:00 до 18:00."
-            },
-            {
-                question: "калькулятор",
-                answer: "Калькулятор находится в разделе 'Инструменты'. Доступны базовые вычисления и финансовые расчеты."
-            }
-        ];
+        // Конфигурация
+        const config = {
+            modelName: 'Xenova/distilgpt2',
+            context: "Ты - помощник в компании Газпром. Отвечай профессионально и вежливо. " +
+                    "Газпром - российская энергетическая компания, специализирующаяся на добыче, " +
+                    "транспортировке и продаже природного газа. " +
+                    "Отвечай кратко и по делу, не более 2-3 предложений."
+        };
 
         // Элементы интерфейса
         const chatMessages = document.getElementById('chat-messages');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
+        const statusMessage = document.getElementById('status-message');
+
+        // Переменные для модели
+        let pipeline;
+        let isModelReady = false;
 
         // Инициализация модели
-        let model;
-        let encoder;
-        
-        async function loadModels() {
-            showTyping();
-            addMessage("Загружаю модели ИИ...", 'bot');
+        async function initializeModel() {
+            try {
+                statusMessage.textContent = "Загружаю нейросеть (это займет 1-2 минуты)...";
+                
+                // Создаем pipeline для генерации текста
+                pipeline = await transformers.TextGenerationPipeline.from_pretrained(
+                    config.modelName,
+                    { quantized: false } // Отключаем квантование для лучшего качества
+                );
+                
+                isModelReady = true;
+                statusMessage.textContent = "Нейросеть готова к работе. Задавайте ваш вопрос.";
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                
+                // Добавляем тестовый ответ для проверки
+                addMessage("Я готов отвечать на ваши вопросы о компании Газпром.", 'bot');
+            } catch (error) {
+                console.error("Ошибка загрузки модели:", error);
+                statusMessage.textContent = "Ошибка загрузки нейросети. Обновите страницу и попробуйте снова.";
+            }
+        }
+
+        // Генерация ответа с помощью нейросети
+        async function generateResponse(prompt) {
+            if (!isModelReady || !pipeline) {
+                return "Нейросеть ещё не готова. Пожалуйста, подождите.";
+            }
             
             try {
-                // Загружаем Universal Sentence Encoder для сравнения вопросов
-                encoder = await use.load();
+                // Формируем полный промпт с контекстом
+                const fullPrompt = `${config.context}\n\nВопрос: ${prompt}\nОтвет:`;
                 
-                // Загружаем модель для генерации ответов (упрощенный вариант)
-                model = {
-                    respond: async (question) => {
-                        // Сначала ищем в базе знаний
-                        const bestMatch = await findBestMatch(question);
-                        if (bestMatch.score > 0.7) {
-                            return bestMatch.answer;
-                        }
-                        
-                        // Если не нашли, генерируем общий ответ
-                        return generateGeneralResponse(question);
-                    }
-                };
+                // Генерируем ответ
+                const response = await pipeline(fullPrompt, {
+                    max_new_tokens: 100,
+                    temperature: 0.7,
+                    do_sample: true,
+                    no_repeat_ngram_size: 2
+                });
                 
-                hideTyping();
-                addMessage("Модели загружены. Задавайте ваш вопрос.", 'bot');
+                // Очищаем ответ
+                let cleanResponse = response[0].generated_text
+                    .replace(fullPrompt, '')
+                    .trim()
+                    .split('\n')[0];
+                
+                return cleanResponse || "Не могу сформулировать ответ. Попробуйте перефразировать вопрос.";
             } catch (error) {
-                console.error("Ошибка загрузки моделей:", error);
-                addMessage("Не удалось загрузить модели ИИ. Буду использовать упрощенный режим.", 'bot');
-                hideTyping();
+                console.error("Ошибка генерации ответа:", error);
+                return "Произошла ошибка при генерации ответа. Попробуйте ещё раз.";
             }
-        }
-
-        // Поиск лучшего соответствия в базе знаний
-        async function findBestMatch(question) {
-            if (!encoder) {
-                return { answer: "Система ещё не готова. Попробуйте позже.", score: 0 };
-            }
-            
-            // Кодируем вопрос пользователя
-            const questionEmbedding = await encoder.embed([question]);
-            
-            let bestMatch = { answer: "", score: 0 };
-            
-            // Сравниваем с каждым вопросом в базе знаний
-            for (const item of knowledgeBase) {
-                const kbEmbedding = await encoder.embed([item.question]);
-                const similarity = tf.matMul(questionEmbedding, kbEmbedding, false, true).dataSync()[0];
-                
-                if (similarity > bestMatch.score) {
-                    bestMatch = { answer: item.answer, score: similarity };
-                }
-            }
-            
-            return bestMatch;
-        }
-
-        // Генерация общего ответа
-        function generateGeneralResponse(question) {
-            const lowerQuestion = question.toLowerCase();
-            
-            if (lowerQuestion.includes("привет") || lowerQuestion.includes("здравств")) {
-                return "Здравствуйте! Чем могу помочь?";
-            }
-            
-            if (lowerQuestion.includes("спасибо")) {
-                return "Пожалуйста! Обращайтесь, если будут ещё вопросы.";
-            }
-            
-            if (lowerQuestion.includes("как") || lowerQuestion.includes("какой")) {
-                return "По этому вопросу обратитесь в службу поддержки по телефону 1234.";
-            }
-            
-            if (lowerQuestion.includes("когда") || lowerQuestion.includes("сколько")) {
-                return "Точную информацию по срокам можно уточнить в соответствующем разделе портала.";
-            }
-            
-            return "Извините, я не совсем понял вопрос. Можете переформулировать?";
         }
 
         // Добавление сообщения в чат
@@ -257,25 +232,20 @@
             userInput.value = '';
             addMessage(message, 'user');
             showTyping();
+            userInput.disabled = true;
+            sendButton.disabled = true;
             
             try {
-                let response;
-                
-                if (model) {
-                    response = await model.respond(message);
-                } else {
-                    // Если модель не загрузилась, используем простой поиск
-                    const lowerMessage = message.toLowerCase();
-                    const found = knowledgeBase.find(item => lowerMessage.includes(item.question));
-                    response = found ? found.answer : generateGeneralResponse(message);
-                }
-                
+                const response = await generateResponse(message);
                 addMessage(response, 'bot');
             } catch (error) {
                 console.error("Ошибка:", error);
                 addMessage("Произошла ошибка при обработке запроса.", 'bot');
             } finally {
                 hideTyping();
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
             }
         }
 
@@ -287,8 +257,8 @@
                 if (e.key === 'Enter') sendMessage();
             });
             
-            // Загрузка моделей
-            loadModels();
+            // Загрузка модели
+            initializeModel();
         });
     </script>
 </body>
