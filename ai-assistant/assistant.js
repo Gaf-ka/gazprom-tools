@@ -1,71 +1,20 @@
-// Конфигурация помощника
-const config = {
-    assistantName: "Помощник Газпром",
-    companyInfo: `Газпром — глобальная энергетическая компания. Основные направления деятельности:
-    - Разведка и добыча газа
-    - Транспортировка газа
-    - Хранение и переработка
-    - Реализация газа и нефтепродуктов
-    
-    Контакты поддержки: телефон 1234, email support@gazprom.ru`,
-    
-    // Локальная модель (работает в браузере)
-    modelName: "Xenova/LaMini-Flan-T5-248M",
-    
-    // Системный промт для модели
-    systemPrompt: `Ты - виртуальный помощник компании Газпром. Отвечай профессионально и вежливо на русском языке.
-    Если вопрос не по теме компании, вежливо ответь, что помогаешь только с вопросами о Газпроме.
-    Отвечай кратко и по делу.`
+// Конфигурация API
+const AI_CONFIG = {
+    HF_API_KEY: "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",
+    MODEL: "facebook/blenderbot-400M-distill",
+    API_URL: "https://api-inference.huggingface.co/models/"
 };
 
 // Элементы интерфейса
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
-const sendButton = document.getElementById('send-button');
-const statusMessage = document.getElementById('status-message');
 
-// Глобальные переменные для модели
-let pipeline = null;
-let modelLoaded = false;
-
-// Инициализация модели
-async function initModel() {
-    try {
-        statusMessage.textContent = "Загрузка нейросети... (это займет около 30 секунд)";
-        
-        // Импортируем необходимые компоненты
-        const { pipeline } = await import('@xenova/transformers');
-        
-        // Загружаем модель
-        statusMessage.textContent = "Загрузка модели...";
-        const generator = await pipeline('text2text-generation', config.modelName, {
-            quantized: true,
-            progress_callback: (progress) => {
-                const percent = Math.round(progress.loaded / progress.total * 100);
-                statusMessage.textContent = `Загрузка модели: ${percent}%`;
-            }
-        });
-        
-        pipeline = generator;
-        modelLoaded = true;
-        statusMessage.textContent = "Модель загружена! Можете задавать вопросы.";
-        userInput.disabled = false;
-        sendButton.disabled = false;
-        userInput.focus();
-        
-        console.log("Модель успешно загружена");
-    } catch (error) {
-        console.error("Ошибка загрузки модели:", error);
-        statusMessage.textContent = "Ошибка загрузки модели. Пожалуйста, обновите страницу.";
-    }
-}
+// История диалога
+let conversationHistory = [];
 
 // Инициализация чата
 function initChat() {
-    sendButton.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') sendMessage();
-    });
+    addMessage("Здравствуйте! Я ваш виртуальный помощник. Могу ответить на вопросы о работе компании. Чем могу помочь?", 'assistant');
 }
 
 // Добавление сообщения в чат
@@ -97,53 +46,97 @@ function hideTypingIndicator() {
     if (typingElement) typingElement.remove();
 }
 
-// Генерация ответа с помощью локальной модели
-async function generateResponse(userMessage) {
-    if (!modelLoaded || !pipeline) {
-        return "Модель еще не загружена. Пожалуйста, подождите.";
-    }
-    
+// Запрос к Hugging Face API
+async function queryHuggingFace(prompt) {
     try {
-        // Формируем полный промт
-        const fullPrompt = `${config.systemPrompt}\n\nКонтекст компании:\n${config.companyInfo}\n\nВопрос: ${userMessage}\nОтвет:`;
+        // Добавляем контекст для нейросети
+        const context = "Ты - помощник в компании Газпром. Отвечай на вопросы вежливо и профессионально. " + 
+                        "Газпром — глобальная энергетическая компания, занимающаяся разведкой, добычей, " + 
+                        "транспортировкой, хранением, переработкой и реализацией газа, газового конденсата и нефти.";
         
-        // Генерируем ответ
-        const response = await pipeline(fullPrompt, {
-            max_new_tokens: 200,
-            temperature: 0.7,
-            repetition_penalty: 1.2,
-            do_sample: true
-        });
+        // Формируем полный запрос с историей диалога
+        const fullPrompt = `${context}\n\nТекущий диалог:\n${conversationHistory.join('\n')}\nПользователь: ${prompt}\nАссистент:`;
         
-        return response[0].generated_text.trim();
+        const response = await fetch(
+            AI_CONFIG.API_URL + AI_CONFIG.MODEL,
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${AI_CONFIG.HF_API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 
+                    inputs: fullPrompt,
+                    parameters: {
+                        max_length: 200,
+                        temperature: 0.7,
+                        repetition_penalty: 1.2
+                    }
+                })
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Ошибка API: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.generated_text;
     } catch (error) {
-        console.error("Ошибка генерации ответа:", error);
-        return "Извините, произошла ошибка при генерации ответа. Пожалуйста, попробуйте еще раз.";
+        console.error('Ошибка Hugging Face API:', error);
+        return null;
     }
 }
 
-// Отправка сообщения
+// Обработка отправки сообщения
 async function sendMessage() {
     const message = userInput.value.trim();
-    if (!message || !modelLoaded) return;
-
+    if (!message) return;
+    
     userInput.value = '';
     addMessage(message, 'user');
     showTypingIndicator();
-
+    
+    // Добавляем вопрос в историю
+    conversationHistory.push(`Пользователь: ${message}`);
+    
     try {
-        const response = await generateResponse(message);
-        addMessage(response, 'assistant');
+        const response = await queryHuggingFace(message);
+        
+        if (response) {
+            // Очищаем лишние части ответа (если есть)
+            let cleanResponse = response.replace(/Ассистент:/g, '').trim();
+            
+            // Добавляем ответ в историю
+            conversationHistory.push(`Ассистент: ${cleanResponse}`);
+            
+            // Ограничиваем историю диалога (чтобы не перегружать API)
+            if (conversationHistory.length > 6) {
+                conversationHistory = conversationHistory.slice(-6);
+            }
+            
+            addMessage(cleanResponse, 'assistant');
+        } else {
+            addMessage("Извините, не удалось получить ответ. Попробуйте позже.", 'assistant');
+        }
     } catch (error) {
         console.error('Ошибка:', error);
-        addMessage("Произошла ошибка. Пожалуйста, попробуйте позже.", 'assistant');
+        addMessage("Произошла ошибка. Попробуйте позже.", 'assistant');
     } finally {
         hideTypingIndicator();
     }
 }
 
+// Обработка нажатия Enter
+function handleKeyPress(event) {
+    if (event.key === 'Enter') sendMessage();
+}
+
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', function() {
     initChat();
-    initModel();
+    
+    // Назначение обработчиков
+    document.querySelector('.assistant-input button').addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', handleKeyPress);
 });
