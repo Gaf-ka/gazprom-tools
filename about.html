@@ -3,20 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>О компании - Газпром</title>
+    <title>Руководство пользователя - Газпром газораспределение Уфа</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        /* Дополнительные стили для руководства */
+        .manual-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .manual-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .manual-title {
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+        }
+        
+        .manual-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .manual-section {
+            margin-bottom: 60px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+        
+        .section-content {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+        
+        .subsection {
+            margin-bottom: 30px;
+        }
+        
+        .subsection-title {
+            font-size: 1.4rem;
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+        }
+        
+        .subsection-content {
+            line-height: 1.6;
+        }
+        
+        .feature-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .feature-list li {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .feature-list li:before {
+            content: '✓';
+            color: var(--primary-color);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        .steps-list {
+            counter-reset: step-counter;
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .steps-list li {
+            margin-bottom: 20px;
+            padding-left: 40px;
+            position: relative;
+            counter-increment: step-counter;
+        }
+        
+        .steps-list li:before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: var(--primary-color);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        
+        .warning-box {
+            background: #fff8e6;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .warning-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ff9800;
+        }
+        
+        .logo-img {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+    </style>
 </head>
 <body>
     <header class="header">
         <div class="container">
             <div class="header-container">
                 <div class="logo">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gazprom_logo.svg/1200px-Gazprom_logo.svg.png" alt="Газпром" class="logo-img">
+                    <img src="https://pic.rutubelist.ru/user/57/68/5768dcac4aeef5099dfbb01395851338.jpg" alt="Газпром газораспределение Уфа" class="logo-img">
                     <div class="logo-text">
-                        <span class="logo-title">Газпром</span>
+                        <span class="logo-title">Газпром газораспределение Уфа</span>
                         <span class="logo-subtitle">Внутренний портал</span>
                     </div>
                 </div>
@@ -24,9 +151,10 @@
                 <nav class="main-nav">
                     <ul class="nav-list">
                         <li class="nav-item"><a href="index.html" class="nav-link">Главная</a></li>
-                        <li class="nav-item"><a href="about.html" class="nav-link active">О компании</a></li>
                         <li class="nav-item"><a href="office-tools/index.html" class="nav-link">Инструменты</a></li>
-               
+                        <li class="nav-item"><a href="visualization/index.html" class="nav-link">Аналитика</a></li>
+                        <li class="nav-item"><a href="ai-assistant/index.html" class="nav-link">Помощник</a></li>
+                        <li class="nav-item"><a href="manual.html" class="nav-link active">Руководство</a></li>
                     </ul>
                 </nav>
                 
@@ -47,145 +175,250 @@
     </header>
 
     <main class="main">
-        <section class="about-hero">
-            <div class="container">
-                <h1 class="about-title animate__animated animate__fadeIn">О компании</h1>
-                <p class="about-subtitle animate__animated animate__fadeIn animate__delay-1s">Крупнейшая газовая компания мира</p>
+        <div class="manual-container">
+            <div class="manual-header animate__animated animate__fadeIn">
+                <h1 class="manual-title">Руководство пользователя внутреннего портала</h1>
+                <p class="manual-subtitle">Полное руководство по использованию возможностей внутреннего портала "Газпром газораспределение Уфа"</p>
             </div>
-        </section>
-
-        <section class="about-section">
-            <div class="container">
-                <div class="about-content">
-                    <div class="about-text">
-                        <h2 class="section-title">Наша миссия</h2>
-                        <p>Обеспечивать эффективное и устойчивое удовлетворение спроса на газ и другие энергоресурсы в России и за рубежом, способствуя экономическому развитию и повышению качества жизни людей.</p>
-                        
-                        <h2 class="section-title">История компании</h2>
-                        <p>ПАО "Газпром" — глобальная энергетическая компания, созданная в 1989 году на базе Министерства газовой промышленности СССР. Сегодня это одна из крупнейших компаний в мире по объемам добычи природного газа.</p>
-                        
-                        <h2 class="section-title">Ключевые показатели</h2>
-                        <ul class="about-list">
-                            <li>Более 400 000 сотрудников по всему миру</li>
-                            <li>Добыча газа — около 500 млрд м³ в год</li>
-                            <li>Доказанные запасы газа — 35 трлн м³</li>
-                            <li>Газотранспортная система — более 170 000 км</li>
-                        </ul>
-                    </div>
+            
+            <div class="manual-section">
+                <h2 class="section-title">О портале</h2>
+                <div class="section-content">
+                    <p>Внутренний портал "Газпром газораспределение Уфа" создан для сотрудников компании и предоставляет доступ к современным инструментам для работы с данными, аналитики и автоматизации рабочих процессов.</p>
                     
-                    <div class="about-image">
-                        <img src="https://www.gazprom.com/f/i/press-center/photoreports/2023/09/0919/01.jpg" alt="Газпром" class="animate__animated animate__fadeInRight">
-                    </div>
+                    <p>Портал состоит из нескольких основных разделов:</p>
+                    
+                    <ul class="feature-list">
+                        <li><strong>Главная страница</strong> - общая информация о портале</li>
+                        <li><strong>Инструменты</strong> - набор полезных утилит для работы</li>
+                        <li><strong>Аналитика</strong> - инструменты визуализации и анализа данных</li>
+                        <li><strong>Помощник</strong> - ИИ-ассистент для ответов на вопросы</li>
+                    </ul>
                 </div>
             </div>
-        </section>
-
-        <section class="values-section">
-            <div class="container">
-                <h2 class="section-title">Наши ценности</h2>
-                <p class="section-subtitle">Основные принципы, которые определяют нашу работу</p>
-                
-                <div class="values-grid">
-                    <div class="value-card animate__animated animate__fadeInUp">
-                        <div class="value-icon">
-                            <img src="https://cdn-icons-png.flaticon.com/512/2933/2933245.png" alt="Безопасность">
+            
+            <div class="manual-section">
+                <h2 class="section-title">Быстрый старт</h2>
+                <div class="section-content">
+                    <div class="subsection">
+                        <h3 class="subsection-title">Системные требования</h3>
+                        <div class="subsection-content">
+                            <ul>
+                                <li>Современный браузер (Chrome, Firefox, Edge, Safari)</li>
+                                <li>Доступ в интернет</li>
+                                <li>Разрешение экрана не менее 1280×720</li>
+                            </ul>
                         </div>
-                        <h3>Безопасность</h3>
-                        <p>Приоритет безопасности персонала, населения и окружающей среды во всех аспектах деятельности</p>
                     </div>
                     
-                    <div class="value-card animate__animated animate__fadeInUp">
-                        <div class="value-icon">
-                            <img src="https://cdn-icons-png.flaticon.com/512/2936/2936886.png" alt="Ответственность">
-                        </div>
-                        <h3>Ответственность</h3>
-                        <p>Выполнение обязательств перед акционерами, клиентами, сотрудниками и обществом</p>
-                    </div>
-                    
-                    <div class="value-card animate__animated animate__fadeInUp">
-                        <div class="value-icon">
-                            <img src="https://cdn-icons-png.flaticon.com/512/2933/2933245.png" alt="Инновации">
-                        </div>
-                        <h3>Инновации</h3>
-                        <p>Постоянное совершенствование технологий и методов работы</p>
-                    </div>
-                    
-                    <div class="value-card animate__animated animate__fadeInUp">
-                        <div class="value-icon">
-                            <img src="https://cdn-icons-png.flaticon.com/512/2936/2936775.png" alt="Эффективность">
-                        </div>
-                        <h3>Эффективность</h3>
-                        <p>Оптимальное использование ресурсов для достижения наилучших результатов</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="map-section">
-            <div class="container">
-                <h2 class="section-title">География деятельности</h2>
-                <p class="section-subtitle">Газпром работает в 50+ странах мира</p>
-                
-                <div class="map-container">
-                    <img src="https://www.gazprom.com/f/i/export-contracts/export-map.jpg" alt="География деятельности Газпром" class="map-image">
-                    <div class="map-point" style="top: 30%; left: 50%">
-                        <div class="point-dot"></div>
-                        <div class="point-info">
-                            <h4>Западная Сибирь</h4>
-                            <p>Основной газодобывающий регион</p>
-                        </div>
-                    </div>
-                    <div class="map-point" style="top: 25%; left: 65%">
-                        <div class="point-dot"></div>
-                        <div class="point-info">
-                            <h4>Восточная Сибирь</h4>
-                            <p>Перспективные месторождения</p>
-                        </div>
-                    </div>
-                    <div class="map-point" style="top: 40%; left: 30%">
-                        <div class="point-dot"></div>
-                        <div class="point-info">
-                            <h4>Европейская часть</h4>
-                            <p>Транспортная инфраструктура</p>
+                    <div class="subsection">
+                        <h3 class="subsection-title">Вход в систему</h3>
+                        <div class="subsection-content">
+                            <ol class="steps-list">
+                                <li>Откройте браузер и перейдите по адресу портала</li>
+                                <li>Используйте корпоративные учетные данные для входа (если требуется)</li>
+                            </ol>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
+            
+            <div class="manual-section">
+                <h2 class="section-title">Основные разделы портала</h2>
+                <div class="section-content">
+                    <div class="subsection">
+                        <h3 class="subsection-title">1. Инструменты</h3>
+                        <div class="subsection-content">
+                            <h4>Доступные инструменты:</h4>
+                            <ul>
+                                <li><strong>Калькулятор</strong> - простой и финансовый калькулятор</li>
+                                <li><strong>Конвертер</strong> - преобразование единиц измерения</li>
+                                <li><strong>Конвертер файлов</strong> - изменение форматов документов</li>
+                                <li><strong>Форматтер JSON</strong> - валидация и форматирование JSON</li>
+                                <li><strong>Генератор паролей</strong> - создание безопасных паролей</li>
+                                <li><strong>Редактор PDF</strong> - объединение и редактирование PDF</li>
+                                <li><strong>Редактор Word</strong> - работа с документами Word</li>
+                            </ul>
+                            
+                            <h4>Как пользоваться:</h4>
+                            <ol class="steps-list">
+                                <li>Перейдите в раздел "Инструменты"</li>
+                                <li>Выберите нужный инструмент</li>
+                                <li>Следуйте инструкциям на экране</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="subsection">
+                        <h3 class="subsection-title">2. Аналитика</h3>
+                        <div class="subsection-content">
+                            <h4>Доступные инструменты:</h4>
+                            <ul>
+                                <li><strong>Графики и диаграммы</strong> - визуализация данных</li>
+                                <li><strong>Геоаналитика</strong> - отображение данных на карте</li>
+                                <li><strong>Анализ таблиц</strong> - работа с табличными данными</li>
+                                <li><strong>Корреляционный анализ</strong> - выявление взаимосвязей</li>
+                                <li><strong>Временные ряды</strong> - анализ данных во времени</li>
+                            </ul>
+                            
+                            <h4>Как пользоваться:</h4>
+                            <ol class="steps-list">
+                                <li>Загрузите данные (CSV, Excel)</li>
+                                <li>Выберите тип визуализации</li>
+                                <li>Настройте параметры отображения</li>
+                                <li>Экспортируйте результат при необходимости</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="subsection">
+                        <h3 class="subsection-title">3. ИИ Помощник</h3>
+                        <div class="subsection-content">
+                            <h4>Возможности:</h4>
+                            <ul>
+                                <li>Ответы на вопросы о работе компании</li>
+                                <li>Помощь в использовании инструментов портала</li>
+                                <li>Поиск информации в корпоративных документах</li>
+                            </ul>
+                            
+                            <h4>Как пользоваться:</h4>
+                            <ol class="steps-list">
+                                <li>Введите вопрос в текстовое поле</li>
+                                <li>Нажмите "Отправить" или клавишу Enter</li>
+                                <li>Используйте быстрые подсказки для частых вопросов</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="manual-section">
+                <h2 class="section-title">Работа с данными</h2>
+                <div class="section-content">
+                    <div class="subsection">
+                        <h3 class="subsection-title">Загрузка данных</h3>
+                        <div class="subsection-content">
+                            <p>Большинство инструментов поддерживают загрузку данных через:</p>
+                            <ol class="steps-list">
+                                <li>Перетаскивание файла в выделенную область</li>
+                                <li>Выбор файла через диалоговое окно</li>
+                                <li>Вставку данных вручную</li>
+                            </ol>
+                            
+                            <p>Поддерживаемые форматы:</p>
+                            <ul>
+                                <li>CSV</li>
+                                <li>Excel (XLSX, XLS)</li>
+                                <li>JSON</li>
+                                <li>Текстовые файлы</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subsection">
+                        <h3 class="subsection-title">Экспорт результатов</h3>
+                        <div class="subsection-content">
+                            <p>Вы можете сохранить результаты работы в различных форматах:</p>
+                            <ul>
+                                <li>Изображения (PNG, JPG)</li>
+                                <li>PDF-документы</li>
+                                <li>Файлы данных (CSV, Excel)</li>
+                                <li>Текстовые отчеты</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="manual-section">
+                <h2 class="section-title">Безопасность</h2>
+                <div class="section-content">
+                    <div class="warning-box">
+                        <div class="warning-title">Рекомендации по безопасности:</div>
+                        <ol class="steps-list">
+                            <li>Не передавайте учетные данные третьим лицам</li>
+                            <li>Всегда выходите из системы при завершении работы</li>
+                            <li>Не загружайте конфиденциальные данные без необходимости</li>
+                            <li>Используйте генератор паролей для создания надежных паролей</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="manual-section">
+                <h2 class="section-title">Частые вопросы</h2>
+                <div class="section-content">
+                    <div class="subsection">
+                        <h3 class="subsection-title">Как восстановить доступ?</h3>
+                        <div class="subsection-content">
+                            <p>Обратитесь в IT-отдел по телефону 1234 (внутренний)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="subsection">
+                        <h3 class="subsection-title">Почему не загружается файл?</h3>
+                        <div class="subsection-content">
+                            <p>Возможные причины:</p>
+                            <ul>
+                                <li>Неподдерживаемый формат</li>
+                                <li>Слишком большой размер файла</li>
+                                <li>Проблемы с подключением к сети</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subsection">
+                        <h3 class="subsection-title">Как создать отчет?</h3>
+                        <div class="subsection-content">
+                            <ol class="steps-list">
+                                <li>Перейдите в раздел "Аналитика"</li>
+                                <li>Загрузите необходимые данные</li>
+                                <li>Настройте параметры отчета</li>
+                                <li>Экспортируйте в нужном формате</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="manual-section">
+                <h2 class="section-title">Поддержка</h2>
+                <div class="section-content">
+                    <p>Если у вас возникли вопросы или проблемы:</p>
+                    <ul>
+                        <li>Обратитесь к ИИ-помощнику</li>
+                        <li>Позвоните в IT-отдел: 1234 (внутренний)</li>
+                        <li>Напишите на <a href="mailto:support@gazprom-ufa.ru">support@gazprom-ufa.ru</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="manual-section">
+                <h2 class="section-title">Версия и обновления</h2>
+                <div class="section-content">
+                    <p><strong>Текущая версия портала:</strong> 2.1.0</p>
+                    <p><strong>Последнее обновление:</strong> 15 июня 2023 года</p>
+                </div>
+            </div>
+        </div>
     </main>
 
     <footer class="footer">
         <div class="container">
             <div class="footer-container">
                 <div class="footer-column">
-                    <h4 class="footer-title">Газпром</h4>
-                    <p class="footer-text">Крупнейшая газовая компания мира, лидер в области разведки, добычи, транспортировки, хранения, переработки и реализации углеводородов.</p>
-                    <div class="footer-social">
-                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
-                    </div>
+                    <h4 class="footer-title">ПАО «Газпром газораспределение Уфа»</h4>
+                    <p class="footer-text">Крупнейшая газовая компания Республики Башкортостан, обеспечивающая надежное газоснабжение региона.</p>
                 </div>
                 
                 <div class="footer-column">
-                    <h4 class="footer-title">Разделы</h4>
+                    <h4 class="footer-title">Навигация</h4>
                     <ul class="footer-links">
                         <li><a href="index.html" class="footer-link">Главная</a></li>
-                        <li><a href="about.html" class="footer-link">О компании</a></li>
                         <li><a href="office-tools/index.html" class="footer-link">Инструменты</a></li>
-                        <li><a href="trainers/index.html" class="footer-link">Тренажёры</a></li>
                         <li><a href="visualization/index.html" class="footer-link">Аналитика</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h4 class="footer-title">Ресурсы</h4>
-                    <ul class="footer-links">
-                        <li><a href="#" class="footer-link">Документы</a></li>
-                        <li><a href="#" class="footer-link">Обучение</a></li>
-                        <li><a href="#" class="footer-link">Техподдержка</a></li>
-                        <li><a href="#" class="footer-link">Вакансии</a></li>
-                        <li><a href="#" class="footer-link">Контакты</a></li>
+                        <li><a href="ai-assistant/index.html" class="footer-link">Помощник</a></li>
+                        <li><a href="manual.html" class="footer-link">Руководство</a></li>
                     </ul>
                 </div>
                 
@@ -193,26 +426,26 @@
                     <h4 class="footer-title">Контакты</h4>
                     <ul class="footer-contacts">
                         <li class="contact-item">
-                            <span class="contact-icon"><i class="fas fa-phone"></i></span>
-                            <span>+7 (495) 719-30-01</span>
+                            <span class="contact-icon">📞</span>
+                            <span>8-800-234-05-00</span>
                         </li>
                         <li class="contact-item">
-                            <span class="contact-icon"><i class="fas fa-envelope"></i></span>
-                            <span>portal@gazprom.ru</span>
+                            <span class="contact-icon">✉️</span>
+                            <span>info@bashgaz.ru</span>
                         </li>
                         <li class="contact-item">
-                            <span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span>
-                            <span>Москва, ул. Наметкина, 16</span>
+                            <span class="contact-icon">📍</span>
+                            <span>Республика Башкортостан, г. Уфа, ул. Новосибирская, д. 2, корп. 4</span>
                         </li>
                     </ul>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>© 2025 ПАО "Газпром". Все права защищены.</p>
+                <p>© 2025 ПАО «Газпром газораспределение Уфа». Все права защищены.</p>
                 <div class="footer-links">
-                    <a href="#" class="footer-link">Политика конфиденциальности</a>
-                    <a href="#" class="footer-link">Условия использования</a>
+                    <a href="https://www.bashgaz.ru/upload/Политика%20конфиденциальности.pdf" class="footer-link">Политика конфиденциальности</a>
+                    <a href="https://www.bashgaz.ru/upload/user_agreement.pdf" class="footer-link">Пользовательское соглашение</a>
                 </div>
             </div>
         </div>

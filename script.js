@@ -1,4 +1,4 @@
-// Mobile menu toggle
+
 const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
 const mainNav = document.querySelector('.main-nav');
 
